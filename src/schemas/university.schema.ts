@@ -15,10 +15,12 @@ export const MajorSchema = z.object({
   universityId: z.string().cuid(),
   duration: z.number().int().min(1).max(10),
   degree: z.string().min(1).max(100),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
 });
 
 export const UniversitySchema = z.object({
-  id: z.string().cuid(),
+  id: z.string().min(1),
   slug: z.string().min(1).max(100),
   nameAr: z.string().min(1).max(200),
   nameEn: z.string().min(1).max(200),
@@ -28,6 +30,8 @@ export const UniversitySchema = z.object({
   logoUrl: z.string().url().nullable().optional(),
   description: z.string().max(2000).nullable().optional(),
   established: z.number().int().min(1800).max(2100).nullable().optional(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
   majors: z.array(MajorSchema).optional(),
 });
 
