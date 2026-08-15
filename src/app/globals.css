@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import "../styles/unicompass.css";
+@import "../styles/roadmap.css";
+
+/* Additional Next.js and layout utility adjustments */
+html, body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+body.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+body.rtl .search-icon {
+  left: auto;
+  right: 16px;
+}
+
+body.rtl .search-container input {
+  padding: 16px 48px 16px 130px;
+}
+
+body.rtl .search-btn {
+  right: auto;
+  left: 6px;
+}
+
+body.rtl .lang-toggle {
+  margin-left: 0;
+  margin-right: 16px;
+}
+
+/* Ensure smooth modal and drawer transitions */
+.modal-overlay.show {
+  display: flex !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.compare-drawer.show {
+  transform: translateY(0) !important;
+}

@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String
+  email         String       @unique
+  emailVerified Boolean      @default(false)
+  image         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  bookmarks     Bookmark[]
+  suggestions   Suggestion[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("verifications")
+}
+
+model University {
+  id          String         @id @default(cuid())
+  slug        String         @unique
+  nameAr      String
+  nameEn      String
+  type        UniversityType
+  governorate String
+  website     String?
+  logoUrl     String?
+  description String?
+  established Int?
+  majors      Major[]
+  bookmarks   Bookmark[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([type])
+  @@index([governorate])
+  @@map("universities")
+}
+
+model Major {
+  id           String     @id @default(cuid())
+  slug         String
+  nameAr       String
+  nameEn       String
+  universityId String
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  duration     Int        // duration in years
+  degree       String     // e.g. "B.Sc.", "B.A.", "Pharm.D."
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([slug, universityId])
+  @@map("majors")
+}
+
+model Bookmark {
+  id           String     @id @default(cuid())
+  userId       String
+  universityId String
+  status       AppStatus  @default(INTERESTED)
+  notes        String?
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([userId, universityId])
+  @@map("bookmarks")
+}
+
+model Suggestion {
+  id        String           @id @default(cuid())
+  userId    String
+  content   String
+  type      SuggestionType
+  status    SuggestionStatus @default(PENDING)
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@map("suggestions")
+}
+
+enum UniversityType {
+  PUBLIC
+  PRIVATE
+  NATIONAL
+  INTERNATIONAL
+}
+
+enum AppStatus {
+  INTERESTED
+  RESEARCHING
+  APPLIED
+  ACCEPTED
+  REJECTED
+}
+
+enum SuggestionType {
+  DATA_CORRECTION
+  MISSING_INFO
+  NEW_UNIVERSITY
+  GENERAL
+}
+
+enum SuggestionStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+}
