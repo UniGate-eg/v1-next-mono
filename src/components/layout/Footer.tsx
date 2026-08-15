@@ -1,86 +1,69 @@
+"use client";
+
+import React from "react";
 import Link from "next/link";
-import { Compass, Heart } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Footer() {
+  const { language } = useLanguage();
+
   return (
-    <footer className="border-t border-slate-200/80 bg-slate-50/50 py-12 text-slate-600 dark:border-slate-800/80 dark:bg-slate-950 dark:text-slate-400">
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-          {/* Brand */}
-          <div className="space-y-3 md:col-span-2">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white">
-                <Compass className="h-4 w-4" />
-              </div>
-              <span className="text-base font-bold text-slate-900 dark:text-white">
-                UniCompass Egypt
-              </span>
-            </div>
-            <p className="max-w-md text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-              Egypt&apos;s comprehensive university guide platform. Helping students navigate public, private, national, and international universities with verified degrees, admission stages, and comparison tools.
-            </p>
+    <footer className="footer">
+      <div className="container footer-inner">
+        <div className="footer-brand">
+          <div className="footer-logo">
+            <Link
+              href="/"
+              className="logo-image"
+              style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
+            >
+              <img
+                src={language === "ar" ? "/logo_ar.jpeg" : "/logo_en.jpeg"}
+                alt={language === "ar" ? "بوابة الجامعة" : "University Gate"}
+                style={{ height: "70px", borderRadius: "10px", objectFit: "contain" }}
+              />
+            </Link>
+            <span className="logo-badge">{language === "ar" ? "مصر" : "Egypt"}</span>
           </div>
-
-          {/* Quick links */}
-          <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white">
-              Explore
-            </h4>
-            <ul className="mt-3 space-y-2 text-sm">
-              <li>
-                <Link href="/universities" className="hover:text-blue-600 transition-colors">
-                  All Universities (جميع الجامعات)
-                </Link>
-              </li>
-              <li>
-                <Link href="/universities?type=NATIONAL" className="hover:text-blue-600 transition-colors">
-                  National Universities (الجامعات الأهلية)
-                </Link>
-              </li>
-              <li>
-                <Link href="/universities?type=PUBLIC" className="hover:text-blue-600 transition-colors">
-                  Public Universities (الجامعات الحكومية)
-                </Link>
-              </li>
-              <li>
-                <Link href="/compare" className="hover:text-blue-600 transition-colors">
-                  Compare Institutions (أداة المقارنة)
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Student tools */}
-          <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white">
-              Student Tools
-            </h4>
-            <ul className="mt-3 space-y-2 text-sm">
-              <li>
-                <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
-                  Application Tracker (متابعة التقديم)
-                </Link>
-              </li>
-              <li>
-                <Link href="/auth/register" className="hover:text-blue-600 transition-colors">
-                  Create Student Account
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="hover:text-blue-600 transition-colors">
-                  About the Project
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="mt-10 border-t border-slate-200/80 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 dark:border-slate-800">
-          <p>© {new Date().getFullYear()} UniCompass Egypt. Open for Egyptian Students.</p>
-          <p className="flex items-center gap-1 mt-2 sm:mt-0">
-            Crafted with care for Egyptian Higher Education
+          <p className="footer-tagline">
+            {language === "ar"
+              ? "دليلك الشامل لاختيار جامعتك في مصر. قارن، واكتشف، واختر بوضوح."
+              : "Your comprehensive guide to universities. Compare, explore, and decide with clarity."}
           </p>
         </div>
+
+        <div className="footer-links-group">
+          <h4>{language === "ar" ? "استكشف" : "Explore"}</h4>
+          <Link href="/universities">{language === "ar" ? "الجامعات" : "Universities"}</Link>
+          <Link href="/majors">{language === "ar" ? "التخصصات" : "Majors"}</Link>
+          <Link href="/compare">{language === "ar" ? "مقارنة" : "Compare"}</Link>
+          <Link href="/about">{language === "ar" ? "عن المنصة" : "About"}</Link>
+        </div>
+
+        <div className="footer-links-group">
+          <h4>{language === "ar" ? "المصادر" : "Resources"}</h4>
+          <Link href="/universities">{language === "ar" ? "دليل الطالب" : "Student Guide"}</Link>
+          <Link href="/about">{language === "ar" ? "الأسئلة الشائعة" : "FAQ"}</Link>
+          <Link href="/about">{language === "ar" ? "اتصل بنا" : "Contact"}</Link>
+        </div>
+      </div>
+
+      <div className="footer-bottom">
+        <p>
+          © 2026 {language === "ar" ? "بوابة الجامعة (University Gate)" : "University Gate"}.{" "}
+          {language === "ar"
+            ? "دليلك الشامل لاختيار جامعتك."
+            : "Your comprehensive guide to universities."}{" "}
+          Made by{" "}
+          <a
+            href="https://gizahost.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "inherit", textDecoration: "underline" }}
+          >
+            GizaHost
+          </a>
+        </p>
       </div>
     </footer>
   );

@@ -1,0 +1,252 @@
+/* Advanced Hierarchical Roadmap Visualization Styles */
+
+/* 1. Full Screen Modal */
+.full-screen-roadmap-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-body);
+    z-index: 9999;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 60px 20px;
+    box-sizing: border-box;
+    animation: modalFadeIn 0.4s ease-out forwards;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; backdrop-filter: blur(0px); }
+    to { opacity: 1; backdrop-filter: blur(10px); }
+}
+
+/* Ensure Drawer pops up ABOVE the full screen modal */
+.roadmap-drawer {
+    z-index: 10000 !important;
+}
+
+.roadmap-modal-close {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    font-size: 32px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.roadmap-modal-close:hover {
+    color: var(--text-primary);
+}
+
+/* 2. Hierarchical Layout adjustments */
+.roadmap-nodes-group {
+    display: flex;
+    flex-direction: column; /* Stack vertically instead of flex-wrap */
+    gap: 0; /* Removing gap to handle nested spacing with padding */
+}
+
+.roadmap-sub-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 16px;
+    padding-bottom: 24px;
+    position: relative;
+    padding-left: 40px;
+}
+
+/* Orthogonal SVG-like Line connecting sub-items to topic */
+.roadmap-sub-container::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    bottom: 30px;
+    left: 15px;
+    width: 2px;
+    background: var(--accent-sage);
+    opacity: 0.5;
+    border-radius: 2px;
+    transform-origin: top;
+    animation: drawLineDown 1s ease-out forwards;
+}
+
+@keyframes drawLineDown {
+    from { transform: scaleY(0); }
+    to { transform: scaleY(1); }
+}
+
+/* Branching lines from the vertical spine to each sub-item */
+.node-type-todo::before,
+.node-type-resource::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -25px;
+    width: 20px;
+    height: 2px;
+    background: var(--accent-sage);
+    opacity: 0.5;
+}
+
+/* 3. Distinct Node Styling */
+
+/* Main Topic */
+.roadmap-node.node-type-topic {
+    background: rgba(30, 41, 59, 0.9);
+    border: 2px solid var(--accent-sage);
+    border-radius: 12px;
+    padding: 16px 24px;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+    align-self: flex-start;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.roadmap-level.align-right .roadmap-node.node-type-topic {
+    align-self: flex-start; /* Maintain left alignment inside the group */
+}
+
+.roadmap-node.node-type-topic:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+    border-color: #34d399;
+}
+
+/* Subtopic / Todo */
+.roadmap-node.node-type-todo {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    position: relative;
+    max-width: 400px;
+    cursor: pointer;
+    /* Animation initial state */
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideIn 0.5s forwards ease-out;
+}
+
+.roadmap-node.node-type-todo:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.todo-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.roadmap-node.node-type-todo:hover .todo-checkbox {
+    border-color: var(--accent-sage);
+}
+
+/* Resource Button */
+.roadmap-node.node-type-resource {
+    background: rgba(245, 158, 11, 0.1); /* Yellow tint */
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fcd34d;
+    position: relative;
+    max-width: 400px;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideIn 0.5s forwards ease-out;
+}
+
+.roadmap-node.node-type-resource:hover {
+    background: rgba(245, 158, 11, 0.2);
+    border-color: rgba(245, 158, 11, 0.6);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+}
+
+/* Tags */
+.resource-tag {
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.tag-course { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+.tag-article { background: rgba(167, 139, 250, 0.2); color: #a78bfa; }
+.tag-book { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+.tag-resource { background: rgba(255, 255, 255, 0.1); color: #ccc; }
+
+/* Status Overrides */
+.roadmap-node.status-completed .todo-checkbox {
+    background: var(--accent-sage);
+    border-color: var(--accent-sage);
+    position: relative;
+}
+.roadmap-node.status-completed .todo-checkbox::after {
+    content: '✓';
+    position: absolute;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 900;
+    top: -1px;
+    left: 3px;
+}
+
+/* Animations */
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Alignment fixes for the alternating sides */
+.roadmap-level.align-right .roadmap-nodes-group {
+    align-items: flex-end;
+}
+
+.roadmap-level.align-right .roadmap-sub-container {
+    align-items: flex-end;
+    padding-left: 0;
+    padding-right: 40px;
+}
+
+.roadmap-level.align-right .roadmap-sub-container::before {
+    left: auto;
+    right: 15px;
+}
+
+.roadmap-level.align-right .node-type-todo::before,
+.roadmap-level.align-right .node-type-resource::before {
+    left: auto;
+    right: -25px;
+}
+
+.roadmap-level.align-right .node-type-todo,
+.roadmap-level.align-right .node-type-resource {
+    transform: translateX(20px); /* Slide from right */
+}
