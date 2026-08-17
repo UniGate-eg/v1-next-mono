@@ -254,6 +254,13 @@ export default function UniversitiesPage() {
     return filtered;
   }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, language, universitiesDatabase]);
 
+  const getPriceRangeText = () => {
+    if (priceMin === 0 && priceMax >= 400000) return t("Any") || "Any";
+    if (priceMin === 0) return `${language === "ar" ? "حتى" : "Up to"} ${(priceMax / 1000).toFixed(0)}K`;
+    if (priceMax >= 400000) return `${(priceMin / 1000).toFixed(0)}K+`;
+    return `${(priceMin / 1000).toFixed(0)}K – ${(priceMax / 1000).toFixed(0)}K`;
+  };
+
   const activeFilterTags = useMemo(() => {
     const tags: Array<{ category: string; value: string; emoji: string; displayValue: string }> = [];
     Object.entries(activeFilters).forEach(([category, values]) => {
@@ -285,13 +292,6 @@ export default function UniversitiesPage() {
     }
     return tags;
   }, [activeFilters, rankFilter, priceMin, priceMax, searchQuery, language]);
-
-  const getPriceRangeText = () => {
-    if (priceMin === 0 && priceMax >= 400000) return t("Any") || "Any";
-    if (priceMin === 0) return `${language === "ar" ? "حتى" : "Up to"} ${(priceMax / 1000).toFixed(0)}K`;
-    if (priceMax >= 400000) return `${(priceMin / 1000).toFixed(0)}K+`;
-    return `${(priceMin / 1000).toFixed(0)}K – ${(priceMax / 1000).toFixed(0)}K`;
-  };
 
   const modelsList = ["American", "German", "British", "Egyptian"];
   const typesList = ["Private", "Public", "National"];
