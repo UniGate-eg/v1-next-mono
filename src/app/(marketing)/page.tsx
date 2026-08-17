@@ -160,72 +160,118 @@ export default function MarketingHomePage() {
   };
 
   const calculateMatches = (selections: typeof quizSelections) => {
-    const calculated = universitiesDatabase.map((uni: any) => {
-      let score = 30; // Baseline compatibility
+    const selMajor = (selections.major || "").toLowerCase();
+    const selCity = (selections.city || "").toLowerCase();
+    const selBudget = selections.budget || "medium";
 
-      // 1. Discipline / Major match based on university focus & models
-      const selMajor = (selections.major || "").toLowerCase();
+    const scored = universitiesDatabase.map((uni: any, index: number) => {
+      let score = 0;
       const uName = (uni.nameEn || "").toLowerCase() + " " + (uni.nameAr || "");
+      const uCity = (uni.city || "").toLowerCase();
+      const uGov = (uni.governorate || "").toLowerCase();
       const uModel = (uni.educationModel || "").toLowerCase();
-      
-      if (selMajor.includes("tech") || selMajor.includes("eng") || selMajor.includes("cs")) {
-        if (uName.includes("tech") || uName.includes("german") || uName.includes("science") || uModel.includes("german")) {
-          score += 35;
-        } else {
-          score += 20;
-        }
-      } else if (selMajor.includes("med") || selMajor.includes("health")) {
-        if (uni.type === "PUBLIC" || uni.type === "NATIONAL" || uName.includes("badr") || uName.includes("galala")) {
-          score += 35;
-        } else {
-          score += 20;
-        }
-      } else if (selMajor.includes("biz") || selMajor.includes("bus") || selMajor.includes("art")) {
-        if (uni.type === "PRIVATE" || uModel.includes("american") || uModel.includes("british")) {
-          score += 35;
-        } else {
-          score += 25;
-        }
-      } else {
-        score += 20;
-      }
+      const uType = uni.type || "PUBLIC";
 
-      // 2. City / Location match
-      if (selections.city === "any") {
-        score += 25;
-      } else if (
-        (uni.city || "").toLowerCase().includes((selections.city || "").toLowerCase()) ||
-        (uni.governorate || "").toLowerCase().includes((selections.city || "").toLowerCase())
-      ) {
-        score += 25;
-      } else {
-        score += 5;
-      }
-
-      // 3. Budget / University Type match
-      if (selections.budget === "public") {
-        if (uni.type === "PUBLIC") score += 30;
-        else if (uni.type === "NATIONAL") score += 20;
-        else score += 5;
-      } else if (selections.budget === "medium") {
-        if (uni.type === "NATIONAL" || uni.type === "PRIVATE") score += 30;
-        else if (uni.type === "PUBLIC") score += 15;
-        else score += 20;
-      } else if (selections.budget === "premium") {
-        if (uni.type === "INTERNATIONAL" || uni.educationModel === "AMERICAN" || uni.educationModel === "GERMAN" || uni.educationModel === "BRITISH") {
+      // 1. Discipline / Field Score (Max 38 pts)
+      if (selMajor.includes("computer") || selMajor.includes("cs")) {
+        if (uName.includes("tech") || uName.includes("german") || uName.includes("science") || uName.includes("nile") || uName.includes("zewail")) {
+          score += 38;
+        } else if (uType === "PUBLIC" || uType === "PRIVATE" || uType === "NATIONAL") {
           score += 30;
-        } else if (uni.type === "PRIVATE") {
-          score += 25;
         } else {
-          score += 10;
+          score += 18;
+        }
+      } else if (selMajor.includes("engineering")) {
+        if (uName.includes("engineering") || uName.includes("tech") || uName.includes("german") || uName.includes("british") || uName.includes("hti")) {
+          score += 38;
+        } else if (uType === "PUBLIC" || uType === "NATIONAL" || uType === "PRIVATE") {
+          score += 31;
+        } else {
+          score += 18;
+        }
+      } else if (selMajor.includes("business")) {
+        if (uName.includes("american") || uName.includes("german") || uName.includes("british") || uName.includes("management") || uName.includes("commerce") || uName.includes("sadat")) {
+          score += 38;
+        } else if (uType === "PRIVATE" || uType === "NATIONAL" || uType === "PUBLIC") {
+          score += 29;
+        } else {
+          score += 18;
+        }
+      } else if (selMajor.includes("pharmacy") || selMajor.includes("biotech")) {
+        if (uName.includes("badr") || uName.includes("cairo") || uName.includes("ain shams") || uName.includes("msa") || uName.includes("galala") || uName.includes("ahram")) {
+          score += 38;
+        } else if (uType === "PUBLIC" || uType === "PRIVATE" || uType === "NATIONAL") {
+          score += 29;
+        } else {
+          score += 18;
+        }
+      } else {
+        score += 25;
+      }
+
+      // 2. Location Fit (Max 32 pts)
+      if (selCity === "any") {
+        score += 28;
+      } else if (selCity === "cairo") {
+        if (uGov.includes("cairo") || uCity.includes("new cairo") || uCity.includes("cairo") || uCity.includes("tagamoa") || uCity.includes("shorouk")) {
+          score += 32;
+        } else if (uGov.includes("giza") || uCity.includes("october") || uCity.includes("zayed")) {
+          score += 20; // Adjacent Greater Cairo
+        } else {
+          score += 8;
+        }
+      } else if (selCity === "giza") {
+        if (uGov.includes("giza") || uCity.includes("october") || uCity.includes("zayed") || uCity.includes("giza") || uCity.includes("dokki")) {
+          score += 32;
+        } else if (uGov.includes("cairo") || uCity.includes("new cairo") || uCity.includes("cairo")) {
+          score += 20; // Adjacent Greater Cairo
+        } else {
+          score += 8;
+        }
+      } else {
+        score += 15;
+      }
+
+      // 3. Budget & Type Fit (Max 26 pts)
+      if (selBudget === "public") {
+        if (uType === "PUBLIC") score += 26;
+        else if (uType === "NATIONAL") score += 18;
+        else if (uType === "PRIVATE") score += 6;
+        else score += 4;
+      } else if (selBudget === "medium") {
+        if (uType === "NATIONAL") score += 26;
+        else if (uType === "PRIVATE") score += 23;
+        else if (uType === "PUBLIC") score += 16;
+        else score += 12;
+      } else if (selBudget === "premium") {
+        if (uType === "INTERNATIONAL" || uModel === "american" || uModel === "german" || uModel === "british" || uModel === "canadian") {
+          score += 26;
+        } else if (uType === "PRIVATE") {
+          score += 21;
+        } else if (uType === "NATIONAL") {
+          score += 12;
+        } else {
+          score += 5;
         }
       }
 
-      return { uni, score: Math.min(score, 98) };
+      // Micro-variance tie-breaker based on institution uniqueness
+      const variance = ((index * 7 + (uni.slug?.length || 5)) % 5) * 0.8;
+      const finalScore = Math.min(Math.round(score - variance), 97);
+
+      return { uni, score: Math.max(finalScore, 45) };
     });
 
-    calculated.sort((a, b) => b.score - a.score);
-    setMatches(calculated.slice(0, 3));
+    scored.sort((a, b) => b.score - a.score);
+
+    // Apply natural top-3 score progression (e.g. #1: 96%, #2: 91%, #3: 86%)
+    const topMatches = scored.slice(0, 3).map((item, i) => {
+      if (i === 0) return { ...item, score: Math.min(item.score, 96) };
+      if (i === 1) return { ...item, score: Math.min(item.score, scored[0].score - 4) };
+      return { ...item, score: Math.min(item.score, scored[0].score - 9) };
+    });
+
+    setMatches(topMatches);
     setMatchStep("results");
   };
 
