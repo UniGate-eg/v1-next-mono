@@ -1,9 +1,279 @@
 # Feature Specification: Production Data Architecture & Admin CMS Suite
 
-**Feature Branch**: `002-data-cms`  
-**Created**: 2026-08-17  
-**Status**: Draft  
-**Input**: User description: "Production Data Architecture, Database Normalization, Automated ETL Ingestion Pipeline, Admin CMS Management Suite, and On-Demand Cache Invalidation System"
+| Field | Value |
+|:---|:---|
+| **Feature ID** | `002-data-cms` |
+| **Branch** | `002-data-cms` |
+| **Created** | 2026-08-17 |
+| **Status** | Approved — Ready for Implementation |
+| **Owner** | Platform Engineering |
+| **Stakeholders** | Platform Admins, University Editors, Student End-Users, Data Operations Team |
+| **Priority** | P0 — Foundational Blocker |
+
+---
+
+## 1. Problem Statement
+
+The UniGate platform currently ships **8.36 MB of data as hardcoded JavaScript bundles** on every page load (`database.js` 1.19 MB, `roadmaps_data.js` 7.17 MB). This creates three critical business failures:
+
+1. **Zero editability**: Any change to a university's tuition, faculty dean, or accreditation status requires a Git commit, CI/CD build, and full server redeployment — a minimum 5–10 minute outage window per data correction.
+2. **Performance degradation**: An 8.36 MB initial client bundle causes 4–8 second Time-to-Interactive on mobile devices, failing Core Web Vitals and suppressing organic search discovery.
+3. **No governance**: There is no audit trail of who changed what data, no community correction mechanism, and no structured access control for administrative operations.
+
+This feature resolves all three failures in a single, cohesive architectural upgrade.
+
+---
+
+## 2. Goal
+
+Migrate university data from static JavaScript bundles into a **normalized, live relational database**, operated through a **built-in Admin CMS portal** with **on-demand cache invalidation**, while reducing the initial client payload by **>95%** and establishing full **data governance and audit accountability**.
+
+---
+
+## 3. Scope
+
+### In Scope
+- Expanded Prisma relational schema: `University`, `Faculty`, `DegreeProgram`, `Accreditation`, `AuditLog`
+- Idempotent ETL ingestion pipeline for the 5.24 MB exhaustive dataset
+- Admin CMS portal (`/admin`): university lifecycle management, faculty/program editors, suggestion moderation queue, audit log viewer, JSON export
+- Client-side slim search index (`public/search-index.json`, target ≤ 35 KB uncompressed)
+- On-demand ISR cache revalidation (`revalidateTag`, `revalidatePath`) triggered on every admin mutation
+- Role-Based Access Control (`STUDENT`, `EDITOR`, `ADMIN`, `SUPER_ADMIN`) via BetterAuth extension
+- Community "Suggest Data Correction" pipeline linked to specific institutions
+
+### Out of Scope (v1)
+- Real-time collaborative editing (multi-cursor conflict resolution UI)
+- Machine-learning-powered duplicate detection during ingestion
+- Multi-language support beyond Arabic and English
+- Image/media asset management
+- Historical data versioning with full diff rollback UI
+
+---
+
+## 4. User Scenarios & Acceptance Criteria
+
+### Story 1 — University Profile Lifecycle Management (Priority: P0)
+
+**As** a platform administrator or authorized university data editor,
+**I want** a visual, authenticated web dashboard to create, update, archive, and publish university institutional profiles, faculty divisions, and degree programs,
+**So that** prospective students always access accurate academic and financial information — without any code deployment or engineering support.
+
+**Why P0**: This is the foundational requirement. All other stories depend on data being editable and live.
+
+**Independently testable**: An administrator logs in, edits a university tuition value, hits Save, and observes the change reflected on the public catalog immediately.
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then | SLO |
+|---|:---|:---|:---|:---|
+| 1a | Authenticated ADMIN at `/admin/universities/[id]` | Updates annual tuition and clicks Save | Record persists; public catalog reflects updated value | < 2.0s from save to cache invalidation |
+| 1b | Authenticated ADMIN adding a degree program | Submits bilingual name, faculty, duration, and tuition | New program appears under correct faculty in both AR and EN | Immediate on next public request |
+| 1c | Authenticated ADMIN archiving a university | Clicks Archive | Institution hidden from public catalog, search index, compare tools — record retained | < 2.0s |
+| 1d | Unauthenticated user or STUDENT role | Requests any `/admin/*` route | Redirect to authentication screen; 403 on Server Action invocation | Always |
+| 1e | Two admins editing the same university concurrently | Second admin submits edit after first already saved | System detects `updatedAt` staleness; presents merge-or-overwrite dialog | Always |
+
+---
+
+### Story 2 — High-Performance Public Discovery & Search (Priority: P0)
+
+**As** a high school student in Egypt browsing on mobile data,
+**I want** instant university and major search with near-zero data consumption,
+**So that** I can explore universities rapidly even on a 3G/4G connection.
+
+**Why P0**: Directly tied to the platform's core value proposition. 8+ MB initial loads on mobile are a critical blocker for growth.
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then | SLO |
+|---|:---|:---|:---|:---|
+| 2a | Student visits the homepage for the first time | Page loads | Total initial JS transfer ≤ 150 KB gzipped; `database.js` NOT shipped to client | Verified via Lighthouse |
+| 2b | Student types in the search bar | At least 2 characters entered | Matching universities and degree programs appear in dropdown | < 50ms (client-side, no network) |
+| 2c | Student clicks "View Details" on a university card | Modal opens | Full faculty hierarchy, accreditations, deans, contacts appear in selected language | < 800ms on 4G |
+| 2d | Student returns within 1 hour | Cached page served | No database query executed; Edge-cached response delivered | < 50ms TTFB from CDN |
+
+---
+
+### Story 3 — Community Data Correction Pipeline (Priority: P1)
+
+**As** a registered student who discovers an inaccurate tuition figure,
+**I want** to submit a structured correction linked to that university's profile,
+**So that** the data stays accurate through community contribution.
+
+**As** an administrator,
+**I want** a moderation inbox to review, verify, apply, or reject community suggestions in a single interaction,
+**So that** corrections enter the live database with one click.
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then | SLO |
+|---|:---|:---|:---|:---|
+| 3a | Registered student on a university profile | Submits a correction | Suggestion record created with status `PENDING`; visible in admin queue | Immediately |
+| 3b | Admin in moderation queue | Clicks "Approve & Apply" | University record updated; suggestion status → `RESOLVED`; audit log created; cache invalidated | < 2.0s end-to-end |
+| 3c | Admin rejects a suggestion | Clicks "Reject" | Suggestion status → `REJECTED`; no data change to university | Immediately |
+| 3d | Unauthenticated user | Submits suggestion form | Request rejected with 401; no record created | Always |
+
+---
+
+### Story 4 — Automated ETL Ingestion Pipeline (Priority: P1)
+
+**As** a platform data operations engineer,
+**I want** an automated, idempotent, and validated ingestion pipeline that reads raw university JSON datasets,
+**So that** initial population and periodic re-synchronization require a single command.
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then | SLO |
+|---|:---|:---|:---|:---|
+| 4a | Raw 5.24 MB JSON dataset with 30+ universities | ETL pipeline runs for the first time | All entities inserted with correct FK relationships | < 30 seconds |
+| 4b | Database already contains data | ETL pipeline re-runs | Existing records updated via upsert; zero duplicate rows | Idempotent |
+| 4c | Dataset contains a malformed record | Pipeline encounters invalid record | Written to `etl-errors.jsonl`; pipeline continues to next record | Zero termination on partial failures |
+| 4d | New university slug not previously seen | Pipeline encounters new institution | All nested entities inserted transactionally; partial inserts roll back on nested failure | Atomic per-institution |
+
+---
+
+### Story 5 — Audit Trail & Data Governance (Priority: P2)
+
+**As** a lead platform administrator,
+**I want** an immutable, chronological record of all administrative data changes,
+**So that** every edit is traceable to a specific actor, timestamp, and data delta.
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then | SLO |
+|---|:---|:---|:---|:---|
+| 5a | Admin performs any create, update, or delete operation | Action succeeds | `AuditLog` record created in same transaction: actor ID, email, entity type, entity ID, action, before state (JSON), after state (JSON), IP, timestamp | 100% of mutations — no exceptions |
+| 5b | Admin views `/admin/audit-log` | Page loads | Paginated list filterable by entity type, action, actor, date range | < 500ms with 10K+ entries |
+| 5c | Admin clicks "Export Database Snapshot" | Request processed | Structured JSON of all PUBLISHED universities with nested faculties and programs | < 5s for 50 universities |
+
+---
+
+### Story 6 — Read Resilience & Graceful Degradation (Priority: P2)
+
+**As** a student browsing during a transient database connectivity failure,
+**I want** the platform to display cached or fallback data rather than an error screen,
+**So that** the user experience is uninterrupted by backend issues.
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then | SLO |
+|---|:---|:---|:---|:---|
+| 6a | Primary PostgreSQL connection unavailable | Public catalog page requested | Fallback static dataset served transparently; no HTTP 500 surfaced | < 200ms failover |
+| 6b | Database returns after reconnection | Next request made | Live database data resumes automatically | No operator action required |
+
+---
+
+### Edge Cases & Boundary Conditions
+
+| Category | Scenario | Required Behavior |
+|:---|:---|:---|
+| **Concurrency** | Two admins save the same university within < 1 second | Second save detects `updatedAt` staleness; conflict resolution UI presented |
+| **Ingestion — Invalid Tuition** | Degree program has `tuitionEgpPerYear: -5000` | Zod validation rejects record; logged to `etl-errors.jsonl`; institution continues |
+| **Bilingual Fallback** | Admin saves a new field only in English | Arabic view renders English text transparently; no null render crash |
+| **Slug Collision** | Two institutions resolve to same computed slug | Deterministic collision suffix appended (`guc-2`); logged as warning |
+| **Large Export** | Export requested with 500+ universities | Response streams progressively; no full payload buffered in memory |
+
+---
+
+## 5. Functional Requirements
+
+| ID | Requirement | Priority |
+|:---|:---|:---|
+| FR-001 | System MUST persist entities in normalized hierarchy: `University → Faculty → DegreeProgram → Accreditation` | P0 |
+| FR-002 | System MUST support bilingual (Arabic, English) attributes on all text-bearing entities | P0 |
+| FR-003 | System MUST store annual tuition as integers (EGP, USD separately) enabling numerical range filtering | P0 |
+| FR-004 | System MUST enforce RBAC with four roles: `STUDENT`, `EDITOR`, `ADMIN`, `SUPER_ADMIN` | P0 |
+| FR-005 | System MUST provide protected Admin CMS portal with full CRUD for universities, faculties, degree programs, accreditations | P0 |
+| FR-006 | System MUST perform on-demand cache invalidation within 2 seconds of any admin mutation | P0 |
+| FR-007 | System MUST generate and maintain a static slim search index ≤ 35 KB uncompressed | P0 |
+| FR-008 | System MUST deliver paginated public catalog pages with ≤ 150 KB total initial JS transfer | P0 |
+| FR-009 | System MUST provide community Suggestion submission form linked to a specific university | P1 |
+| FR-010 | System MUST provide admin suggestion moderation queue with single-action Approve & Apply | P1 |
+| FR-011 | System MUST provide an idempotent ETL ingestion pipeline with upsert semantics | P1 |
+| FR-012 | ETL pipeline MUST validate each record with Zod before insertion; errors streamed to separate log | P1 |
+| FR-013 | System MUST write immutable `AuditLog` on every admin create, update, delete — in same DB transaction | P2 |
+| FR-014 | Audit records MUST capture: actor ID, email, action, entity type, entity ID, before-state JSON, after-state JSON, timestamp | P2 |
+| FR-015 | System MUST provide Admin audit log viewer with pagination and multi-field filtering | P2 |
+| FR-016 | System MUST support on-demand JSON snapshot export of all published university data | P2 |
+| FR-017 | System MUST fall back gracefully to static in-memory data when PostgreSQL is unreachable | P2 |
+| FR-018 | System MUST detect concurrent edit conflicts using optimistic locking via `updatedAt` comparison | P2 |
+
+---
+
+## 6. Non-Functional Requirements
+
+### 6.1 Performance SLOs
+
+| Metric | Target | Measurement Method |
+|:---|:---|:---|
+| Admin Save → Cache Invalidation | < 2.0s | Server-side timing in admin actions |
+| Public Catalog Initial JS Transfer | ≤ 150 KB gzipped | Lighthouse Network audit |
+| Client Search Autocomplete Latency | < 50ms | `Performance.now()` delta in search hook |
+| University Modal Fetch Latency | < 800ms on 4G simulated | Chrome DevTools throttling |
+| Public Catalog TTFB (CDN-cached) | < 50ms | Vercel Analytics |
+| ETL Full Run (18K lines) | < 30 seconds | Script exit-time log |
+| Audit Log Page Load (10K entries) | < 500ms | Server Action response time |
+| JSON Snapshot Export (50 universities) | < 5 seconds | Browser download initiation time |
+
+### 6.2 Security Requirements
+
+- All admin Server Actions MUST re-validate session role inside the Server Action body (defense-in-depth beyond middleware).
+- `AuditLog` repository interface exposes ONLY `create()` — no update or delete method exists at any layer.
+- ETL ingestion scripts are CLI-only tools; no HTTP endpoint shall invoke them.
+- All database credentials loaded via `src/env.ts` with runtime validation; zero hardcoded credentials in source.
+
+### 6.3 Type Safety Contract
+
+- End-to-end type safety from Prisma-generated types → Zod-validated inputs → typed Server Action responses — zero `any` assertions.
+- Raw Prisma model types MUST NOT leak to the client layer; all crossings enforced by explicit Mapper classes.
+- Every Service class MUST depend on a Repository interface, not a concrete Prisma implementation.
+
+### 6.4 Reliability
+
+- `FallbackUniversityRepository` and `PostgresUniversityRepository` MUST be transparently interchangeable via `IUniversityRepository` — no `instanceof` checks or conditional branching in services.
+- ETL transactions MUST be atomic per university; failure on nested entities rolls back only that institution and continues to the next.
+
+---
+
+## 7. Key Domain Entities
+
+| Entity | Description |
+|:---|:---|
+| `University` | Top-level institution with full bilingual profile, rankings, contacts, social links, and publish status |
+| `Faculty` | Academic division with bilingual name, dean, description, and department list |
+| `DegreeProgram` | Individual degree offering with numeric tuition (EGP/USD), duration, language, career outcomes, dual-degree partner |
+| `Accreditation` | External recognition record (ABET, RIBA, AACSB, NAQAAE, etc.) |
+| `Suggestion` | Community correction proposal: `PENDING → RESOLVED / REJECTED` lifecycle |
+| `AuditLog` | Immutable event record — INSERT-only; actor, action, entity, before/after JSON diff |
+| `User` (extended) | Existing auth entity extended with `role` enum |
+
+---
+
+## 8. Success Criteria
+
+| ID | Criterion | Target |
+|:---|:---|:---|
+| SC-001 | Admin data change → public page reflects update | < 2.0 seconds |
+| SC-002 | Total initial client JS bundle reduction | From 8.36 MB → ≤ 150 KB (≥ 95% reduction) |
+| SC-003 | Client-side search autocomplete response | < 50ms |
+| SC-004 | Full ETL ingestion of 5.24 MB dataset | < 30 seconds; zero duplicates; zero FK violations |
+| SC-005 | Audit trail completeness | 100% of admin mutations produce an audit record |
+| SC-006 | Mobile Core Web Vitals | LCP < 2.5s, INP < 200ms, CLS < 0.1 — all Green |
+| SC-007 | Concurrent edit conflict detection | 100% of concurrent saves to same entity trigger conflict warning |
+
+---
+
+## 9. Dependencies & Assumptions
+
+### Dependencies
+- PostgreSQL instance (Neon Serverless or Supabase) provisioned; `DATABASE_URL` set in environment.
+- BetterAuth supports `role` field extension on the User model.
+- Next.js 15.5+ `revalidateTag` and `revalidatePath` APIs available.
+
+### Assumptions
+- University logos and media continue to be served from `public/` or external CDN.
+- Arabic and English are the only two languages in v1 scope.
+- Raw JSON dataset available during one-time ETL execution; not committed to repository.
+
 
 ---
 
