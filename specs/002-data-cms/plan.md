@@ -238,7 +238,81 @@ public/
 
 ### Phase 1: Schema Expansion & ETL Ingestion Pipeline
 
-**Goal**: All 30+ Egyptian universities and 400+ degree programs live in PostgreSQL with full relational integrity.
+**Goal**: Ingest all 30+ Egyptian universities, 150+ faculties, and 400+ degree programs from the raw dataset (`Egyptian_Universities_Deep_Exhaustive_Database.json`, 5.24 MB, 18,001 lines) into PostgreSQL with full relational normalization and zero data loss.
+
+#### 1.1 Data Source & Extraction Strategy
+- **Primary Source**: `Egyptian_Universities_Deep_Exhaustive_Database.json` (contains rich nested faculties, deans, bilingual descriptions, degree programs with EGP/USD tuition, career outcomes, and international accreditations).
+- **Secondary Fallback Source**: `src/data/database.js` (provides UI emojis, short codes, and curated tags).
+
+#### 1.2 Transformation & Data Cleansing Rules (`prisma/etl/transform.ts`)
+1. **Tuition Parsing**: String values like `"EGP 85,000 / Year"` and `"$4,500 / Year"` are parsed using regular expressions into raw integer values (`85000` and `4500`).
+2. **Slug Generation**: Stable URL-friendly slugs are computed for every university (e.g. `guc`, `auc`, `cairo-university`) and degree program (e.g. `bsc-civil-engineering-guc`).
+3. **Education Model Classification**: Mapped to enum values (`AMERICAN`, `GERMAN`, `BRITISH`, `EGYPTIAN`, `FRENCH`, `CANADIAN`).
+4. **Relational Hierarchy Mapping**:
+   - `University` (Root entity with institutional metadata, rankings, and contact lists)
+   - `Faculty` (Nested entity linked via `universityId`, containing `deanName` and `departments[]`)
+   - `DegreeProgram` (Nested entity linked via `universityId` and optional `facultyId`)
+   - `Accreditation` (Child entities linked via `universityId`)
+
+#### 1.3 Transactional Injection Sequence (`prisma/etl/seed-deep.ts`)
+Each university is inserted/updated inside an isolated `prisma.$transaction()`:
+```typescript
+// Transactional Injection per University
+await prisma.$transaction(async (tx) => {
+  // 1. Upsert University Root
+  const university = await tx.university.upsert({
+    where: { slug: normalized.slug },
+    create: normalized.universityData,
+    update: normalized.universityData,
+  });
+
+  // 2. Upsert Faculties & Build Lookup Map
+  const facultyMap = new Map<string, string>();
+  for (const facultyInput of normalized.faculties) {
+    const faculty = await tx.faculty.create({
+      data: { ...facultyInput, universityId: university.id },
+    });
+    facultyMap.set(faculty.nameEn.toLowerCase(), faculty.id);
+  }
+
+  // 3. Insert Degree Programs with Resolved Faculty Foreign Keys
+  for (const programInput of normalized.degreePrograms) {
+    const matchedFacultyId = programInput.facultyName 
+      ? facultyMap.get(programInput.facultyName.toLowerCase()) 
+      : null;
+
+    await tx.degreeProgram.create({
+      data: {
+        ...programInput.data,
+        universityId: university.id,
+        facultyId: matchedFacultyId,
+      },
+    });
+  }
+
+  // 4. Batch Insert Accreditations
+  if (normalized.accreditations.length > 0) {
+    await tx.accreditation.createMany({
+      data: normalized.accreditations.map(acc => ({
+        ...acc,
+        universityId: university.id,
+      })),
+    });
+  }
+});
+```
+
+#### 1.4 Execution & Verification Workflow
+```bash
+# Step 1: Push Schema to Database
+pnpm prisma db push
+
+# Step 2: Run the Ingestion Pipeline
+pnpm tsx prisma/etl/seed-deep.ts
+
+# Step 3: Verify Ingestion Row Counts
+pnpm tsx -e "import { prisma } from './src/lib/prisma'; async function test() { console.log('Universities:', await prisma.university.count(), 'Programs:', await prisma.degreeProgram.count()); } test();"
+```
 
 **Files to create/modify**:
 
