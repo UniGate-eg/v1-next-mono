@@ -4,29 +4,29 @@ import { PrismaClient } from "@prisma/client";
 import { transformUniversity } from "./transform";
 import { validateUniversityData, streamError } from "./validate";
 import { CheckpointManager } from "./checkpoint";
+import { universitiesDatabase } from "../../src/data/database.js";
 
 const prisma = new PrismaClient();
 const checkpoint = new CheckpointManager();
 
-// Look for the database file in the project root
-const DB_FILE = path.join(process.cwd(), "Egyptian_Universities_Deep_Exhaustive_Database.json");
-
 async function main() {
-  console.log("🚀 Starting Deep ETL Ingestion Pipeline...");
-  
-  if (!fs.existsSync(DB_FILE)) {
-    console.error(`❌ Database file not found at ${DB_FILE}`);
+  console.log("🚀 Starting Deep ETL Ingestion Pipeline to Neon Serverless Postgres...");
+
+  let rawData: any[] = [];
+  const DB_FILE = path.join(process.cwd(), "Egyptian_Universities_Deep_Exhaustive_Database.json");
+
+  if (fs.existsSync(DB_FILE)) {
+    console.log(`📂 Loading data from ${DB_FILE}`);
+    rawData = JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
+  } else if (Array.isArray(universitiesDatabase)) {
+    console.log("📂 Loading data from src/data/database.js");
+    rawData = universitiesDatabase;
+  } else {
+    console.error("❌ No database source found (checked JSON and database.js).");
     process.exit(1);
   }
 
-  const rawData = JSON.parse(fs.readFileSync(DB_FILE, "utf8"));
-  
-  if (!Array.isArray(rawData)) {
-    console.error("❌ Expected JSON file to contain an array of universities.");
-    process.exit(1);
-  }
-
-  console.log(`📦 Found ${rawData.length} universities in source file.`);
+  console.log(`📦 Found ${rawData.length} universities in source.`);
 
   let successCount = 0;
   let skipCount = 0;
@@ -37,24 +37,17 @@ async function main() {
       // 1. Validation
       const validation = validateUniversityData(rawUni);
       if (!validation.success) {
-        streamError("Egyptian_Universities_Deep_Exhaustive_Database.json", validation.error, rawUni);
+        streamError("source_data", validation.error, rawUni);
         errorCount++;
         continue;
       }
 
       // 2. Transformation
-      const normalized = transformUniversity(validation.data as any);
-      
-      // 3. Idempotency Check
-      if (checkpoint.isProcessed(normalized.slug)) {
-        console.log(`⏩ Skipping ${normalized.slug} (already processed)`);
-        skipCount++;
-        continue;
-      }
+      const normalized = transformUniversity(rawUni);
 
-      console.log(`🔄 Ingesting ${normalized.slug}...`);
+      console.log(`🔄 Ingesting ${normalized.slug} (${normalized.universityData.nameEn})...`);
 
-      // 4. Transactional Injection
+      // 3. Transactional Injection
       await prisma.$transaction(async (tx) => {
         // Upsert University Root
         const university = await tx.university.upsert({
@@ -62,6 +55,11 @@ async function main() {
           create: normalized.universityData as any,
           update: normalized.universityData as any,
         });
+
+        // Clear existing nested entities before re-inserting to prevent duplicates
+        await tx.degreeProgram.deleteMany({ where: { universityId: university.id } });
+        await tx.faculty.deleteMany({ where: { universityId: university.id } });
+        await tx.accreditation.deleteMany({ where: { universityId: university.id } });
 
         // Upsert Faculties & Build Lookup Map
         const facultyMap = new Map<string, string>();
@@ -74,8 +72,8 @@ async function main() {
 
         // Insert Degree Programs with Resolved Faculty Foreign Keys
         for (const programInput of normalized.degreePrograms) {
-          const matchedFacultyId = programInput.facultyName 
-            ? facultyMap.get(programInput.facultyName.toLowerCase()) 
+          const matchedFacultyId = programInput.facultyName
+            ? facultyMap.get(programInput.facultyName.toLowerCase())
             : null;
 
           await tx.degreeProgram.create({
@@ -86,14 +84,23 @@ async function main() {
             } as any,
           });
         }
+
+        // Insert Accreditations
+        for (const accInput of normalized.accreditations) {
+          await tx.accreditation.create({
+            data: {
+              ...accInput,
+              universityId: university.id,
+            },
+          });
+        }
       });
 
-      // 5. Mark Checkpoint
       checkpoint.markProcessed(normalized.slug);
       successCount++;
     } catch (error) {
-      console.error(`❌ Failed to ingest university: ${rawUni.nameEn}`, error);
-      streamError("Egyptian_Universities_Deep_Exhaustive_Database.json", error, rawUni);
+      console.error(`❌ Failed to ingest university: ${rawUni.name || rawUni.nameEn}`, error);
+      streamError("source_data", error, rawUni);
       errorCount++;
     }
   }
