@@ -9,6 +9,17 @@ import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 import type { SlimSearchToken } from "@/types/university.types";
 
+const homeMajors = [
+  { name: "Computer Science", name_ar: "علوم الحاسب", icon: "💻" },
+  { name: "Artificial Intelligence", name_ar: "الذكاء الاصطناعي", icon: "🤖" },
+  { name: "Industrial Engineering", name_ar: "هندسة صناعية", icon: "🏭" },
+  { name: "Business Administration", name_ar: "إدارة أعمال", icon: "📊" },
+  { name: "Pharmacy", name_ar: "صيدلة", icon: "💊" },
+  { name: "Architectural Engineering", name_ar: "هندسة معمارية", icon: "🏗️" },
+  { name: "Mechatronics Engineering", name_ar: "هندسة الميكاترونكس", icon: "⚙️" },
+  { name: "Economics", name_ar: "اقتصاد", icon: "📈" },
+];
+
 interface MarketingHomeClientProps {
   initialUniversities?: SlimSearchToken[];
 }
@@ -751,6 +762,36 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
                   : "Explore universities and save bookmarks to get personalized recommendations."}
               </p>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* Browse by Major Section */}
+      <section className="section majors-section" style={{ paddingBottom: "80px" }}>
+        <div className="container">
+          <div className="section-header-center animate-in">
+            <span className="section-badge">{language === "ar" ? "حسب التخصص" : "By program"}</span>
+            <h2 className="section-title">{language === "ar" ? "تصفح حسب التخصص الدراسي" : "Browse by major"}</h2>
+            <p className="section-subtitle">
+              {language === "ar"
+                ? "ابدأ بما تريد دراسته — واستكشف كل الجامعات المعتمدة التي تقدم هذا التخصص."
+                : "Start from what you want to study — see every university that offers it."}
+            </p>
+          </div>
+          <div className="major-chips">
+            {homeMajors.map((m) => (
+              <Link
+                key={m.name}
+                href={`/universities?search=${encodeURIComponent(m.name)}`}
+                className="major-chip"
+              >
+                <span className="chip-icon">{m.icon}</span>
+                <span>{language === "ar" ? m.name_ar : m.name}</span>
+              </Link>
+            ))}
+            <Link href="/majors" className="major-chip major-chip-arrow">
+              {language === "ar" ? "جميع التخصصات ←" : "All majors →"}
+            </Link>
           </div>
         </div>
       </section>
