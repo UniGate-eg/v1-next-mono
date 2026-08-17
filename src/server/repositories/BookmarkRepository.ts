@@ -10,11 +10,7 @@ export class BookmarkRepository implements IBookmarkRepository {
           where: { userId },
           include: {
             university: {
-              include: {
-                majors: {
-                  orderBy: { nameEn: "asc" },
-                },
-              },
+              // faculties: true,
             },
           },
           orderBy: { updatedAt: "desc" },
@@ -33,11 +29,7 @@ export class BookmarkRepository implements IBookmarkRepository {
           where: { id },
           include: {
             university: {
-              include: {
-                majors: {
-                  orderBy: { nameEn: "asc" },
-                },
-              },
+              // faculties: true,
             },
           },
         })
@@ -63,11 +55,7 @@ export class BookmarkRepository implements IBookmarkRepository {
           },
           include: {
             university: {
-              include: {
-                majors: {
-                  orderBy: { nameEn: "asc" },
-                },
-              },
+              // faculties: true,
             },
           },
         })
@@ -104,11 +92,7 @@ export class BookmarkRepository implements IBookmarkRepository {
         },
         include: {
           university: {
-            include: {
-              majors: {
-                orderBy: { nameEn: "asc" },
-              },
-            },
+            // faculties: true,
           },
         },
       })
@@ -129,11 +113,7 @@ export class BookmarkRepository implements IBookmarkRepository {
         },
         include: {
           university: {
-            include: {
-              majors: {
-                orderBy: { nameEn: "asc" },
-              },
-            },
+            // faculties: true,
           },
         },
       })

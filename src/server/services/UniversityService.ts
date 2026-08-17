@@ -1,16 +1,18 @@
-import type { IUniversityRepository, UniversityWithMajors } from "@/server/repositories/interfaces/IUniversityRepository";
-import { UniversityFiltersSchema, type UniversityFilters } from "@/schemas/university.schema";
+import type { IUniversityReader } from "@/server/repositories/interfaces/IUniversityRepository";
+import type { UniversityDTO } from "@/types/university.types";
+import { UniversityFiltersSchema } from "@/schemas/university.schema";
 
 export class UniversityService {
-  constructor(private readonly universityRepo: IUniversityRepository) {}
+  constructor(private readonly universityRepo: IUniversityReader) {}
 
   async getUniversities(rawFilters: unknown = {}) {
     const filters = UniversityFiltersSchema.parse(rawFilters);
 
-    const [universities, total] = await Promise.all([
-      this.universityRepo.findAll(filters),
-      this.universityRepo.count(filters),
-    ]);
+    const { data: universities, total } = await this.universityRepo.findMany(
+      filters,
+      filters.page,
+      filters.limit
+    );
 
     return {
       data: universities,
@@ -23,19 +25,21 @@ export class UniversityService {
     };
   }
 
-  async getUniversityBySlug(slug: string): Promise<UniversityWithMajors> {
+  async getUniversityBySlug(slug: string): Promise<UniversityDTO> {
     if (!slug) throw new Error("University slug is required");
     const university = await this.universityRepo.findBySlug(slug);
     if (!university) throw new Error(`University not found: ${slug}`);
     return university;
   }
 
-  async getUniversitiesByIds(ids: string[]): Promise<UniversityWithMajors[]> {
+  async getUniversitiesByIds(ids: string[]): Promise<UniversityDTO[]> {
     if (!ids || ids.length === 0) return [];
-    return this.universityRepo.findByIds(ids);
+    const results = await Promise.all(ids.map((id) => this.universityRepo.findById(id)));
+    return results.filter((u): u is UniversityDTO => u !== null);
   }
 
-  async getFeaturedUniversities(): Promise<UniversityWithMajors[]> {
-    return this.universityRepo.getFeatured();
+  async getFeaturedUniversities(): Promise<UniversityDTO[]> {
+    const { data } = await this.universityRepo.findMany(undefined, 1, 6);
+    return data;
   }
 }

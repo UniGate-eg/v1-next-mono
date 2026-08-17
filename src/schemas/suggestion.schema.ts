@@ -1,23 +1,19 @@
 import { z } from "zod";
 
-export const SuggestionTypeSchema = z.enum([
-  "DATA_CORRECTION",
-  "MISSING_INFO",
-  "NEW_UNIVERSITY",
-  "GENERAL",
-]);
-
-export const SuggestionStatusSchema = z.enum([
-  "PENDING",
-  "REVIEWED",
-  "RESOLVED",
-]);
-
 export const CreateSuggestionSchema = z.object({
-  content: z.string().min(5, "Suggestion must be at least 5 characters").max(2000),
-  type: SuggestionTypeSchema.default("DATA_CORRECTION"),
+  universityId: z.string().min(1),
+  suggestedField: z.string().min(1),
+  suggestedValue: z.string().min(1),
+  sourceUrl: z.string().url().optional(),
+  notes: z.string().optional(),
+  suggestedByEmail: z.string().optional(),
 });
 
-export type SuggestionType = z.infer<typeof SuggestionTypeSchema>;
-export type SuggestionStatus = z.infer<typeof SuggestionStatusSchema>;
+export const ResolveSuggestionSchema = z.object({
+  id: z.string().min(1),
+  status: z.enum(["MERGED", "REJECTED"]),
+  adminNotes: z.string().optional(),
+});
+
 export type CreateSuggestionInput = z.infer<typeof CreateSuggestionSchema>;
+export type ResolveSuggestionInput = z.infer<typeof ResolveSuggestionSchema>;

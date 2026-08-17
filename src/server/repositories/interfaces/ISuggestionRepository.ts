@@ -1,16 +1,9 @@
-import type { SuggestionType, SuggestionStatus } from "@/schemas/suggestion.schema";
-
-export type SuggestionRecord = {
-  id: string;
-  userId: string;
-  content: string;
-  type: SuggestionType;
-  status: SuggestionStatus;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import type { CreateSuggestionInput } from "@/schemas/suggestion.schema";
+import type { SuggestionDTO } from "@/types/audit.types";
 
 export interface ISuggestionRepository {
-  create(userId: string, content: string, type: SuggestionType): Promise<SuggestionRecord>;
-  findByUser(userId: string): Promise<SuggestionRecord[]>;
+  create(data: CreateSuggestionInput): Promise<SuggestionDTO>;
+  findPending(page?: number, limit?: number): Promise<{ data: SuggestionDTO[]; total: number }>;
+  findById(id: string): Promise<SuggestionDTO | null>;
+  updateStatus(id: string, status: "MERGED" | "REJECTED", reviewerId: string, feedback?: string): Promise<SuggestionDTO>;
 }
