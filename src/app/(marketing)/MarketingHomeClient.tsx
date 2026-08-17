@@ -796,6 +796,77 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
         </div>
       </section>
 
+      {/* Why UniGate Section */}
+      <section className="section why-section" style={{ paddingBottom: "80px" }}>
+        <div className="container">
+          <div className="section-header-center animate-in">
+            <h2 className="section-title">
+              {language === "ar" ? "لماذا بوابة الجامعات المصرية (UniGate)؟" : "Why UniGate"}
+            </h2>
+            <p className="section-subtitle">
+              {language === "ar"
+                ? "صُممت لمساعدتك على اتخاذ القرار السليم، وليس لمجرد سرد أسماء الجامعات."
+                : "Built to help you decide, not just to list."}
+            </p>
+          </div>
+          <div className="features-grid">
+            <div className="feature-card animate-in">
+              <div className="feature-icon">📋</div>
+              <h3>{language === "ar" ? "معلومات منظمة وموثقة" : "Organized information"}</h3>
+              <p>
+                {language === "ar"
+                  ? "جميع ملفات الجامعات تتبع هيكلاً موحداً ومنظماً لتسهيل المقارنة المباشرة والدقيقة."
+                  : "Every university profile follows the same structure so you can actually compare them."}
+              </p>
+            </div>
+            <div className="feature-card animate-in">
+              <div className="feature-icon">🛡️</div>
+              <h3>{language === "ar" ? "نبذة شفافة وموثوقة" : "Trustworthy overviews"}</h3>
+              <p>
+                {language === "ar"
+                  ? "ملخصات واقعية ومحايدة لما تتميز به كل جامعة حقيقةً بدون مبالغات ترويجية."
+                  : "Neutral summaries of what each university is genuinely known for — no marketing fluff."}
+              </p>
+            </div>
+            <div className="feature-card animate-in">
+              <div className="feature-icon">⚖️</div>
+              <h3>{language === "ar" ? "مقارنة حقيقية جنباً إلى جنب" : "Real side-by-side compare"}</h3>
+              <p>
+                {language === "ar"
+                  ? "قارن الجامعات وجهاً لوجه بناءً على المعايير الأكثر أهمية للطلاب وأولياء الأمور في مصر."
+                  : "Put universities next to each other on the criteria that matter to students in Egypt."}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="cta-section">
+        <div className="cta-bg">
+          <div className="gradient-orb orb-cta-1"></div>
+          <div className="gradient-orb orb-cta-2"></div>
+        </div>
+        <div className="container cta-content animate-in">
+          <h2>
+            {language === "ar"
+              ? "قرارك الجامعي يستحق الوضوح واليقين."
+              : "Your university decision deserves clarity."}
+          </h2>
+          <p>
+            {language === "ar"
+              ? "ابدأ الآن باستكشاف الجامعات والبرامج التي تناسب طموحاتك وميزانيتك وأسلوب حياتك."
+              : "Start exploring the universities that fit your goals, interests, and budget."}
+          </p>
+          <Link href="/universities" className="cta-btn">
+            {language === "ar" ? "استكشف جميع الجامعات" : "Explore universities"}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+      </section>
+
       {/* University Modal */}
       {selectedUniModal && (
         <UniversityModal
