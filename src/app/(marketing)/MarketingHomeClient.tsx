@@ -735,7 +735,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
             </p>
           </div>
 
-          <div className="unis-grid">
+          <div className="uni-grid" id="recommendedUnisGrid">
             {recommendations.length > 0 ? (
               recommendations.map((uni: any) => (
                 <UniversityCard
