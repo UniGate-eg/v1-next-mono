@@ -85,19 +85,25 @@ export default function MajorsPage() {
           {filteredMajors.map((major, index) => {
             const db = universitiesDatabase;
             const offeringUnis = db.filter((u: any) => {
-              const majorsList = u.majors || [];
               const facultiesList = u.faculties || [];
+              const facultiesArList = u.faculties_ar || [];
+              const searchKey = major.name.toLowerCase();
+              const searchKeyAr = (major.name_ar || "").toLowerCase();
+              const uNameEn = (u.nameEn || "").toLowerCase();
+              const uNameAr = (u.nameAr || "");
+
               return (
-                majorsList.some((m: any) =>
-                  (typeof m === "string" ? m : m.name_en || "")
-                    .toLowerCase()
-                    .includes(major.name.toLowerCase())
-                ) ||
+                uNameEn.includes(searchKey) ||
+                (searchKeyAr && uNameAr.includes(searchKeyAr)) ||
                 facultiesList.some((f: any) =>
-                  (typeof f === "string" ? f : f.name_en || "")
+                  (typeof f === "string" ? f : f.nameEn || f.name || "")
                     .toLowerCase()
-                    .includes(major.name.toLowerCase())
-                )
+                    .includes(searchKey)
+                ) ||
+                (searchKeyAr && facultiesArList.some((f: any) =>
+                  (typeof f === "string" ? f : f.nameAr || "")
+                    .includes(searchKeyAr)
+                ))
               );
             });
 
