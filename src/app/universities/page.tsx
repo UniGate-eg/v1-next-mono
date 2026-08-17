@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
+import { TuitionBudgetFilter } from "@/components/university/TuitionBudgetFilter";
 
 const parseTuition = (tuitionStr?: string | number) => {
   if (!tuitionStr) return 0;
@@ -466,68 +467,21 @@ export default function UniversitiesPage() {
             </div>
           </div>
 
-          {/* Tuition Budget Range Slider */}
-          <div className="price-range-container">
-            <div className="price-range-header">
-              <span className="filter-group-label">💰 {t("Tuition Budget (EGP/year)")}</span>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <span className="price-range-value">{getPriceRangeText()}</span>
-                {(priceMin > 0 || priceMax < 400000) && (
-                  <button
-                    onClick={() => {
-                      setPriceMin(0);
-                      setPriceMax(400000);
-                    }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "var(--accent-coral)",
-                      fontSize: "12px",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      padding: 0,
-                    }}
-                    title={language === "ar" ? "إعادة ضبط" : "Reset"}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M18 6 6 18M6 6l12 12" />
-                    </svg>
-                    {language === "ar" ? "إعادة ضبط" : "Reset"}
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className="price-range-slider">
-              <div className="price-range-track">
-                <div
-                  className="price-range-track-fill"
-                  style={{
-                    left: `${(priceMin / 400000) * 100}%`,
-                    right: `${100 - (priceMax / 400000) * 100}%`,
-                  }}
-                ></div>
-              </div>
-              <input
-                type="range"
-                className="range-input range-min"
-                min="0"
-                max="400000"
-                step="5000"
-                value={priceMin}
-                onChange={(e) => handlePriceChange(e, "min")}
-              />
-              <input
-                type="range"
-                className="range-input range-max"
-                min="0"
-                max="400000"
-                step="5000"
-                value={priceMax}
-                onChange={(e) => handlePriceChange(e, "max")}
-              />
-            </div>
+          {/* Modern Tuition Budget Filter Component */}
+          <div className="mt-5 pt-4 border-t border-slate-200/60 dark:border-slate-800/80">
+            <TuitionBudgetFilter
+              priceMin={priceMin}
+              priceMax={priceMax}
+              onPriceChange={(min, max) => {
+                setPriceMin(min);
+                setPriceMax(max);
+              }}
+              onReset={() => {
+                setPriceMin(0);
+                setPriceMax(400000);
+              }}
+              maxLimit={400000}
+            />
           </div>
 
           {/* Active Filter Tags Row */}
