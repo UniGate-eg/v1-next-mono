@@ -83,10 +83,28 @@ export interface SlimSearchToken {
   slug: string;
   nameEn: string;
   nameAr: string;
+  shortName?: string | null;
   type: string;
   emoji?: string | null;
+  modelEmoji?: string | null;
   city?: string | null;
+  governorate?: string | null;
   educationModel: string;
+  established?: number | null;
+  overviewEn?: string | null;
+  overviewAr?: string | null;
+  description?: string | null;
+  description_ar?: string | null;
+  qsRanking?: string | null;
+  theRanking?: string | null;
+  tuition?: string | null;
+  tuition_ar?: string | null;
+  strengthsEn?: string[];
+  strengthsAr?: string[];
+  faculties?: string[];
+  faculties_ar?: string[];
+  accentGradient?: string | null;
+  featured?: boolean;
 }
 
 export interface UniversityFilters {

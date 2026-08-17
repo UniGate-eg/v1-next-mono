@@ -81,11 +81,27 @@ export class PostgresUniversityRepository implements IUniversityReader, IUnivers
         slug: true,
         nameEn: true,
         nameAr: true,
+        shortName: true,
         type: true,
         emoji: true,
         city: true,
+        governorate: true,
         educationModel: true,
-      }
+        established: true,
+        overviewEn: true,
+        overviewAr: true,
+        qsRanking: true,
+        theRanking: true,
+        strengthsEn: true,
+        strengthsAr: true,
+        faculties: {
+          select: {
+            nameEn: true,
+            nameAr: true,
+          },
+          take: 6,
+        },
+      },
     });
 
     return universities.map(UniversityMapper.toSlimSearchToken);

@@ -50,15 +50,59 @@ export class UniversityMapper {
   }
 
   static toSlimSearchToken(university: any): SlimSearchToken {
+    const modelEmojiMap: Record<string, string> = {
+      AMERICAN: "🎓",
+      GERMAN: "🏛️",
+      BRITISH: "🏫",
+      EGYPTIAN: "🇪🇬",
+      FRENCH: "🗼",
+      CANADIAN: "🍁",
+    };
+
+    const gradientMap: Record<string, string> = {
+      AMERICAN: "linear-gradient(135deg, #2563EB, #7C3AED)",
+      GERMAN: "linear-gradient(135deg, #059669, #0D9488)",
+      BRITISH: "linear-gradient(135deg, #DC2626, #EA580C)",
+      EGYPTIAN: "linear-gradient(135deg, #7C3AED, #DB2777)",
+      FRENCH: "linear-gradient(135deg, #4F46E5, #06B6D4)",
+      CANADIAN: "linear-gradient(135deg, #D97706, #DC2626)",
+    };
+
+    const modelKey = String(university.educationModel || "").toUpperCase();
+
+    // Compute faculties preview list
+    const facultiesEn = university.faculties
+      ? university.faculties.map((f: any) => (typeof f === "string" ? f : f.nameEn || f.name || "")).filter(Boolean)
+      : [];
+    const facultiesAr = university.faculties
+      ? university.faculties.map((f: any) => (typeof f === "string" ? f : f.nameAr || f.name_ar || f.nameEn || "")).filter(Boolean)
+      : [];
+
     return {
       id: university.id,
       slug: university.slug,
       nameEn: university.nameEn,
       nameAr: university.nameAr,
+      shortName: university.shortName,
       type: university.type,
-      emoji: university.emoji,
-      city: university.city,
+      emoji: university.emoji || "🏛️",
+      modelEmoji: modelEmojiMap[modelKey] || "🎓",
+      city: university.city || university.governorate,
+      governorate: university.governorate,
       educationModel: university.educationModel,
+      established: university.established,
+      overviewEn: university.overviewEn,
+      overviewAr: university.overviewAr,
+      description: university.overviewEn,
+      description_ar: university.overviewAr,
+      qsRanking: university.qsRanking,
+      theRanking: university.theRanking,
+      strengthsEn: university.strengthsEn || [],
+      strengthsAr: university.strengthsAr || [],
+      faculties: facultiesEn,
+      faculties_ar: facultiesAr,
+      accentGradient: gradientMap[modelKey] || "linear-gradient(135deg, #7C3AED, #EC4899)",
+      featured: Boolean(university.qsRanking && university.qsRanking !== "N/A"),
     };
   }
 }
