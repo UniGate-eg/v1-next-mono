@@ -26,7 +26,14 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ data: university });
+    return NextResponse.json(
+      { data: university },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400",
+        },
+      }
+    );
   } catch (error) {
     console.error(`[API] Error fetching university by slug ${resolvedSlug}:`, error);
     return NextResponse.json(

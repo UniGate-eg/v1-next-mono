@@ -117,6 +117,33 @@ describe("UniversityMapper", () => {
       strengthsAr: ["الهندسة", "الفنون التطبيقية"],
       faculties: ["Faculty of Engineering"],
       faculties_ar: ["كلية الهندسة"],
+      structured_faculties: [
+        {
+          id: "fac-eng",
+          nameEn: "Faculty of Engineering",
+          nameAr: "كلية الهندسة",
+          deanName: "Dr. Schmidt",
+          descriptionEn: "Engineering excellence",
+          descriptionAr: "التميز الهندسي",
+          departments: ["Computer Engineering", "Mechatronics"],
+        },
+      ],
+      degreePrograms: [
+        {
+          id: "prog-cs",
+          facultyId: "fac-eng",
+          nameEn: "B.Sc. in Computer Science",
+          nameAr: "بكالوريوس علوم الحاسب",
+          degreeType: "BACHELORS",
+          durationYears: 4,
+          tuitionEgpPerYear: 180000,
+          studyLanguage: "ENGLISH",
+        },
+      ],
+      website: "https://guc.edu.eg",
+      phones: ["+201234567890"],
+      emails: ["info@guc.edu.eg"],
+      socialLinks: { facebook: "https://facebook.com/guc" },
       accentGradient: "linear-gradient(135deg, #059669, #0D9488)",
       featured: true,
     });

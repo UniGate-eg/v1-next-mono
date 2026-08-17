@@ -92,6 +92,8 @@ export interface UniversityData {
   website?: string | null;
 }
 
+const universityDetailsMemoryCache = new Map<string, any>();
+
 interface UniversityModalProps {
   uni: UniversityData | null;
   onClose: () => void;
@@ -108,7 +110,12 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
   const [expandedFaculties, setExpandedFaculties] = useState<Record<number, boolean>>({ 0: true });
   const [activeTab, setActiveTab] = useState<"faculties" | "admission" | "facilities" | "contact">("faculties");
   const [allExpanded, setAllExpanded] = useState(false);
-  const [fullUni, setFullUni] = useState<any>(uni);
+  const [fullUni, setFullUni] = useState<any>(() => {
+    if (uni && (uni as any).slug && universityDetailsMemoryCache.has((uni as any).slug)) {
+      return universityDetailsMemoryCache.get((uni as any).slug);
+    }
+    return uni;
+  });
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
   const uniIdStr = String(uni?.id || "");
@@ -119,15 +126,23 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
   const isBookmarked = !!existingBookmark;
 
   useEffect(() => {
-    if (uni && (uni as any).slug) {
-      fetch(`/api/universities/${(uni as any).slug}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.data) {
-            setFullUni(data.data);
-          }
-        })
-        .catch((err) => console.warn("Failed to fetch full university details:", err));
+    if (!uni) return;
+    const slug = (uni as any).slug;
+    if (slug) {
+      if (universityDetailsMemoryCache.has(slug)) {
+        setFullUni(universityDetailsMemoryCache.get(slug));
+      } else {
+        setFullUni(uni);
+        fetch(`/api/universities/${slug}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.data) {
+              universityDetailsMemoryCache.set(slug, data.data);
+              setFullUni(data.data);
+            }
+          })
+          .catch((err) => console.warn("Failed to fetch full university details:", err));
+      }
     } else {
       setFullUni(uni);
     }

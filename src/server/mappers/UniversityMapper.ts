@@ -70,13 +70,34 @@ export class UniversityMapper {
 
     const modelKey = String(university.educationModel || "").toUpperCase();
 
-    // Compute faculties preview list
-    const facultiesEn = university.faculties
-      ? university.faculties.map((f: any) => (typeof f === "string" ? f : f.nameEn || f.name || "")).filter(Boolean)
+    // Compute structured faculties and degree programs
+    const structuredFaculties = Array.isArray(university.faculties)
+      ? university.faculties.map((f: any) => ({
+          id: f.id,
+          nameEn: f.nameEn || f.name_en || f.name || "",
+          nameAr: f.nameAr || f.name_ar || f.nameEn || f.name || "",
+          deanName: f.deanName || f.dean_name || null,
+          descriptionEn: f.descriptionEn || f.description_en || null,
+          descriptionAr: f.descriptionAr || f.description_ar || null,
+          departments: Array.isArray(f.departments) ? f.departments : [],
+        }))
       : [];
-    const facultiesAr = university.faculties
-      ? university.faculties.map((f: any) => (typeof f === "string" ? f : f.nameAr || f.name_ar || f.nameEn || "")).filter(Boolean)
+
+    const degreePrograms = Array.isArray(university.degreePrograms)
+      ? university.degreePrograms.map((p: any) => ({
+          id: p.id,
+          facultyId: p.facultyId,
+          nameEn: p.nameEn || p.name_en || p.name || "",
+          nameAr: p.nameAr || p.name_ar || p.nameEn || p.name || "",
+          degreeType: p.degreeType || "B.Sc.",
+          durationYears: p.durationYears || null,
+          tuitionEgpPerYear: p.tuitionEgpPerYear || null,
+          studyLanguage: p.studyLanguage || "English",
+        }))
       : [];
+
+    const facultiesEn = structuredFaculties.map((f: any) => f.nameEn).filter(Boolean);
+    const facultiesAr = structuredFaculties.map((f: any) => f.nameAr).filter(Boolean);
 
     return {
       id: university.id,
@@ -101,6 +122,12 @@ export class UniversityMapper {
       strengthsAr: university.strengthsAr || [],
       faculties: facultiesEn,
       faculties_ar: facultiesAr,
+      structured_faculties: structuredFaculties,
+      degreePrograms: degreePrograms,
+      website: university.website || null,
+      phones: Array.isArray(university.phones) ? university.phones : [],
+      emails: Array.isArray(university.emails) ? university.emails : [],
+      socialLinks: university.socialLinks || null,
       accentGradient: gradientMap[modelKey] || "linear-gradient(135deg, #7C3AED, #EC4899)",
       featured: Boolean(university.qsRanking && university.qsRanking !== "N/A"),
     };

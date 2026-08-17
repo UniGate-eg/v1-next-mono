@@ -103,6 +103,12 @@ export interface SlimSearchToken {
   strengthsAr?: string[];
   faculties?: string[];
   faculties_ar?: string[];
+  structured_faculties?: any[];
+  degreePrograms?: any[];
+  website?: string | null;
+  phones?: string[];
+  emails?: string[];
+  socialLinks?: Record<string, string> | null;
   accentGradient?: string | null;
   featured?: boolean;
 }
