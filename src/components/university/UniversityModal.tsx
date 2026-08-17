@@ -29,7 +29,6 @@ import {
   ShieldCheck,
   Clock,
   Compass,
-  Briefcase,
   Users,
   CheckCircle2,
   BadgeCheck,
@@ -100,7 +99,7 @@ interface UniversityModalProps {
 }
 
 export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModalProps) {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const isArabic = language === "ar";
 
   const { selectedUniversities, toggleUniversity } = useCompareStore();
@@ -110,7 +109,6 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
   const [activeTab, setActiveTab] = useState<"faculties" | "admission" | "facilities" | "contact">("faculties");
   const [allExpanded, setAllExpanded] = useState(false);
   const [fullUni, setFullUni] = useState<any>(uni);
-  const [loading, setLoading] = useState(false);
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
   const uniIdStr = String(uni?.id || "");
@@ -122,7 +120,6 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
 
   useEffect(() => {
     if (uni && (uni as any).slug) {
-      setLoading(true);
       fetch(`/api/universities/${(uni as any).slug}`)
         .then((res) => res.json())
         .then((data) => {
@@ -130,8 +127,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
             setFullUni(data.data);
           }
         })
-        .catch((err) => console.warn("Failed to fetch full university details:", err))
-        .finally(() => setLoading(false));
+        .catch((err) => console.warn("Failed to fetch full university details:", err));
     } else {
       setFullUni(uni);
     }
@@ -243,7 +239,6 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
         const facName = isArabic && fac.nameAr ? fac.nameAr : fac.nameEn || fac.name || "";
         const facDesc = isArabic && fac.descriptionAr ? fac.descriptionAr : fac.descriptionEn || fac.description || null;
         
-        // Find programs under this faculty
         const facPrograms = degreePrograms.filter(
           (p: any) => p.facultyId === fac.id || (p.faculty && p.faculty.id === fac.id)
         );
@@ -307,473 +302,533 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-xl animate-in fade-in duration-200"
+      className="modal-overlay show"
       id="modalOverlay"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 99999,
+        background: "rgba(0, 0, 0, 0.78)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px",
+      }}
       onClick={(e) => {
         if ((e.target as HTMLElement).id === "modalOverlay") onClose();
       }}
     >
       <div
-        className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-slate-950 border border-slate-800/90 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 animate-in zoom-in-95 duration-200"
+        className="modal"
         id="uniModal"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          maxWidth: "800px",
+          width: "100%",
+          maxHeight: "88vh",
+          background: "var(--bg-surface, #131534)",
+          border: "1px solid var(--border, rgba(168, 85, 247, 0.25))",
+          borderRadius: "24px",
+          overflow: "hidden",
+          position: "relative",
+          boxShadow: "0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(124, 58, 237, 0.2)",
+        }}
       >
-        {/* Sticky Header with Hero Accent Gradient */}
-        <div
-          className="relative px-6 py-6 sm:px-8 sm:py-7 text-white shrink-0 border-b border-white/10 overflow-hidden"
-          style={{
-            background: displayUni.accentGradient || "linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #DB2777 100%)",
-          }}
-        >
-          {/* Subtle Ambient Orbs */}
-          <div className="absolute top-0 right-0 -mt-8 -mr-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
-          <div className="absolute bottom-0 left-1/3 -mb-10 w-36 h-36 rounded-full bg-black/20 blur-xl pointer-events-none"></div>
+        {/* Top Control Buttons */}
+        <div style={{ position: "absolute", top: "16px", right: isArabic ? "auto" : "16px", left: isArabic ? "16px" : "auto", display: "flex", alignItems: "center", gap: "8px", zIndex: 10 }}>
+          {/* Quick Compare */}
+          <button
+            onClick={handleCompareToggle}
+            className={`card-compare-btn ${isCompared ? "selected" : ""}`}
+            style={{
+              width: "34px",
+              height: "34px",
+              borderRadius: "50%",
+              background: isCompared ? "var(--primary)" : "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#FFF",
+              cursor: "pointer",
+            }}
+            title={isArabic ? "مقارنة الجامعة" : "Compare university"}
+          >
+            <Scale style={{ width: "15px", height: "15px" }} />
+          </button>
 
-          {/* Floating Actions Top Right */}
-          <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2 z-20">
-            {/* Quick Compare Button */}
-            <button
-              onClick={handleCompareToggle}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer backdrop-blur-md border ${
-                isCompared
-                  ? "bg-purple-600 border-purple-400 text-white shadow-lg"
-                  : "bg-black/30 hover:bg-black/50 border-white/20 text-white/90"
-              }`}
-              title={isArabic ? "مقارنة الجامعة" : "Compare university"}
-            >
-              <Scale className="w-4 h-4" />
-            </button>
+          {/* Quick Bookmark */}
+          <button
+            onClick={handleBookmarkToggle}
+            style={{
+              width: "34px",
+              height: "34px",
+              borderRadius: "50%",
+              background: isBookmarked ? "#E11D48" : "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#FFF",
+              cursor: "pointer",
+            }}
+            title={isArabic ? "إضافة للمفضلة" : "Bookmark university"}
+          >
+            <Heart style={{ width: "15px", height: "15px", fill: isBookmarked ? "#FFF" : "none" }} />
+          </button>
 
-            {/* Quick Bookmark Button */}
-            <button
-              onClick={handleBookmarkToggle}
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all cursor-pointer backdrop-blur-md border ${
-                isBookmarked
-                  ? "bg-rose-600 border-rose-400 text-white shadow-lg"
-                  : "bg-black/30 hover:bg-black/50 border-white/20 text-white/90"
-              }`}
-              title={isArabic ? "إضافة للمفضلة" : "Bookmark university"}
-            >
-              <Heart className={`w-4 h-4 ${isBookmarked ? "fill-white" : ""}`} />
-            </button>
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            style={{
+              width: "34px",
+              height: "34px",
+              borderRadius: "50%",
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#FFF",
+              cursor: "pointer",
+            }}
+            aria-label="Close modal"
+          >
+            <X style={{ width: "16px", height: "16px" }} />
+          </button>
+        </div>
 
-            {/* Close Button */}
-            <button
-              className="w-9 h-9 rounded-full bg-black/30 hover:bg-black/50 text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-md border border-white/20"
-              onClick={onClose}
-              aria-label="Close modal"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Hero Header Content */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 pr-24 sm:pr-28">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/15 backdrop-blur-md border border-white/30 flex items-center justify-center text-4xl sm:text-5xl shadow-xl shrink-0">
-              {displayUni.emoji || "🏛️"}
-            </div>
-
-            <div className="space-y-1.5 flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold border border-white/30 shadow-xs">
-                  <span>{displayUni.modelEmoji || "🎓"}</span>
-                  <span>
-                    {displayUni.educationModel || getLangField("model") || "University"} {isArabic ? "نموذج" : "Model"}
-                  </span>
-                </span>
-
-                {rank && rank !== "N/A" && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-amber-400/30 text-amber-200 border border-amber-300/50 backdrop-blur-md px-2.5 py-1 rounded-full font-bold">
-                    <Trophy className="w-3.5 h-3.5 text-amber-300" />
-                    {rank}
-                  </span>
+        {/* Scrollable Modal Content */}
+        <div style={{ overflowY: "auto", padding: "28px 32px 24px 32px", flex: 1 }}>
+          {/* Modal Header */}
+          <div style={{ borderBottom: "1px solid var(--border, rgba(168, 85, 247, 0.2))", paddingBottom: "20px", marginBottom: "20px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "10px" }}>
+              <div style={{ fontSize: "42px", lineHeight: 1 }}>{displayUni.emoji || "🏛️"}</div>
+              <div style={{ flex: 1, paddingRight: isArabic ? "0" : "100px", paddingLeft: isArabic ? "100px" : "0" }}>
+                <h2 style={{ fontSize: "24px", fontWeight: "800", margin: 0, color: "#FFF", fontFamily: "var(--font-display)" }}>
+                  {uniName}
+                </h2>
+                {subTitleName && (
+                  <div style={{ fontSize: "14px", color: "var(--text-muted)", marginTop: "2px" }}>
+                    {subTitleName}
+                  </div>
                 )}
               </div>
+            </div>
 
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white m-0 drop-shadow-sm truncate">
-                {uniName}
-              </h2>
-
-              {subTitleName && (
-                <div className="text-sm font-medium text-white/80 truncate">{subTitleName}</div>
+            {/* Meta Tags */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
+              <span className="modal-meta-item">
+                {displayUni.modelEmoji || "🎓"} {displayUni.educationModel || getLangField("model") || "University"} {isArabic ? "نموذج" : "Model"}
+              </span>
+              <span className="modal-meta-item">
+                📍 {getLangField("location")}
+              </span>
+              <span className="modal-meta-item">
+                🏛️ {displayUni.type || "University"}
+              </span>
+              {establishedYear && (
+                <span className="modal-meta-item">
+                  📅 {isArabic ? `تأسست ${establishedYear}` : `Est. ${establishedYear}`}
+                </span>
               )}
-
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="inline-flex items-center gap-1 text-xs bg-black/25 backdrop-blur-sm px-2.5 py-0.5 rounded-md text-white/90 border border-white/10">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-300" />
-                  {getLangField("location")}
+              {rank && rank !== "N/A" && (
+                <span
+                  className="modal-meta-item"
+                  style={{
+                    background: "rgba(251, 191, 36, 0.15)",
+                    borderColor: "rgba(251, 191, 36, 0.4)",
+                    color: "#F59E0B",
+                    fontWeight: "700",
+                  }}
+                >
+                  🏆 {rank}
                 </span>
-
-                <span className="inline-flex items-center gap-1 text-xs bg-black/25 backdrop-blur-sm px-2.5 py-0.5 rounded-md text-white/90 border border-white/10">
-                  <Building2 className="w-3.5 h-3.5 text-cyan-300" />
-                  {displayUni.type || "University"}
-                </span>
-
-                {establishedYear && (
-                  <span className="inline-flex items-center gap-1 text-xs bg-black/25 backdrop-blur-sm px-2.5 py-0.5 rounded-md text-white/90 border border-white/10">
-                    <Calendar className="w-3.5 h-3.5 text-purple-300" />
-                    {isArabic ? `تأسست ${establishedYear}` : `Est. ${establishedYear}`}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tab Navigation Sticky Bar */}
-        <div className="flex items-center gap-2 px-6 pt-3 bg-slate-900/90 border-b border-slate-800/80 overflow-x-auto scrollbar-none shrink-0">
-          <button
-            className={`px-4 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === "faculties"
-                ? "border-purple-500 text-purple-400 bg-purple-500/10 rounded-t-xl"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-            onClick={handleFacultiesTabClick}
-          >
-            <GraduationCap className="w-4 h-4" />
-            <span>{isArabic ? "الكليات والبرامج الأكاديمية" : "Faculties & Programs"}</span>
-            <span className="px-2 py-0.5 rounded-full text-xs bg-purple-500/20 text-purple-300 font-mono font-bold">
-              {facultyItems.length}
-            </span>
-          </button>
-
-          <button
-            className={`px-4 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === "admission"
-                ? "border-purple-500 text-purple-400 bg-purple-500/10 rounded-t-xl"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-            onClick={() => setActiveTab("admission")}
-          >
-            <DollarSign className="w-4 h-4" />
-            <span>{isArabic ? "المصروفات والقبول" : "Tuition & Admissions"}</span>
-          </button>
-
-          <button
-            className={`px-4 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === "facilities"
-                ? "border-purple-500 text-purple-400 bg-purple-500/10 rounded-t-xl"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-            onClick={() => setActiveTab("facilities")}
-          >
-            <Award className="w-4 h-4" />
-            <span>{isArabic ? "الاعتمادات والمميزات" : "Accreditation & Strengths"}</span>
-          </button>
-
-          <button
-            className={`px-4 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              activeTab === "contact"
-                ? "border-purple-500 text-purple-400 bg-purple-500/10 rounded-t-xl"
-                : "border-transparent text-slate-400 hover:text-slate-200"
-            }`}
-            onClick={() => setActiveTab("contact")}
-          >
-            <Compass className="w-4 h-4" />
-            <span>{isArabic ? "التواصل والموقع" : "Contact & Location"}</span>
-          </button>
-        </div>
-
-        {/* Modal Scrollable Body */}
-        <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 bg-slate-950 text-slate-200 scrollbar-thin scrollbar-thumb-slate-800">
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-3.5 text-center shadow-xs">
-              <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">
-                {isArabic ? "سنة التأسيس" : "Founded"}
-              </div>
-              <div className="text-base font-extrabold text-slate-100 mt-1">{establishedYear || "N/A"}</div>
+              )}
             </div>
 
-            <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-3.5 text-center shadow-xs">
-              <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">
-                {isArabic ? "التصنيف الدولي" : "QS Ranking"}
-              </div>
-              <div className="text-base font-extrabold text-amber-400 mt-1 truncate">
-                {rank ? (String(rank).includes("#1") ? "#1 in Egypt" : String(rank).split("/")[0]) : "Ranked"}
-              </div>
-            </div>
-
-            <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-3.5 text-center shadow-xs">
-              <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">
-                {isArabic ? "النوع الأكاديمي" : "Institution Type"}
-              </div>
-              <div className="text-base font-extrabold text-purple-400 mt-1">{displayUni.type || "University"}</div>
-            </div>
-
-            <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-3.5 text-center shadow-xs">
-              <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">
-                {isArabic ? "المدينة والحرم" : "City"}
-              </div>
-              <div className="text-base font-extrabold text-emerald-400 mt-1 truncate">
-                {getLangField("city")}
-              </div>
-            </div>
-          </div>
-
-          {/* Overview Statement Card */}
-          <div className="bg-slate-900/50 border border-slate-800/80 rounded-2xl p-5 space-y-2">
-            <h3 className="text-xs font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
-              <BookOpen className="w-4 h-4" />
-              <span>{isArabic ? "نبذة عن الجامعة ورؤيتها" : "About University & Mission"}</span>
-            </h3>
-            <p className="text-sm leading-relaxed text-slate-300 font-normal">
+            {/* Overview Paragraph */}
+            <p style={{ fontSize: "14px", color: "var(--text-secondary, #E2E8F0)", lineHeight: "1.65", marginTop: "14px" }}>
               {getLangField("overview") || getLangField("description")}
             </p>
           </div>
 
-          {/* TAB 1: FACULTIES & ACCORDION */}
-          {activeTab === "faculties" && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5 text-purple-400" />
-                  <span>{isArabic ? "الكليات والأقسام الأكاديمية" : "Academic Faculties & Departments"}</span>
-                </h3>
-
-                <button
-                  onClick={() => {
-                    const nextState = !allExpanded;
-                    setAllExpanded(nextState);
-                    const newExpanded: Record<number, boolean> = {};
-                    facultyItems.forEach((_: any, idx: number) => {
-                      newExpanded[idx] = nextState;
-                    });
-                    setExpandedFaculties(newExpanded);
-                  }}
-                  className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 transition-colors cursor-pointer"
-                >
-                  {allExpanded ? (isArabic ? "طي الكل" : "Collapse All") : (isArabic ? "توسيع الكل" : "Expand All")}
-                </button>
+          {/* Quick Metrics Grid */}
+          <div className="modal-info-grid" style={{ marginBottom: "20px" }}>
+            <div className="modal-info-item">
+              <div className="modal-info-value">{establishedYear || "N/A"}</div>
+              <div className="modal-info-label">{isArabic ? "سنة التأسيس" : "Founded"}</div>
+            </div>
+            <div className="modal-info-item">
+              <div className="modal-info-value" style={{ color: "#F59E0B" }}>
+                {rank ? (String(rank).includes("#1") ? "#1 in Egypt" : String(rank).split("/")[0]) : "Ranked"}
               </div>
+              <div className="modal-info-label">{isArabic ? "التصنيف الدولي" : "QS Ranking"}</div>
+            </div>
+            <div className="modal-info-item">
+              <div className="modal-info-value" style={{ color: "var(--primary-light)" }}>
+                {displayUni.type || "University"}
+              </div>
+              <div className="modal-info-label">{isArabic ? "نوع المؤسسة" : "Type"}</div>
+            </div>
+            <div className="modal-info-item">
+              <div className="modal-info-value" style={{ color: "var(--accent-cyan)" }}>
+                {getLangField("city")}
+              </div>
+              <div className="modal-info-label">{isArabic ? "المدينة" : "City"}</div>
+            </div>
+          </div>
 
-              <div className="space-y-3">
-                {facultyItems.map((fac: any, idx: number) => {
-                  const isExpanded = !!expandedFaculties[idx];
-                  const depts = fac.departments || [];
-                  const programs = fac.programs || [];
+          {/* Tuition Fee Overview Banner */}
+          <div
+            style={{
+              background: "rgba(124, 58, 237, 0.08)",
+              borderRadius: "14px",
+              padding: "14px 20px",
+              border: "1px solid rgba(124, 58, 237, 0.2)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "20px",
+            }}
+          >
+            <span style={{ fontWeight: "600", fontSize: "14px", color: "#FFF" }}>
+              💰 {isArabic ? "المصروفات السنوية التقديرية" : "Estimated Annual Tuition"}
+            </span>
+            <span style={{ fontSize: "15px", fontWeight: "800", color: "var(--accent-emerald, #10B981)" }}>
+              {displayUni.tuition || (isArabic ? "حسب الكلية ونظام الساعات" : "Varies by Faculty")}
+            </span>
+          </div>
 
-                  return (
+          {/* Key Strengths Tags */}
+          {strengths.length > 0 && (
+            <div style={{ marginBottom: "22px" }}>
+              <div style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "1px", color: "var(--text-muted)", marginBottom: "10px" }}>
+                ⭐ {isArabic ? "أبرز نقاط القوة والمزايا" : "Key Strengths"}
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {strengths.slice(0, 6).map((s, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      padding: "5px 12px",
+                      borderRadius: "20px",
+                      background: "rgba(124, 58, 237, 0.12)",
+                      border: "1px solid rgba(124, 58, 237, 0.25)",
+                      fontSize: "12px",
+                      color: "var(--primary-light, #C084FC)",
+                      fontWeight: "500",
+                    }}
+                  >
+                    ✨ {s}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sub-Navigation Tabs */}
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              borderBottom: "1px solid var(--border, rgba(168, 85, 247, 0.2))",
+              paddingBottom: "12px",
+              marginBottom: "20px",
+              overflowX: "auto",
+            }}
+          >
+            <button
+              onClick={handleFacultiesTabClick}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: activeTab === "faculties" ? "1px solid var(--primary-light)" : "1px solid rgba(255,255,255,0.1)",
+                cursor: "pointer",
+                fontWeight: "700",
+                fontSize: "13px",
+                background: activeTab === "faculties" ? "linear-gradient(135deg, var(--primary), var(--primary-dark))" : "rgba(255,255,255,0.05)",
+                color: activeTab === "faculties" ? "#FFF" : "var(--text-muted)",
+                boxShadow: activeTab === "faculties" ? "0 4px 15px rgba(124, 58, 237, 0.35)" : "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              📚 {isArabic ? "الكليات والأقسام" : "Faculties & Programs"} ({facultyItems.length})
+              {activeTab === "faculties" && (
+                <span style={{ fontSize: "10px", background: "rgba(255,255,255,0.2)", padding: "2px 6px", borderRadius: "8px" }}>
+                  {allExpanded ? (isArabic ? "طي" : "Collapse") : (isArabic ? "توسيع" : "Expand All")}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab("admission")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: activeTab === "admission" ? "1px solid var(--primary-light)" : "1px solid rgba(255,255,255,0.1)",
+                cursor: "pointer",
+                fontWeight: "700",
+                fontSize: "13px",
+                background: activeTab === "admission" ? "linear-gradient(135deg, var(--primary), var(--primary-dark))" : "rgba(255,255,255,0.05)",
+                color: activeTab === "admission" ? "#FFF" : "var(--text-muted)",
+                boxShadow: activeTab === "admission" ? "0 4px 15px rgba(124, 58, 237, 0.35)" : "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              📜 {isArabic ? "شروط القبول" : "Admissions"}
+            </button>
+
+            <button
+              onClick={() => setActiveTab("facilities")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: activeTab === "facilities" ? "1px solid var(--primary-light)" : "1px solid rgba(255,255,255,0.1)",
+                cursor: "pointer",
+                fontWeight: "700",
+                fontSize: "13px",
+                background: activeTab === "facilities" ? "linear-gradient(135deg, var(--primary), var(--primary-dark))" : "rgba(255,255,255,0.05)",
+                color: activeTab === "facilities" ? "#FFF" : "var(--text-muted)",
+                boxShadow: activeTab === "facilities" ? "0 4px 15px rgba(124, 58, 237, 0.35)" : "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              🔬 {isArabic ? "الاعتمادات والمرافق" : "Accreditation"}
+            </button>
+
+            <button
+              onClick={() => setActiveTab("contact")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "20px",
+                border: activeTab === "contact" ? "1px solid var(--primary-light)" : "1px solid rgba(255,255,255,0.1)",
+                cursor: "pointer",
+                fontWeight: "700",
+                fontSize: "13px",
+                background: activeTab === "contact" ? "linear-gradient(135deg, var(--primary), var(--primary-dark))" : "rgba(255,255,255,0.05)",
+                color: activeTab === "contact" ? "#FFF" : "var(--text-muted)",
+                boxShadow: activeTab === "contact" ? "0 4px 15px rgba(124, 58, 237, 0.35)" : "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              📞 {isArabic ? "التواصل والموقع" : "Contact & Campus"}
+            </button>
+          </div>
+
+          {/* TAB 1: FACULTIES ACCORDION */}
+          {activeTab === "faculties" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {facultyItems.map((fac: any, idx: number) => {
+                const isExpanded = !!expandedFaculties[idx];
+                const depts = fac.departments || [];
+                const programs = fac.programs || [];
+
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      background: isExpanded ? "rgba(124, 58, 237, 0.08)" : "rgba(255, 255, 255, 0.03)",
+                      border: isExpanded ? "1px solid var(--primary-light)" : "1px solid rgba(255, 255, 255, 0.08)",
+                      borderRadius: "14px",
+                      overflow: "hidden",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
                     <div
-                      key={idx}
-                      className={`rounded-2xl border transition-all overflow-hidden ${
-                        isExpanded
-                          ? "bg-slate-900/90 border-purple-500/50 shadow-md shadow-purple-500/5 ring-1 ring-purple-500/20"
-                          : "bg-slate-900/40 border-slate-800 hover:border-slate-700"
-                      }`}
+                      onClick={() => toggleFaculty(idx)}
+                      style={{
+                        padding: "14px 18px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        cursor: "pointer",
+                        userSelect: "none",
+                        background: isExpanded ? "rgba(124, 58, 237, 0.12)" : "transparent",
+                      }}
                     >
-                      <div
-                        onClick={() => toggleFaculty(idx)}
-                        className="p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer select-none"
-                      >
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 font-extrabold flex items-center justify-center text-sm border border-purple-500/20 shadow-xs">
-                            #{idx + 1}
-                          </div>
-                          <div>
-                            <h4 className="text-base font-bold text-slate-100">{fac.name}</h4>
-                            {fac.dean && (
-                              <div className="text-xs text-amber-400 font-medium mt-0.5">
-                                👨‍🏫 {isArabic ? "العميد:" : "Dean:"} {fac.dean}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                          {depts.length > 0 && (
-                            <span className="hidden sm:inline-flex text-xs font-semibold px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
-                              {depts.length} {isArabic ? "برنامج / قسم" : "Programs"}
-                            </span>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1 }}>
+                        <span style={{ fontSize: "18px" }}>🏛️</span>
+                        <div>
+                          <div style={{ fontWeight: "700", fontSize: "15px", color: "#FFF" }}>{fac.name}</div>
+                          {fac.dean && (
+                            <div style={{ fontSize: "12px", color: "#FCD34D", marginTop: "2px", fontWeight: "500" }}>
+                              👨‍🏫 {isArabic ? "العميد:" : "Dean:"} {fac.dean}
+                            </div>
                           )}
-                          <div className="w-7 h-7 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
-                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                          </div>
                         </div>
                       </div>
 
-                      {isExpanded && (
-                        <div className="px-5 pb-5 pt-2 border-t border-slate-800/80 space-y-4 bg-slate-950/40">
-                          {fac.description && (
-                            <p className="text-xs text-slate-300 leading-relaxed font-normal">{fac.description}</p>
-                          )}
-
-                          {programs.length > 0 ? (
-                            <div className="space-y-2">
-                              <div className="text-xs font-bold text-cyan-400 tracking-wide uppercase flex items-center gap-1.5">
-                                <Sparkles className="w-3.5 h-3.5" />
-                                <span>{isArabic ? "البرامج الأكاديمية المتخصصة:" : "Specialized Degree Programs:"}</span>
-                              </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                {programs.map((prog: any, pIdx: number) => {
-                                  const progName = isArabic && prog.nameAr ? prog.nameAr : prog.nameEn || prog.name || "";
-                                  const tuition = prog.tuitionEgpPerYear
-                                    ? `${(prog.tuitionEgpPerYear / 1000).toLocaleString()}K EGP`
-                                    : null;
-                                  return (
-                                    <div
-                                      key={pIdx}
-                                      onClick={() => {
-                                        if (onSelectMajor) onSelectMajor(progName);
-                                        onClose();
-                                      }}
-                                      className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-purple-500/50 hover:bg-slate-900 transition-all cursor-pointer group"
-                                    >
-                                      <div className="flex items-center justify-between gap-2">
-                                        <div className="text-xs font-bold text-slate-200 group-hover:text-purple-300 transition-colors">
-                                          {progName}
-                                        </div>
-                                        {prog.degreeType && (
-                                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono">
-                                            {prog.degreeType}
-                                          </span>
-                                        )}
-                                      </div>
-                                      <div className="flex items-center gap-3 text-[11px] text-slate-400 mt-1.5">
-                                        {prog.durationYears && (
-                                          <span className="flex items-center gap-1">
-                                            <Clock className="w-3 h-3 text-slate-500" />
-                                            {prog.durationYears} {isArabic ? "سنوات" : "Yrs"}
-                                          </span>
-                                        )}
-                                        {tuition && (
-                                          <span className="text-emerald-400 font-semibold">{tuition}/yr</span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          ) : depts.length > 0 ? (
-                            <div className="space-y-2">
-                              <div className="text-xs font-bold text-cyan-400 tracking-wide uppercase">
-                                🎯 {isArabic ? "الأقسام والبرامج الأكاديمية (اضغط للتصفح):" : "Offered Programs (Click to Explore):"}
-                              </div>
-                              <div className="flex flex-wrap gap-2">
-                                {depts.map((d: any, dIdx: number) => {
-                                  const dStr = typeof d === "string" ? d : d.name || "";
-                                  return (
-                                    <button
-                                      key={dIdx}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (onSelectMajor) onSelectMajor(dStr);
-                                        onClose();
-                                      }}
-                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-purple-900/30 hover:bg-purple-800/50 text-purple-200 border border-purple-500/40 hover:border-cyan-400 transition-all cursor-pointer hover:scale-102"
-                                    >
-                                      <span className="text-[10px] text-cyan-400">✦</span>
-                                      <span>{dStr}</span>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="text-xs text-slate-500 italic">
-                              {isArabic
-                                ? "تواصل مع شؤون الطلاب لمعرفة التخصصات الدقيقة لهذه الكلية."
-                                : "Contact faculty admissions for detailed major programs."}
-                            </div>
-                          )}
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        {depts.length > 0 && (
+                          <span style={{ fontSize: "11px", fontWeight: "600", background: "rgba(0, 245, 212, 0.12)", border: "1px solid rgba(0, 245, 212, 0.3)", padding: "3px 10px", borderRadius: "14px", color: "var(--accent-cyan)" }}>
+                            {depts.length} {isArabic ? "برنامج/قسم" : "Programs"}
+                          </span>
+                        )}
+                        <div
+                          style={{
+                            width: "26px",
+                            height: "26px",
+                            borderRadius: "50%",
+                            background: isExpanded ? "var(--primary)" : "rgba(255,255,255,0.08)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "#FFF",
+                            fontSize: "12px",
+                          }}
+                        >
+                          {isExpanded ? "▲" : "▼"}
                         </div>
-                      )}
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
+
+                    {isExpanded && (
+                      <div style={{ padding: "12px 18px 16px 18px", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
+                        {fac.description && (
+                          <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: "1.6", marginBottom: "12px" }}>
+                            {fac.description}
+                          </p>
+                        )}
+
+                        {programs.length > 0 ? (
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "8px", marginTop: "8px" }}>
+                            {programs.map((prog: any, pIdx: number) => {
+                              const progName = isArabic && prog.nameAr ? prog.nameAr : prog.nameEn || prog.name || "";
+                              return (
+                                <div
+                                  key={pIdx}
+                                  onClick={() => {
+                                    if (onSelectMajor) onSelectMajor(progName);
+                                    onClose();
+                                  }}
+                                  style={{
+                                    padding: "10px 14px",
+                                    borderRadius: "10px",
+                                    background: "rgba(255, 255, 255, 0.04)",
+                                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <div style={{ fontSize: "13px", fontWeight: "700", color: "#FFF" }}>{progName}</div>
+                                  <div style={{ fontSize: "11px", color: "var(--primary-light)", marginTop: "3px" }}>
+                                    {prog.degreeType || "B.Sc."} {prog.durationYears ? `· ${prog.durationYears} ${isArabic ? "سنوات" : "Yrs"}` : ""}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : depts.length > 0 ? (
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "6px" }}>
+                            {depts.map((dept: any, dIdx: number) => {
+                              const deptName = typeof dept === "string" ? dept : dept.name || "";
+                              return (
+                                <span
+                                  key={dIdx}
+                                  onClick={() => {
+                                    if (onSelectMajor) onSelectMajor(deptName);
+                                    onClose();
+                                  }}
+                                  className="dept-tag"
+                                  style={{
+                                    cursor: "pointer",
+                                    padding: "6px 12px",
+                                    borderRadius: "16px",
+                                    background: "rgba(124, 58, 237, 0.15)",
+                                    border: "1px solid rgba(124, 58, 237, 0.35)",
+                                    fontSize: "12px",
+                                    color: "#FFF",
+                                  }}
+                                >
+                                  🎓 {deptName}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div style={{ fontSize: "12px", color: "var(--text-muted)", fontStyle: "italic" }}>
+                            {isArabic ? "يرجى مراجعة إدارة القبول لمعرفة الأقسام بالتفصيل." : "Inquire with university admissions for department details."}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
           {/* TAB 2: ADMISSION & TUITION */}
           {activeTab === "admission" && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-emerald-950/40 to-slate-900 border border-emerald-500/30 rounded-2xl p-5 space-y-2">
-                  <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold">
-                    <DollarSign className="w-5 h-5" />
-                    <span>{isArabic ? "المصروفات السنوية التقديرية" : "Estimated Tuition Range"}</span>
-                  </div>
-                  <p className="text-lg font-extrabold text-emerald-300">
-                    {displayUni.tuition || (isArabic ? "يرجى مراجعة إدارة القبول بالجامعة" : "Refer to official website")}
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    {isArabic
-                      ? "المصروفات قد تختلف حسب الكلية ونظام الساعات المعتمدة."
-                      : "Tuition varies by faculty and credit-hour system."}
-                  </p>
-                </div>
-
-                <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 space-y-2">
-                  <div className="flex items-center gap-2 text-purple-400 text-sm font-bold">
-                    <Users className="w-5 h-5" />
-                    <span>{isArabic ? "مجتمع الطلاب" : "Student Body"}</span>
-                  </div>
-                  <p className="text-base font-bold text-slate-200">
-                    {displayUni.students || (isArabic ? "أكثر من 10,000 طالب وطالبة" : "10,000+ Students")}
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    {isArabic ? "بيئة تعليمية متعددة الثقافات" : "Multicultural campus environment"}
-                  </p>
-                </div>
+            <div className="admission-grid">
+              <div className="admission-card">
+                <div className="admission-card-icon">💵</div>
+                <h4>{isArabic ? "المصروفات السنوية التقديرية" : "Estimated Tuition Fees"}</h4>
+                <p className="tuition-highlight" style={{ color: "var(--accent-emerald, #10B981)", fontWeight: "800" }}>
+                  {displayUni.tuition || (isArabic ? "يرجى مراجعة الموقع الرسمي للجامعة" : "Refer to official website")}
+                </p>
               </div>
 
-              {/* Requirement Cards */}
-              <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-5 space-y-3">
-                <h4 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                  <BadgeCheck className="w-4 h-4 text-purple-400" />
-                  <span>{isArabic ? "الشهادات المقبولة وشروط الالتحاق" : "Accepted High School Certificates"}</span>
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-                    <div className="text-xs font-bold text-cyan-400">🇪🇬 {isArabic ? "الثانوية العامة" : "Thanaweya Amma"}</div>
-                    <p className="text-xs text-slate-300">
-                      {isArabic ? "الحد الأدنى المعلن من وزارة التعليم العالي" : "According to Ministry of Higher Education quotas"}
-                    </p>
-                  </div>
+              <div className="admission-card">
+                <div className="admission-card-icon">👥</div>
+                <h4>{isArabic ? "أعداد الطلاب" : "Student Body"}</h4>
+                <p>{displayUni.students || (isArabic ? "~10,000+ طالب" : "~10,000+ Students")}</p>
+              </div>
 
-                  <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-                    <div className="text-xs font-bold text-purple-400">🇬🇧 IGCSE / British</div>
-                    <p className="text-xs text-slate-300">
-                      {isArabic ? "8 مواد O-Level + مواد متقدمة AS/A-Level" : "8 O-Levels + relevant AS/A2 subjects"}
-                    </p>
-                  </div>
+              <div className="admission-card">
+                <div className="admission-card-icon">📜</div>
+                <h4>{isArabic ? "شروط القبول" : "Admission Criteria"}</h4>
+                <p>
+                  {isArabic
+                    ? "شهادة الثانوية العامة أو ما يعادلها (IGCSE, American Diploma, IB) + اختبارات القبول والمقابلة الشخصية."
+                    : "General Secondary Certificate (Thanaweya Amma) or international equivalents (IG, SAT/ACT, IB) + Entrance Exams."}
+                </p>
+              </div>
 
-                  <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
-                    <div className="text-xs font-bold text-amber-400">🇺🇸 American Diploma</div>
-                    <p className="text-xs text-slate-300">
-                      {isArabic ? "GPA + درجات اختبارات SAT / ACT / EST" : "High School GPA + SAT / ACT / EST scores"}
-                    </p>
-                  </div>
-                </div>
+              <div className="admission-card">
+                <div className="admission-card-icon">🎁</div>
+                <h4>{isArabic ? "المنح الدراسية" : "Scholarships"}</h4>
+                <p>
+                  {isArabic
+                    ? "منح للمتفوقين أكاديمياً ورياضياً تغطي حتى 100% من المصروفات الدراسية."
+                    : "Academic merit scholarships and athletic grants covering up to 100% of annual tuition."}
+                </p>
               </div>
             </div>
           )}
 
-          {/* TAB 3: STRENGTHS & ACCREDITATIONS */}
+          {/* TAB 3: ACCREDITATION & FACILITIES */}
           {activeTab === "facilities" && (
-            <div className="space-y-6">
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
               {accreditations.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="text-sm font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>{isArabic ? "الاعتمادات الدولية والمحلية المعتمدة" : "Recognized International Accreditations"}</span>
+                <div>
+                  <h4 style={{ fontSize: "13px", fontWeight: "700", color: "var(--accent-cyan)", textTransform: "uppercase", marginBottom: "8px" }}>
+                    {isArabic ? "الاعتمادات الدولية والمحلية" : "Accreditations & Recognitions"}
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
                     {accreditations.map((acc: any, i: number) => {
                       const accName = typeof acc === "string" ? acc : acc.name || acc.fullName || "";
-                      const accFull = typeof acc === "object" ? acc.fullName : null;
                       return (
-                        <div
+                        <span
                           key={i}
-                          className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/30 flex items-center gap-3"
+                          style={{
+                            padding: "6px 14px",
+                            borderRadius: "16px",
+                            background: "rgba(16, 185, 129, 0.15)",
+                            border: "1px solid rgba(16, 185, 129, 0.4)",
+                            color: "#10B981",
+                            fontSize: "12px",
+                            fontWeight: "600",
+                          }}
                         >
-                          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                          <div>
-                            <div className="text-xs font-bold text-emerald-200">{accName}</div>
-                            {accFull && <div className="text-[11px] text-emerald-400/80">{accFull}</div>}
-                          </div>
-                        </div>
+                          ✅ {accName}
+                        </span>
                       );
                     })}
                   </div>
@@ -781,20 +836,15 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
               )}
 
               {strengths.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="text-sm font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4" />
-                    <span>{isArabic ? "أبرز نقاط القوة والمزايا التنافسية" : "Key Institutional Strengths"}</span>
+                <div>
+                  <h4 style={{ fontSize: "13px", fontWeight: "700", color: "var(--primary-light)", textTransform: "uppercase", marginBottom: "8px" }}>
+                    {isArabic ? "المرافق ومزايا الحرم الجامعي" : "Campus Facilities & Amenities"}
                   </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {strengths.map((s: string, i: number) => (
-                      <div
-                        key={i}
-                        className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-start gap-2.5"
-                      >
-                        <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                        <span className="text-xs text-slate-200 font-medium leading-relaxed">{s}</span>
-                      </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    {strengths.map((str: string, i: number) => (
+                      <span key={i} className="strength-tag">
+                        ✨ {str}
+                      </span>
                     ))}
                   </div>
                 </div>
@@ -804,79 +854,74 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
 
           {/* TAB 4: CONTACT & LOCATION */}
           {activeTab === "contact" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 space-y-2">
-                <div className="flex items-center gap-2 text-purple-400 font-bold text-sm">
-                  <MapPin className="w-4 h-4" />
-                  <span>{isArabic ? "عنوان الحرم الجامعي" : "Campus Address"}</span>
+            <div className="contact-grid">
+              <div className="contact-item">
+                <span className="contact-icon">📍</span>
+                <div>
+                  <strong>{isArabic ? "العنوان:" : "Campus Address:"}</strong>
+                  <p>{getLangField("address") || getLangField("location")}</p>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  {getLangField("address") || getLangField("location")}
-                </p>
               </div>
 
               {displayUni.website && (
-                <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 space-y-2">
-                  <div className="flex items-center gap-2 text-cyan-400 font-bold text-sm">
-                    <Globe className="w-4 h-4" />
-                    <span>{isArabic ? "الموقع الرسمي" : "Official Website"}</span>
+                <div className="contact-item">
+                  <span className="contact-icon">🌐</span>
+                  <div>
+                    <strong>{isArabic ? "الموقع الرسمي:" : "Official Website:"}</strong>
+                    <p>
+                      <a
+                        href={displayUni.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "var(--primary-light)", textDecoration: "underline" }}
+                      >
+                        {displayUni.website}
+                      </a>
+                    </p>
                   </div>
-                  <a
-                    href={displayUni.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-cyan-300 hover:underline break-all inline-flex items-center gap-1"
-                  >
-                    <span>{displayUni.website}</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
                 </div>
               )}
 
               {displayUni.phones && displayUni.phones.length > 0 && (
-                <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                      <Phone className="w-4 h-4" />
-                      <span>{isArabic ? "أرقام الهاتف والخط الساخن" : "Telephone Lines"}</span>
+                <div className="contact-item">
+                  <span className="contact-icon">📞</span>
+                  <div style={{ flex: 1 }}>
+                    <strong>{isArabic ? "أرقام الهاتف:" : "Telephone Lines:"}</strong>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
+                      {displayUni.phones.map((phone: string, pIdx: number) => (
+                        <div key={pIdx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "13px" }}>
+                          <span>{phone}</span>
+                          <button
+                            onClick={() => handleCopy(phone, `phone-${pIdx}`)}
+                            style={{ color: "var(--text-muted)", fontSize: "11px", display: "flex", alignItems: "center", gap: "3px" }}
+                          >
+                            {copiedText === `phone-${pIdx}` ? <Check style={{ width: "12px", height: "12px", color: "#10B981" }} /> : <Copy style={{ width: "12px", height: "12px" }} />}
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    {displayUni.phones.map((phone: string, pIdx: number) => (
-                      <div key={pIdx} className="flex items-center justify-between text-xs text-slate-300">
-                        <span>{phone}</span>
-                        <button
-                          onClick={() => handleCopy(phone, `phone-${pIdx}`)}
-                          className="text-[11px] text-slate-500 hover:text-emerald-400 flex items-center gap-1 cursor-pointer"
-                        >
-                          {copiedText === `phone-${pIdx}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                        </button>
-                      </div>
-                    ))}
                   </div>
                 </div>
               )}
 
               {displayUni.emails && displayUni.emails.length > 0 && (
-                <div className="bg-slate-900/70 border border-slate-800 rounded-2xl p-5 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-rose-400 font-bold text-sm">
-                      <Mail className="w-4 h-4" />
-                      <span>{isArabic ? "البريد الإلكتروني للقبول" : "Email Inquiries"}</span>
+                <div className="contact-item">
+                  <span className="contact-icon">✉️</span>
+                  <div style={{ flex: 1 }}>
+                    <strong>{isArabic ? "البريد الإلكتروني:" : "Email Inquiries:"}</strong>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
+                      {displayUni.emails.map((email: string, eIdx: number) => (
+                        <div key={eIdx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "13px" }}>
+                          <span style={{ wordBreak: "break-all" }}>{email}</span>
+                          <button
+                            onClick={() => handleCopy(email, `email-${eIdx}`)}
+                            style={{ color: "var(--text-muted)", fontSize: "11px", display: "flex", alignItems: "center", gap: "3px", marginLeft: "6px" }}
+                          >
+                            {copiedText === `email-${eIdx}` ? <Check style={{ width: "12px", height: "12px", color: "#10B981" }} /> : <Copy style={{ width: "12px", height: "12px" }} />}
+                          </button>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    {displayUni.emails.map((email: string, eIdx: number) => (
-                      <div key={eIdx} className="flex items-center justify-between text-xs text-slate-300">
-                        <span className="truncate mr-2">{email}</span>
-                        <button
-                          onClick={() => handleCopy(email, `email-${eIdx}`)}
-                          className="text-[11px] text-slate-500 hover:text-rose-400 flex items-center gap-1 cursor-pointer shrink-0"
-                        >
-                          {copiedText === `email-${eIdx}` ? <Check className="w-3 h-3 text-rose-400" /> : <Copy className="w-3 h-3" />}
-                        </button>
-                      </div>
-                    ))}
                   </div>
                 </div>
               )}
@@ -884,28 +929,56 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
           )}
         </div>
 
-        {/* Floating Actions Glass Footer */}
-        <div className="p-4 sm:p-5 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 flex items-center justify-between flex-wrap gap-3 shrink-0">
+        {/* Modal Bottom Footer Toolbar */}
+        <div
+          style={{
+            padding: "14px 24px",
+            background: "rgba(10, 11, 30, 0.95)",
+            borderTop: "1px solid var(--border, rgba(168, 85, 247, 0.2))",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "10px",
+          }}
+        >
           <div>
             <SuggestionDialog universityId={String(displayUni.id)} universityName={uniName} />
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div style={{ display: "flex", gap: "10px" }}>
             {displayUni.website && (
               <a
                 href={displayUni.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transition-all shadow-md shadow-purple-500/25 cursor-pointer"
+                className="view-details-btn"
+                style={{
+                  background: "linear-gradient(135deg, var(--primary), var(--secondary))",
+                  color: "#FFF",
+                  padding: "8px 18px",
+                  fontSize: "13px",
+                  borderRadius: "12px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontWeight: "700",
+                }}
               >
                 <span>{isArabic ? "زيارة الموقع الرسمي" : "Visit Official Website"}</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ExternalLink style={{ width: "14px", height: "14px" }} />
               </a>
             )}
-
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer"
+              className="view-details-btn"
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                color: "#FFF",
+                padding: "8px 18px",
+                fontSize: "13px",
+                borderRadius: "12px",
+              }}
             >
               {isArabic ? "إغلاق" : "Close"}
             </button>
