@@ -4,6 +4,8 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
+import { useBookmarks } from "@/hooks/useBookmarks";
+import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 import type { SlimSearchToken } from "@/types/university.types";
 
@@ -14,10 +16,67 @@ interface MarketingHomeClientProps {
 export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeClientProps) {
   const { language } = useLanguage();
   const { index: universitiesDatabase } = useUniversitySearch(initialUniversities);
+  const { bookmarks = [] } = useBookmarks();
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
 
   // Search state
   const [heroSearchQuery, setHeroSearchQuery] = useState("");
+
+  // Recommendations logic
+  const recommendations = useMemo(() => {
+    if (!universitiesDatabase || universitiesDatabase.length === 0) return [];
+
+    const bookmarkedIds = new Set(
+      bookmarks.map((b: any) => String(b.universityId || b.university?.id))
+    );
+
+    // 1. If user has bookmarks, recommend similar universities
+    if (bookmarkedIds.size > 0) {
+      const bookmarkedModels = new Set<string>();
+      const bookmarkedCities = new Set<string>();
+      const bookmarkedTypes = new Set<string>();
+
+      universitiesDatabase.forEach((u: any) => {
+        if (bookmarkedIds.has(String(u.id))) {
+          if (u.educationModel) bookmarkedModels.add(String(u.educationModel).toUpperCase());
+          if (u.city) bookmarkedCities.add(String(u.city).toLowerCase());
+          if (u.type) bookmarkedTypes.add(String(u.type).toUpperCase());
+        }
+      });
+
+      const matched = universitiesDatabase.filter((u: any) => {
+        if (bookmarkedIds.has(String(u.id))) return false;
+        const uModel = String(u.educationModel || "").toUpperCase();
+        const uCity = String(u.city || "").toLowerCase();
+        const uType = String(u.type || "").toUpperCase();
+        return bookmarkedModels.has(uModel) || bookmarkedCities.has(uCity) || bookmarkedTypes.has(uType);
+      });
+
+      if (matched.length > 0) {
+        return matched.slice(0, 3);
+      }
+    }
+
+    // 2. Default Top Recommended Curated Unis: GUC, Nile University, AUC
+    const preferredSlugs = [
+      "german-university-in-cairo",
+      "nile-university",
+      "the-american-university-in-cairo",
+    ];
+    const topPicks = preferredSlugs
+      .map((slug) => universitiesDatabase.find((u: any) => u.slug === slug))
+      .filter(Boolean);
+
+    if (topPicks.length >= 3) {
+      return topPicks as any[];
+    }
+
+    // Fallback to featured
+    const featured = universitiesDatabase.filter(
+      (u: any) => u.featured && !bookmarkedIds.has(String(u.id))
+    );
+    return (featured.length >= 3 ? featured : universitiesDatabase).slice(0, 3);
+  }, [universitiesDatabase, bookmarks]);
 
   // Match Finder State
   const [matchStep, setMatchStep] = useState<number | "results">(1);
@@ -659,6 +718,39 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
                 </span>
               </div>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Suggestions / Recommendations Section */}
+      <section className="section recommendations-section" style={{ paddingBottom: "80px" }}>
+        <div className="container">
+          <div className="section-header text-center animate-in">
+            <span className="section-badge">✨ {language === "ar" ? "اقتراحات ذكية" : "AI Suggestions"}</span>
+            <h2>{language === "ar" ? "موصى به لك" : "Recommended For You"}</h2>
+            <p>
+              {language === "ar"
+                ? "ترشيحات مخصصة بناءً على محفوظاتك وإشارات تصفحك وتفضيلاتك الدراسية"
+                : "Curated matches based on your bookmarks and browsing"}
+            </p>
+          </div>
+
+          <div className="unis-grid">
+            {recommendations.length > 0 ? (
+              recommendations.map((uni: any) => (
+                <UniversityCard
+                  key={uni.id}
+                  university={uni}
+                  onViewDetails={(u) => setSelectedUniModal(u)}
+                />
+              ))
+            ) : (
+              <p style={{ textAlign: "center", color: "var(--text-muted)", width: "100%" }}>
+                {language === "ar"
+                  ? "استكشف الجامعات واحفظ مفضلاتك للحصول على ترشيحات مخصصة."
+                  : "Explore universities and save bookmarks to get personalized recommendations."}
+              </p>
+            )}
           </div>
         </div>
       </section>
