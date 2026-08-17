@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { universitiesDatabase } from "@/data/database";
+import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 
@@ -67,8 +67,9 @@ const newsItems = [
   },
 ];
 
-export default function HomePage() {
+export default function MarketingHomePage() {
   const { language, t } = useLanguage();
+  const { index: universitiesDatabase, loading } = useUniversitySearch();
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
 
   // Search state
@@ -176,13 +177,13 @@ export default function HomePage() {
       if (selections.city === "any") {
         score += 30;
       } else if (
-        getLangField(uni, "city").toLowerCase().includes((selections.city || "").toLowerCase()) ||
-        getLangField(uni, "location").toLowerCase().includes((selections.city || "").toLowerCase())
+        (uni.city || "").toLowerCase().includes((selections.city || "").toLowerCase()) ||
+        (uni.governorate || "").toLowerCase().includes((selections.city || "").toLowerCase())
       ) {
         score += 30;
       }
 
-      const tuitionVal = parseTuition(getLangField(uni, "tuition"));
+      const tuitionVal = 0; // Simplified for slim search token
       if (selections.budget === "public") {
         if (tuitionVal < 10000) score += 30;
         else if (tuitionVal <= 100000) score += 10;

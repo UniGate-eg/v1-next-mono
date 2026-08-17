@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Filter, RotateCcw } from "lucide-react";
-import type { UniversityType } from "@/schemas/university.schema";
+import type { UniversityType } from "@prisma/client";
 
 const EGYPTIAN_GOVERNORATES = [
   { value: "Cairo", labelEn: "Cairo", labelAr: "القاهرة" },

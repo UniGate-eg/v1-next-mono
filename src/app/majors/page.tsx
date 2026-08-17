@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { universitiesDatabase } from "@/data/database";
+import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 
 const majors = [
@@ -29,6 +29,7 @@ const majors = [
 
 export default function MajorsPage() {
   const { language, t } = useLanguage();
+  const { index: universitiesDatabase } = useUniversitySearch();
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedMajors, setExpandedMajors] = useState<Record<string, boolean>>({});
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);

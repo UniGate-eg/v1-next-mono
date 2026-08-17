@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { universitiesDatabase } from "@/data/database";
+import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useCompareStore } from "@/stores/compareStore";
 import Link from "next/link";
 
 export default function ComparePage() {
   const { language } = useLanguage();
+  const { index: universitiesDatabase } = useUniversitySearch();
   const { selectedIds, toggle, clear } = useCompareStore();
   const [selectorSearch, setSelectorSearch] = useState("");
 

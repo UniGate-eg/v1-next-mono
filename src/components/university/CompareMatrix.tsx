@@ -3,7 +3,7 @@
 import { useCompareStore } from "@/stores/compareStore";
 import { useEffect, useState } from "react";
 import { getUniversitiesByIdsAction } from "@/server/actions/university.actions";
-import type { UniversityWithMajors } from "@/server/repositories/interfaces/IUniversityRepository";
+import type { UniversityDTO } from "@/types/university.types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, X, MapPin, Calendar, BookOpen, Award, Clock } from "lucide-react";
@@ -12,7 +12,7 @@ import { formatGovernorate } from "@/lib/utils";
 
 export function CompareMatrix() {
   const { selectedIds, remove, clear } = useCompareStore();
-  const [universities, setUniversities] = useState<UniversityWithMajors[]>([]);
+  const [universities, setUniversities] = useState<UniversityDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -149,35 +149,12 @@ export function CompareMatrix() {
               <td className="p-4 font-semibold text-slate-500 align-top">Overview</td>
               {universities.map((uni) => (
                 <td key={uni.id} className="p-4 text-xs text-slate-600 dark:text-slate-300 leading-relaxed align-top">
-                  {uni.description || "No description provided."}
+                  {uni.overviewEn || "No description provided."}
                 </td>
               ))}
             </tr>
 
-            <tr>
-              <td className="p-4 font-semibold text-slate-500 align-top">
-                Available Majors ({universities.map((u) => u.majors?.length || 0).join(" vs ")})
-              </td>
-              {universities.map((uni) => (
-                <td key={uni.id} className="p-4 align-top">
-                  <div className="space-y-1.5 max-h-80 overflow-y-auto pr-2">
-                    {uni.majors?.map((m) => (
-                      <div
-                        key={m.id}
-                        className="rounded-md border border-slate-100 bg-slate-50 p-2 text-xs dark:border-slate-800 dark:bg-slate-950"
-                      >
-                        <div className="font-semibold text-slate-900 dark:text-white">{m.nameEn}</div>
-                        <div className="text-[11px] text-slate-500 font-arabic">{m.nameAr}</div>
-                        <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500">
-                          <span>{m.degree}</span>
-                          <span>{m.duration} Yrs</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </td>
-              ))}
-            </tr>
+            {/* Majors Comparison Temporarily Removed (Migrating to Faculties/Programs) */}
           </tbody>
         </table>
       </div>

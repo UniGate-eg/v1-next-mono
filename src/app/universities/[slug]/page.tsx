@@ -1,8 +1,6 @@
 import { notFound } from "next/navigation";
-import { UniversityRepository } from "@/server/repositories/UniversityRepository";
-import { UniversityService } from "@/server/services/UniversityService";
+import { universityRepository } from "@/lib/di";
 import { Badge } from "@/components/ui/badge";
-import { MajorList } from "@/components/university/MajorList";
 import { CompareToggleButton } from "@/components/university/CompareToggleButton";
 import { SuggestionDialog } from "@/components/university/SuggestionDialog";
 import { MapPin, Calendar, ExternalLink, ArrowLeft, Building2 } from "lucide-react";
@@ -17,25 +15,26 @@ interface UniversityPageProps {
 }
 
 export async function generateStaticParams() {
-  const repository = new UniversityRepository();
-  const service = new UniversityService(repository);
-  const result = await service.getUniversities({ page: 1, limit: 100 });
-  return result.data.map((u) => ({ slug: u.slug }));
+  try {
+    const result = await universityRepository.findMany({}, 1, 100);
+    return result.data.map((u: any) => ({ slug: u.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
   params,
 }: UniversityPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const repository = new UniversityRepository();
-  const service = new UniversityService(repository);
-
+  
   try {
-    const university = await service.getUniversityBySlug(slug);
+    const university = await universityRepository.findBySlug(slug);
+    if (!university) throw new Error("Not found");
     return {
       title: `${university.nameEn} (${university.nameAr}) — UniCompass`,
       description:
-        university.description ||
+        university.overviewEn ||
         `Explore degrees, faculties, and admission details for ${university.nameEn} in ${university.governorate}, Egypt.`,
     };
   } catch {
@@ -47,13 +46,15 @@ export async function generateMetadata({
 
 export default async function UniversityDetailPage({ params }: UniversityPageProps) {
   const { slug } = await params;
-  const repository = new UniversityRepository();
-  const service = new UniversityService(repository);
-
-  let university;
+  
+  let university = null;
   try {
-    university = await service.getUniversityBySlug(slug);
+    university = await universityRepository.findBySlug(slug);
   } catch {
+    university = null;
+  }
+  
+  if (!university) {
     notFound();
   }
 
@@ -104,7 +105,7 @@ export default async function UniversityDetailPage({ params }: UniversityPagePro
 
           <div className="flex flex-wrap items-center gap-3">
             <CompareToggleButton universityId={university.id} size="default" />
-            <SuggestionDialog universityName={university.nameEn} />
+            <SuggestionDialog universityId={university.id} universityName={university.nameEn} />
           </div>
         </div>
 
@@ -115,7 +116,7 @@ export default async function UniversityDetailPage({ params }: UniversityPagePro
               Overview & Accreditation
             </h3>
             <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              {university.description ||
+              {university.overviewEn ||
                 `${university.nameEn} is a distinguished higher education institution located in ${university.governorate}, Egypt, offering accredited degree programs across diverse faculties.`}
             </p>
           </div>
@@ -141,10 +142,7 @@ export default async function UniversityDetailPage({ params }: UniversityPagePro
         </div>
       </div>
 
-      {/* Majors Listing */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs dark:border-slate-800 dark:bg-slate-900">
-        <MajorList majors={university.majors || []} />
-      </div>
+      {/* Majors Listing (Temporarily removed during migration to Faculties/DegreePrograms) */}
     </div>
   );
 }

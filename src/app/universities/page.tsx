@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { universitiesDatabase } from "@/data/database";
+import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 
@@ -27,6 +27,7 @@ const emojiMap: Record<string, string> = {
 
 export default function UniversitiesPage() {
   const { language, t } = useLanguage();
+  const { index: universitiesDatabase, loading } = useUniversitySearch();
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,70 +82,44 @@ export default function UniversitiesPage() {
 
     if (activeFilters.model.length > 0) {
       filtered = filtered.filter((u: any) =>
-        activeFilters.model.includes(getLangField(u, "model"))
+        activeFilters.model.includes(u.educationModel)
       );
     }
     if (activeFilters.type.length > 0) {
       filtered = filtered.filter((u: any) =>
-        activeFilters.type.includes(getLangField(u, "type"))
+        activeFilters.type.includes(u.type)
       );
     }
     if (activeFilters.city.length > 0) {
       filtered = filtered.filter((u: any) =>
-        activeFilters.city.includes(getLangField(u, "city"))
+        activeFilters.city.includes(u.city)
       );
-    }
-
-    if (priceMin > 0 || priceMax < 400000) {
-      filtered = filtered.filter((u: any) => {
-        const tuition = parseTuition(getLangField(u, "tuition"));
-        if (tuition === 0) return true;
-        return tuition >= priceMin && tuition <= priceMax;
-      });
     }
 
     if (search) {
       filtered = filtered.filter((u: any) => {
-        const nameEn = (u.name || "").toLowerCase();
-        const nameAr = (u.name_ar || "").toLowerCase();
-        const shortName = (u.shortName || "").toLowerCase();
-        const descEn = (u.description || "").toLowerCase();
-        const descAr = (u.description_ar || "").toLowerCase();
-        const majorsEn = (u.majors || []).map((m: any) => (typeof m === "string" ? m : m.name_en || "").toLowerCase());
-        const majorsAr = (u.majors_ar || []).map((m: any) => (typeof m === "string" ? m : m.name_ar || "").toLowerCase());
+        const nameEn = (u.nameEn || "").toLowerCase();
+        const nameAr = (u.nameAr || "").toLowerCase();
 
         return (
           nameEn.includes(search) ||
-          nameAr.includes(search) ||
-          shortName.includes(search) ||
-          descEn.includes(search) ||
-          descAr.includes(search) ||
-          majorsEn.some((m: string) => m.includes(search)) ||
-          majorsAr.some((m: string) => m.includes(search))
+          nameAr.includes(search)
         );
       });
     }
 
     if (currentSort === "name-asc") {
       filtered.sort((a: any, b: any) =>
-        getLangField(a, "name").localeCompare(getLangField(b, "name"))
+        (a.nameEn || "").localeCompare(b.nameEn || "")
       );
     } else if (currentSort === "name-desc") {
       filtered.sort((a: any, b: any) =>
-        getLangField(b, "name").localeCompare(getLangField(a, "name"))
+        (b.nameEn || "").localeCompare(a.nameEn || "")
       );
-    } else if (currentSort === "oldest") {
-      filtered.sort((a: any, b: any) => (a.founded || 9999) - (b.founded || 9999));
-    } else if (currentSort === "newest") {
-      filtered.sort((a: any, b: any) => (b.founded || 0) - (a.founded || 0));
-    } else if (currentSort === "tuition-asc") {
-      filtered.sort((a: any, b: any) => parseTuition(a.tuition) - parseTuition(b.tuition));
-    } else if (currentSort === "tuition-desc") {
-      filtered.sort((a: any, b: any) => parseTuition(b.tuition) - parseTuition(a.tuition));
     }
 
     return filtered;
-  }, [searchQuery, activeFilters, priceMin, priceMax, currentSort, language]);
+  }, [searchQuery, activeFilters, priceMin, priceMax, currentSort, language, universitiesDatabase]);
 
   const modelsList = ["American", "German", "British", "Egyptian"];
   const typesList = ["Private", "Public", "National"];

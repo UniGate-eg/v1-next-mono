@@ -2,11 +2,8 @@
 
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { SuggestionRepository } from "@/server/repositories/SuggestionRepository";
 import { SuggestionService } from "@/server/services/SuggestionService";
-
-const suggestionRepository = new SuggestionRepository();
-const suggestionService = new SuggestionService(suggestionRepository);
+import { CreateSuggestionSchema } from "@/schemas/suggestion.schema";
 
 export async function submitSuggestionAction(rawInput: unknown) {
   try {
@@ -21,10 +18,10 @@ export async function submitSuggestionAction(rawInput: unknown) {
       } as const;
     }
 
-    const suggestion = await suggestionService.submitSuggestion(
-      session.user.id,
-      rawInput
-    );
+    const data = CreateSuggestionSchema.parse(rawInput);
+    const inputWithUser = { ...data, suggestedByEmail: session.user.email || "ANONYMOUS" };
+    
+    const suggestion = await SuggestionService.createSuggestion(inputWithUser as any);
     return { success: true, data: suggestion } as const;
   } catch (error) {
     if (error instanceof Error) {

@@ -6,6 +6,7 @@ import { SuggestionDialog } from "@/components/university/SuggestionDialog";
 
 export interface UniversityData {
   id: string | number;
+  slug?: string;
   name?: string;
   nameEn?: string;
   name_ar?: string;
@@ -65,11 +66,31 @@ export function UniversityModal({
   const [expandedFaculties, setExpandedFaculties] = useState<Record<number, boolean>>({ 0: true });
   const [activeTab, setActiveTab] = useState<"faculties" | "admission" | "facilities" | "contact">("faculties");
   const [allExpanded, setAllExpanded] = useState(false);
+  const [fullUni, setFullUni] = useState<any>(uni);
+  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (uni && (uni as any).slug && !(uni as any).faculties && !(uni as any).strengthsEn) {
+      setLoading(true);
+      fetch(`/api/universities/${(uni as any).slug}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.data) {
+            setFullUni(data.data);
+          }
+        })
+        .finally(() => setLoading(false));
+    } else {
+      setFullUni(uni);
+    }
+  }, [uni]);
 
   if (!uni) return null;
 
+  const displayUni = fullUni || uni;
+
   const getLangField = (fieldName: string) => {
-    const uniAny = uni as any;
+    const uniAny = displayUni as any;
     if (language === "ar") {
       if (uniAny[fieldName + "_ar"]) return uniAny[fieldName + "_ar"];
       if (uniAny[fieldName + "Ar"]) return uniAny[fieldName + "Ar"];
@@ -79,7 +100,7 @@ export function UniversityModal({
   };
 
   const getLangArray = (fieldName: string): string[] => {
-    const uniAny = uni as any;
+    const uniAny = displayUni as any;
     if (language === "ar") {
       if (Array.isArray(uniAny[fieldName + "_ar"])) return uniAny[fieldName + "_ar"];
       if (Array.isArray(uniAny[fieldName + "Ar"])) return uniAny[fieldName + "Ar"];
@@ -97,13 +118,13 @@ export function UniversityModal({
     setExpandedFaculties((prev) => ({ ...prev, [idx]: !prev[idx] }));
   };
 
-  const structuredFaculties = uni.structured_faculties || [];
+  const structuredFaculties = displayUni.structured_faculties || displayUni.faculties || [];
   const flatFaculties = getLangArray("faculties");
-  const flatMajors = getLangArray("majors");
+  const flatMajors = getLangArray("majors") || getLangArray("degreePrograms");
 
   const facultyItems = useMemo(() => {
     if (structuredFaculties.length > 0) {
-      return structuredFaculties.map((fac) => ({
+      return structuredFaculties.map((fac: any) => ({
         name: language === "ar" && fac.name_ar ? fac.name_ar : fac.name_en,
         dean: fac.dean_name,
         description: language === "ar" && fac.description_ar ? fac.description_ar : fac.description_en,
@@ -112,7 +133,7 @@ export function UniversityModal({
     }
 
     if (flatFaculties.length > 0) {
-      return flatFaculties.map((f) => ({
+      return flatFaculties.map((f: any) => ({
         name: f,
         dean: null,
         description: null,
@@ -137,14 +158,14 @@ export function UniversityModal({
       const nextState = !allExpanded;
       setAllExpanded(nextState);
       const newExpanded: Record<number, boolean> = {};
-      facultyItems.forEach((_, idx) => {
+      facultyItems.forEach((_: any, idx: number) => {
         newExpanded[idx] = nextState;
       });
       setExpandedFaculties(newExpanded);
     }
   };
 
-  const uniName = getLangField("name") || uni.nameEn || uni.name || "";
+  const uniName = getLangField("name") || displayUni.nameEn || displayUni.name || "";
 
   return (
     <div
@@ -158,24 +179,24 @@ export function UniversityModal({
         {/* Modal Header */}
         <div
           className="modal-header"
-          style={{ background: uni.accentGradient || "linear-gradient(135deg, #7C3AED, #EC4899)" }}
+          style={{ background: displayUni.accentGradient || "linear-gradient(135deg, #7C3AED, #EC4899)" }}
         >
           <button className="modal-close-btn" onClick={onClose} aria-label="Close modal">
             ✕
           </button>
           <div className="modal-header-content">
-            <div className="modal-emoji">{uni.emoji || "🏛️"}</div>
+            <div className="modal-emoji">{displayUni.emoji || "🏛️"}</div>
             <div>
               <span className="modal-model-badge">
-                {uni.modelEmoji || "🎓"} {getLangField("model") || uni.type || "University"}
+                {displayUni.modelEmoji || "🎓"} {getLangField("model") || displayUni.type || "University"}
               </span>
               <h2 className="modal-title">{uniName}</h2>
               <div className="modal-meta">
-                <span>📍 {getLangField("location") || uni.governorate || "Egypt"}</span>
-                <span>🏛️ {getLangField("type") || uni.type}</span>
-                {(uni.founded || uni.established) && <span>📅 Est. {uni.founded || uni.established}</span>}
-                {uni.qs_ranking && uni.qs_ranking !== "N/A" && (
-                  <span className="qs-rank-badge">🏆 {uni.qs_ranking}</span>
+                <span>📍 {getLangField("location") || displayUni.governorate || "Egypt"}</span>
+                <span>🏛️ {getLangField("type") || displayUni.type}</span>
+                {(displayUni.founded || displayUni.established) && <span>📅 Est. {displayUni.founded || displayUni.established}</span>}
+                {displayUni.qs_ranking && displayUni.qs_ranking !== "N/A" && (
+                  <span className="qs-rank-badge">🏆 {displayUni.qs_ranking}</span>
                 )}
               </div>
             </div>
@@ -215,7 +236,7 @@ export function UniversityModal({
           {/* Overview summary */}
           <div className="modal-section modal-overview">
             <h3>{language === "ar" ? "نبذة عن الجامعة" : "About University"}</h3>
-            <p>{getLangField("overview") || getLangField("description") || uni.description}</p>
+            <p>{getLangField("overview") || getLangField("description") || displayUni.description}</p>
           </div>
 
           {/* TAB 1: Faculties & Departments */}
@@ -228,7 +249,7 @@ export function UniversityModal({
                     const nextState = !allExpanded;
                     setAllExpanded(nextState);
                     const newExpanded: Record<number, boolean> = {};
-                    facultyItems.forEach((_, idx) => {
+                    facultyItems.forEach((_: any, idx: number) => {
                       newExpanded[idx] = nextState;
                     });
                     setExpandedFaculties(newExpanded);
@@ -249,7 +270,7 @@ export function UniversityModal({
               </div>
 
               <div className="faculties-accordion">
-                {facultyItems.map((fac, idx) => {
+                {facultyItems.map((fac: any, idx: number) => {
                   const isExpanded = !!expandedFaculties[idx];
                   return (
                     <div key={idx} className={`faculty-accordion-item ${isExpanded ? "expanded" : ""}`}>
@@ -315,7 +336,7 @@ export function UniversityModal({
                 <div className="admission-card">
                   <div className="admission-card-icon">👥</div>
                   <h4>{language === "ar" ? "أعداد الطلاب" : "Student Body"}</h4>
-                  <p>{uni.students || "~12,000+ Students"}</p>
+                  <p>{displayUni.students || "~12,000+ Students"}</p>
                 </div>
 
                 <div className="admission-card">
@@ -344,11 +365,11 @@ export function UniversityModal({
           {/* TAB 3: Facilities & Campus Life */}
           {activeTab === "facilities" && (
             <div className="modal-section space-y-4">
-              {uni.international_accreditations && uni.international_accreditations.length > 0 && (
+              {displayUni.international_accreditations && displayUni.international_accreditations.length > 0 && (
                 <div>
                   <h4>{language === "ar" ? "الاعتمادات الدولية والمحلية" : "Accreditations & Recognitions"}</h4>
                   <div className="depts-tags" style={{ marginTop: "8px" }}>
-                    {uni.international_accreditations.map((acc, i) => (
+                    {displayUni.international_accreditations.map((acc: any, i: number) => (
                       <span key={i} className="dept-tag" style={{ background: "rgba(16, 185, 129, 0.15)", borderColor: "rgba(16, 185, 129, 0.4)", color: "#10B981" }}>
                         ✅ {acc}
                       </span>
@@ -357,11 +378,11 @@ export function UniversityModal({
                 </div>
               )}
 
-              {uni.strengths && uni.strengths.length > 0 && (
+              {displayUni.strengths && displayUni.strengths.length > 0 && (
                 <div style={{ marginTop: "16px" }}>
                   <h4>{language === "ar" ? "أبرز نقاط القوة والمزايا" : "Key Strengths & Highlights"}</h4>
                   <div className="depts-tags" style={{ marginTop: "8px" }}>
-                    {getLangArray("strengths").map((str, i) => (
+                    {getLangArray("strengths").map((str: any, i: number) => (
                       <span key={i} className="strength-tag">
                         ✨ {str}
                       </span>
@@ -380,40 +401,40 @@ export function UniversityModal({
                   <span className="contact-icon">📍</span>
                   <div>
                     <strong>{language === "ar" ? "العنوان:" : "Campus Address:"}</strong>
-                    <p>{getLangField("address") || getLangField("location") || uni.governorate}</p>
+                    <p>{getLangField("address") || getLangField("location") || displayUni.governorate}</p>
                   </div>
                 </div>
 
-                {uni.website && (
+                {displayUni.website && (
                   <div className="contact-item">
                     <span className="contact-icon">🌐</span>
                     <div>
                       <strong>{language === "ar" ? "الموقع الرسمي:" : "Official Website:"}</strong>
                       <p>
-                        <a href={uni.website} target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-light)", textDecoration: "underline" }}>
-                          {uni.website}
+                        <a href={displayUni.website} target="_blank" rel="noopener noreferrer" style={{ color: "var(--primary-light)", textDecoration: "underline" }}>
+                          {displayUni.website}
                         </a>
                       </p>
                     </div>
                   </div>
                 )}
 
-                {uni.phones && uni.phones.length > 0 && (
+                {displayUni.phones && displayUni.phones.length > 0 && (
                   <div className="contact-item">
                     <span className="contact-icon">📞</span>
                     <div>
                       <strong>{language === "ar" ? "أرقام الهاتف:" : "Telephone Lines:"}</strong>
-                      <p>{uni.phones.join(" · ")}</p>
+                      <p>{displayUni.phones.join(" · ")}</p>
                     </div>
                   </div>
                 )}
 
-                {uni.emails && uni.emails.length > 0 && (
+                {displayUni.emails && displayUni.emails.length > 0 && (
                   <div className="contact-item">
                     <span className="contact-icon">✉️</span>
                     <div>
                       <strong>{language === "ar" ? "البريد الإلكتروني:" : "Email Inquiries:"}</strong>
-                      <p>{uni.emails.join(" · ")}</p>
+                      <p>{displayUni.emails.join(" · ")}</p>
                     </div>
                   </div>
                 )}
@@ -425,13 +446,13 @@ export function UniversityModal({
         {/* Modal Footer */}
         <div className="modal-footer" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
           <div>
-            <SuggestionDialog universityName={uniName} />
+            <SuggestionDialog universityId={String(displayUni.id)} universityName={uniName} />
           </div>
 
           <div style={{ display: "flex", gap: "10px" }}>
-            {uni.website && (
+            {displayUni.website && (
               <a
-                href={uni.website}
+                href={displayUni.website}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="view-details-btn"
