@@ -3,12 +3,17 @@
 import { useState, useEffect } from "react";
 import { SlimSearchToken } from "../types/university.types";
 
-export function useUniversitySearch() {
-  const [index, setIndex] = useState<SlimSearchToken[]>([]);
-  const [loading, setLoading] = useState(true);
+export function useUniversitySearch(initialData?: SlimSearchToken[]) {
+  const [index, setIndex] = useState<SlimSearchToken[]>(initialData || []);
+  const [loading, setLoading] = useState(!initialData || initialData.length === 0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // If we already have initialData, we don't need to block UI, but can optionally refresh in background
+    if (initialData && initialData.length > 0 && index.length > 0) {
+      return;
+    }
+
     async function fetchIndex() {
       try {
         const res = await fetch("/search-index.json");
@@ -22,7 +27,7 @@ export function useUniversitySearch() {
       }
     }
     fetchIndex();
-  }, []);
+  }, [initialData, index.length]);
 
   const search = (query: string): SlimSearchToken[] => {
     if (!query) return [];
