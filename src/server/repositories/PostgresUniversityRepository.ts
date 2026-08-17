@@ -99,7 +99,6 @@ export class PostgresUniversityRepository implements IUniversityReader, IUnivers
             nameEn: true,
             nameAr: true,
           },
-          take: 6,
         },
       },
     });
