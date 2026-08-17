@@ -52,8 +52,9 @@ describe("ETL Pipeline Utilities", () => {
 
     it("should reject invalid records missing required fields", () => {
       const invalidRecord = {
-        nameEn: "Incomplete University",
-        // missing nameAr, type, governorate
+        city: "Cairo",
+        established: 2020,
+        // missing name and nameEn
       };
 
       const validation = validateUniversityData(invalidRecord);

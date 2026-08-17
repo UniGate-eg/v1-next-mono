@@ -86,6 +86,20 @@ export default function MarketingHomePage() {
 
   const getLangField = (obj: any, field: string) => {
     if (!obj) return "";
+    if (field === "name") {
+      return language === "ar" ? obj.nameAr || obj.name_ar || obj.nameEn || obj.name : obj.nameEn || obj.name || obj.nameAr;
+    }
+    if (field === "location" || field === "city") {
+      const val = language === "ar" ? obj.city_ar || obj.city || obj.governorate : obj.city || obj.governorate || obj.location;
+      return val || (language === "ar" ? "مصر" : "Egypt");
+    }
+    if (field === "model" || field === "educationModel") {
+      const model = obj.educationModel || obj.model || "EGYPTIAN";
+      return model.charAt(0).toUpperCase() + model.slice(1).toLowerCase();
+    }
+    if (field === "type") {
+      return obj.type || "";
+    }
     if (language === "ar" && obj[field + "_ar"]) return obj[field + "_ar"];
     return obj[field] || "";
   };
@@ -114,7 +128,6 @@ export default function MarketingHomePage() {
       const uShort = u.shortName || "";
       const uType = getLangField(u, "type");
       const uCity = getLangField(u, "city");
-      const uMajors = getLangArray(u, "majors");
 
       if (uName.toLowerCase().includes(qLower) || uShort.toLowerCase().includes(qLower)) {
         results.push({
@@ -126,29 +139,10 @@ export default function MarketingHomePage() {
           uniData: u,
         });
       }
-
-      uMajors.forEach((m: string) => {
-        if (m && m.toLowerCase().includes(qLower) && !results.some((r) => r.text === m)) {
-          results.push({
-            type: "major",
-            id: u.id,
-            text: m,
-            icon: "🎓",
-            secondary: uName,
-            uniData: u,
-          });
-        }
-      });
     });
 
     return results.slice(0, 8);
-  }, [heroSearchQuery, language]);
-
-  const parseTuition = (tuitionStr?: string) => {
-    if (!tuitionStr) return 0;
-    const match = tuitionStr.replace(/,/g, "").match(/(\d+)/);
-    return match ? parseInt(match[1]) : 0;
-  };
+  }, [heroSearchQuery, language, universitiesDatabase]);
 
   const handleMatchOption = (category: "major" | "city" | "budget", value: string) => {
     const updated = { ...quizSelections, [category]: value };
@@ -167,35 +161,67 @@ export default function MarketingHomePage() {
 
   const calculateMatches = (selections: typeof quizSelections) => {
     const calculated = universitiesDatabase.map((uni: any) => {
-      let score = 0;
+      let score = 30; // Baseline compatibility
 
-      const hasMajor = getLangArray(uni, "majors")
-        .filter(Boolean)
-        .some((m: string) => m.toLowerCase().includes((selections.major || "").toLowerCase()));
-      if (hasMajor) score += 40;
+      // 1. Discipline / Major match based on university focus & models
+      const selMajor = (selections.major || "").toLowerCase();
+      const uName = (uni.nameEn || "").toLowerCase() + " " + (uni.nameAr || "");
+      const uModel = (uni.educationModel || "").toLowerCase();
+      
+      if (selMajor.includes("tech") || selMajor.includes("eng") || selMajor.includes("cs")) {
+        if (uName.includes("tech") || uName.includes("german") || uName.includes("science") || uModel.includes("german")) {
+          score += 35;
+        } else {
+          score += 20;
+        }
+      } else if (selMajor.includes("med") || selMajor.includes("health")) {
+        if (uni.type === "PUBLIC" || uni.type === "NATIONAL" || uName.includes("badr") || uName.includes("galala")) {
+          score += 35;
+        } else {
+          score += 20;
+        }
+      } else if (selMajor.includes("biz") || selMajor.includes("bus") || selMajor.includes("art")) {
+        if (uni.type === "PRIVATE" || uModel.includes("american") || uModel.includes("british")) {
+          score += 35;
+        } else {
+          score += 25;
+        }
+      } else {
+        score += 20;
+      }
 
+      // 2. City / Location match
       if (selections.city === "any") {
-        score += 30;
+        score += 25;
       } else if (
         (uni.city || "").toLowerCase().includes((selections.city || "").toLowerCase()) ||
         (uni.governorate || "").toLowerCase().includes((selections.city || "").toLowerCase())
       ) {
-        score += 30;
+        score += 25;
+      } else {
+        score += 5;
       }
 
-      const tuitionVal = 0; // Simplified for slim search token
+      // 3. Budget / University Type match
       if (selections.budget === "public") {
-        if (tuitionVal < 10000) score += 30;
-        else if (tuitionVal <= 100000) score += 10;
+        if (uni.type === "PUBLIC") score += 30;
+        else if (uni.type === "NATIONAL") score += 20;
+        else score += 5;
       } else if (selections.budget === "medium") {
-        if (tuitionVal >= 10000 && tuitionVal <= 150000) score += 30;
-        else if (tuitionVal < 10000) score += 20;
+        if (uni.type === "NATIONAL" || uni.type === "PRIVATE") score += 30;
+        else if (uni.type === "PUBLIC") score += 15;
+        else score += 20;
       } else if (selections.budget === "premium") {
-        if (tuitionVal > 150000) score += 30;
-        else if (tuitionVal >= 10000 && tuitionVal <= 150000) score += 15;
+        if (uni.type === "INTERNATIONAL" || uni.educationModel === "AMERICAN" || uni.educationModel === "GERMAN" || uni.educationModel === "BRITISH") {
+          score += 30;
+        } else if (uni.type === "PRIVATE") {
+          score += 25;
+        } else {
+          score += 10;
+        }
       }
 
-      return { uni, score };
+      return { uni, score: Math.min(score, 98) };
     });
 
     calculated.sort((a, b) => b.score - a.score);

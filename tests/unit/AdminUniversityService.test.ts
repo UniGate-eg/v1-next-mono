@@ -32,6 +32,7 @@ describe("AdminUniversityService", () => {
       slug: "new-uni",
       nameEn: "New University",
       nameAr: "جامعة جديدة",
+      emoji: "🏛️",
       educationModel: "BRITISH" as const,
       type: "PRIVATE" as const,
       governorate: "Giza",
