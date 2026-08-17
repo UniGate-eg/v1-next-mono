@@ -538,6 +538,131 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
         </div>
       </section>
 
+      {/* Visual City Explorer Section */}
+      <section className="section city-explorer-section">
+        <div className="container">
+          <div className="section-header text-center">
+            <span className="section-badge">🗺️ {language === "ar" ? "الموقع الجغرافي" : "Location"}</span>
+            <h2>{language === "ar" ? "استكشف الجامعات حسب المدينة" : "Explore by City"}</h2>
+            <p>
+              {language === "ar"
+                ? "ابحث عن المدينة التعليمية والبيئة الجامعية الأنسب لأسلوب حياتك وأهدافك"
+                : "Find the perfect university hub for your lifestyle and goals"}
+            </p>
+          </div>
+
+          <div className="city-explorer-grid">
+            {/* New Cairo */}
+            <Link href="/universities?search=New Cairo" className="city-card animate-in">
+              <div
+                className="city-card-bg"
+                style={{
+                  backgroundImage:
+                    "url('https://images.unsplash.com/photo-1572252009286-268acec5ca0a?auto=format&fit=crop&q=80&w=800')",
+                }}
+              ></div>
+              <div className="city-card-overlay"></div>
+              <div className="city-card-content">
+                <div className="city-card-icon">🏛️</div>
+                <h3>{language === "ar" ? "القاهرة الجديدة والشروق" : "New Cairo"}</h3>
+                <p>
+                  {language === "ar"
+                    ? "المركز الأكبر للجامعات الدولية والألمانية والأمريكية الرائدة ومجمعات الابتكار."
+                    : "The modern hub of premium international, German, and American universities."}
+                </p>
+                <span className="city-card-action">
+                  {language === "ar" ? "عرض الجامعات" : "View Universities"}{" "}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </div>
+            </Link>
+
+            {/* Sheikh Zayed & 6th October */}
+            <Link href="/universities?search=Zayed" className="city-card animate-in">
+              <div
+                className="city-card-bg"
+                style={{
+                  backgroundImage:
+                    "url('https://images.unsplash.com/photo-1539650116574-8efeb43e2b50?auto=format&fit=crop&q=80&w=800')",
+                }}
+              ></div>
+              <div className="city-card-overlay"></div>
+              <div className="city-card-content">
+                <div className="city-card-icon">🌇</div>
+                <h3>{language === "ar" ? "الشيخ زايد و 6 أكتوبر" : "Sheikh Zayed & October"}</h3>
+                <p>
+                  {language === "ar"
+                    ? "بيئة تعليمية نابضة بالحياة وحرم جامعي متطور يضم نخبة من جامعات التكنولوجيا والأبحاث."
+                    : "Dynamic, vibrant, and packed with thriving student life, research, and tech campuses."}
+                </p>
+                <span className="city-card-action">
+                  {language === "ar" ? "عرض الجامعات" : "View Universities"}{" "}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </div>
+            </Link>
+
+            {/* Alexandria & Coastal */}
+            <Link href="/universities?search=Alexandria" className="city-card animate-in">
+              <div
+                className="city-card-bg"
+                style={{
+                  backgroundImage:
+                    "url('https://images.unsplash.com/photo-1568322445389-f64ac2515020?auto=format&fit=crop&q=80&w=800')",
+                }}
+              ></div>
+              <div className="city-card-overlay"></div>
+              <div className="city-card-content">
+                <div className="city-card-icon">🌊</div>
+                <h3>{language === "ar" ? "الإسكندرية والساحل الشمالي" : "Alexandria & North Coast"}</h3>
+                <p>
+                  {language === "ar"
+                    ? "عروس البحر المتوسط التي تجمع بين كبرى الجامعات الحكومية والخاصة والأكاديمية البحرية."
+                    : "Historic Mediterranean capital offering renowned public, private, and maritime institutions."}
+                </p>
+                <span className="city-card-action">
+                  {language === "ar" ? "عرض الجامعات" : "View Universities"}{" "}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </div>
+            </Link>
+
+            {/* National & New Smart Hubs */}
+            <Link href="/universities?search=National" className="city-card animate-in">
+              <div
+                className="city-card-bg"
+                style={{
+                  backgroundImage:
+                    "url('https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=800')",
+                }}
+              ></div>
+              <div className="city-card-overlay"></div>
+              <div className="city-card-content">
+                <div className="city-card-icon">🚀</div>
+                <h3>{language === "ar" ? "العاصمة الإدارية والجامعات الأهلية" : "New Capital & National Hubs"}</h3>
+                <p>
+                  {language === "ar"
+                    ? "الجيل الجديد من الفروع الدولية والجامعات التكنولوجية والأهلية الحديثة على مستوى الجمهورية."
+                    : "Next-generation smart international branch campuses and technological universities across Egypt."}
+                </p>
+                <span className="city-card-action">
+                  {language === "ar" ? "عرض الجامعات" : "View Universities"}{" "}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* University Modal */}
       {selectedUniModal && (
         <UniversityModal
