@@ -4,69 +4,8 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
-import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 import type { SlimSearchToken } from "@/types/university.types";
-
-const newsItems = [
-  {
-    id: 1,
-    title: "Nile University Opens State-of-the-Art AI Research Center",
-    title_ar: "جامعة النيل تفتتح مركزاً متطوراً لأبحاث الذكاء الاصطناعي",
-    excerpt:
-      "The new center will focus on machine learning, natural language processing, and robotics, aiming to position Egypt as a regional AI hub.",
-    excerpt_ar:
-      "سيركز المركز الجديد على تعلم الآلة ومعالجة اللغات الطبيعية والروبوتات، بهدف جعل مصر مركزاً إقليمياً للذكاء الاصطناعي.",
-    date: "July 12, 2026",
-    date_ar: "12 يوليو 2026",
-    category: "Research",
-    category_ar: "بحث علمي",
-    emoji: "🤖",
-    university: "Nile University",
-    university_ar: "جامعة النيل",
-    gradient: "linear-gradient(135deg, #E11D48, #99582a)",
-    categoryColor: "rgba(187, 107, 0, 0.2)",
-    categoryText: "var(--accent-sage)",
-  },
-  {
-    id: 2,
-    title: "AUC Announces Full Scholarship Program for 2027 Intake",
-    title_ar: "الجامعة الأمريكية تعلن عن برنامج منح دراسية كاملة لعام 2027",
-    excerpt:
-      "The American University in Cairo will offer 50 full-ride scholarships to exceptional Egyptian students from public schools across all governorates.",
-    excerpt_ar:
-      "ستقدم الجامعة الأمريكية بالقاهرة 50 منحة دراسية كاملة للطلاب المصريين المتفوقين من المدارس الحكومية في جميع المحافظات.",
-    date: "July 8, 2026",
-    date_ar: "8 يوليو 2026",
-    category: "Scholarships",
-    category_ar: "منح دراسية",
-    emoji: "🎓",
-    university: "AUC",
-    university_ar: "الجامعة الأمريكية بالقاهرة",
-    gradient: "linear-gradient(135deg, #bb9457, #ffe6a7)",
-    categoryColor: "rgba(105, 5, 0, 0.2)",
-    categoryText: "var(--accent-sand)",
-  },
-  {
-    id: 3,
-    title: "GUC Partners with TU Munich for Dual-Degree Engineering Program",
-    title_ar: "الجامعة الألمانية تتعاون مع جامعة ميونخ لبرنامج هندسة مزدوج الدرجة",
-    excerpt:
-      "Students in the new program will spend two years in Cairo and two in Munich, earning degrees from both universities.",
-    excerpt_ar:
-      "سيقضي الطلاب في البرنامج الجديد عامين في القاهرة وعامين في ميونخ، وسيحصلون على شهادات من كلتا الجامعتين.",
-    date: "July 3, 2026",
-    date_ar: "3 يوليو 2026",
-    category: "Programs",
-    category_ar: "برامج",
-    emoji: "🇩🇪",
-    university: "GUC",
-    university_ar: "الجامعة الألمانية بالقاهرة",
-    gradient: "linear-gradient(135deg, #99582a, #bb9457)",
-    categoryColor: "rgba(147, 75, 0, 0.2)",
-    categoryText: "var(--accent-terracotta)",
-  },
-];
 
 interface MarketingHomeClientProps {
   initialUniversities?: SlimSearchToken[];
@@ -273,10 +212,6 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
     setMatches(topMatches);
     setMatchStep("results");
   };
-
-  const featuredUnis = useMemo(() => {
-    return universitiesDatabase.filter((u: any) => u.featured).slice(0, 6);
-  }, [universitiesDatabase]);
 
   return (
     <div className="home-tab-container">
@@ -599,92 +534,6 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Universities Grid */}
-      <section className="section">
-        <div className="container">
-          <div className="section-header">
-            <span className="section-badge">🏛️ {language === "ar" ? "جامعات مميزة" : "Featured"}</span>
-            <h2>{language === "ar" ? "أبرز الجامعات في مصر" : "Featured Egyptian Universities"}</h2>
-            <p>
-              {language === "ar"
-                ? "استكشف الجامعات الأكثر إقبالاً بتصنيفاتها ومصروفاتها ونقاط قوتها."
-                : "Explore top higher education institutions across Egypt with accredited programs."}
-            </p>
-          </div>
-
-          <div className="unis-grid">
-            {featuredUnis.map((uni: any) => (
-              <UniversityCard
-                key={uni.id}
-                university={uni}
-                onViewDetails={(u) => setSelectedUniModal(u)}
-              />
-            ))}
-          </div>
-
-          <div style={{ textAlign: "center", marginTop: "40px" }}>
-            <Link
-              href="/universities"
-              className="view-details-btn"
-              style={{
-                display: "inline-flex",
-                padding: "12px 32px",
-                fontSize: "15px",
-                background: "linear-gradient(135deg, var(--primary), var(--primary-dark))",
-                color: "#fff",
-              }}
-            >
-              {language === "ar" ? "عرض جميع الجامعات (30+)" : "View All Universities (30+)"} →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* University News Section */}
-      <section className="section news-section">
-        <div className="container">
-          <div className="section-header">
-            <span className="section-badge">📰 {language === "ar" ? "أحدث الأخبار" : "Latest Updates"}</span>
-            <h2>{language === "ar" ? "أخبار وتحديثات التعليم الجامعي" : "Higher Education News"}</h2>
-            <p>
-              {language === "ar"
-                ? "تابع آخر أخبار الجامعات والمنح والبرامج الجديدة والشراكات الدولية."
-                : "Stay informed with the latest announcements, scholarships, and new programs across Egypt."}
-            </p>
-          </div>
-
-          <div className="news-grid">
-            {newsItems.map((news) => (
-              <div key={news.id} className="news-card animate-in">
-                <div
-                  className="news-card-header"
-                  style={{
-                    background: news.gradient,
-                  }}
-                >
-                  <span className="news-card-emoji">{news.emoji}</span>
-                  <span
-                    className="news-card-badge"
-                    style={{
-                      background: news.categoryColor,
-                      color: news.categoryText,
-                    }}
-                  >
-                    {getLangField(news, "category")}
-                  </span>
-                </div>
-                <div className="news-card-body">
-                  <div className="news-card-date">📅 {getLangField(news, "date")}</div>
-                  <h3 className="news-card-title">{getLangField(news, "title")}</h3>
-                  <p className="news-card-excerpt">{getLangField(news, "excerpt")}</p>
-                  <span className="news-card-uni">🏛️ {getLangField(news, "university")}</span>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
