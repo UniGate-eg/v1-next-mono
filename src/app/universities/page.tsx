@@ -186,6 +186,14 @@ export default function UniversitiesPage() {
       });
     }
 
+    if (priceMin > 0 || priceMax < 400000) {
+      filtered = filtered.filter((u: any) => {
+        const rawTuition = u.tuition || u.tuitionEgp || (u.type === "PUBLIC" ? 5000 : u.type === "NATIONAL" ? 75000 : 160000);
+        const tuition = parseTuition(rawTuition);
+        return tuition >= priceMin && tuition <= priceMax;
+      });
+    }
+
     if (search) {
       filtered = filtered.filter((u: any) => {
         const nameEn = (u.nameEn || "").toLowerCase();
@@ -222,6 +230,20 @@ export default function UniversitiesPage() {
       case "founded-new":
         filtered.sort((a: any, b: any) => (b.established || b.founded || 2000) - (a.established || a.founded || 2000));
         break;
+      case "tuition-low":
+        filtered.sort((a: any, b: any) => {
+          const tA = parseTuition(a.tuition || a.tuitionEgp || (a.type === "PUBLIC" ? 5000 : a.type === "NATIONAL" ? 75000 : 160000));
+          const tB = parseTuition(b.tuition || b.tuitionEgp || (b.type === "PUBLIC" ? 5000 : b.type === "NATIONAL" ? 75000 : 160000));
+          return tA - tB;
+        });
+        break;
+      case "tuition-high":
+        filtered.sort((a: any, b: any) => {
+          const tA = parseTuition(a.tuition || a.tuitionEgp || (a.type === "PUBLIC" ? 5000 : a.type === "NATIONAL" ? 75000 : 160000));
+          const tB = parseTuition(b.tuition || b.tuitionEgp || (b.type === "PUBLIC" ? 5000 : b.type === "NATIONAL" ? 75000 : 160000));
+          return tB - tA;
+        });
+        break;
       default:
         if (rankFilter !== "all") {
           filtered.sort((a: any, b: any) => parseRankScore(a) - parseRankScore(b));
@@ -230,7 +252,7 @@ export default function UniversitiesPage() {
     }
 
     return filtered;
-  }, [searchQuery, activeFilters, rankFilter, currentSort, language, universitiesDatabase]);
+  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, language, universitiesDatabase]);
 
   const activeFilterTags = useMemo(() => {
     const tags: Array<{ category: string; value: string; emoji: string; displayValue: string }> = [];
@@ -250,11 +272,19 @@ export default function UniversitiesPage() {
         displayValue: rankFilter === "top500" ? "Top 500" : rankFilter === "top1000" ? "Top 1000" : "Ranked in Egypt",
       });
     }
+    if (priceMin > 0 || priceMax < 400000) {
+      tags.push({
+        category: "price",
+        value: "price",
+        emoji: "💰",
+        displayValue: getPriceRangeText(),
+      });
+    }
     if (searchQuery.trim()) {
       tags.push({ category: "search", value: `"${searchQuery.trim()}"`, emoji: "🔍", displayValue: `"${searchQuery.trim()}"` });
     }
     return tags;
-  }, [activeFilters, rankFilter, searchQuery, language]);
+  }, [activeFilters, rankFilter, priceMin, priceMax, searchQuery, language]);
 
   const getPriceRangeText = () => {
     if (priceMin === 0 && priceMax >= 400000) return t("Any") || "Any";
@@ -314,6 +344,8 @@ export default function UniversitiesPage() {
                 <option value="name-desc">{t("Name Z → A")}</option>
                 <option value="founded-old">{t("Oldest first")}</option>
                 <option value="founded-new">{t("Newest first")}</option>
+                <option value="tuition-low">{t("Tuition: Low → High")}</option>
+                <option value="tuition-high">{t("Tuition: High → Low")}</option>
               </select>
             </div>
           </div>
@@ -434,6 +466,70 @@ export default function UniversitiesPage() {
             </div>
           </div>
 
+          {/* Tuition Budget Range Slider */}
+          <div className="price-range-container">
+            <div className="price-range-header">
+              <span className="filter-group-label">💰 {t("Tuition Budget (EGP/year)")}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span className="price-range-value">{getPriceRangeText()}</span>
+                {(priceMin > 0 || priceMax < 400000) && (
+                  <button
+                    onClick={() => {
+                      setPriceMin(0);
+                      setPriceMax(400000);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--accent-coral)",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      padding: 0,
+                    }}
+                    title={language === "ar" ? "إعادة ضبط" : "Reset"}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                    {language === "ar" ? "إعادة ضبط" : "Reset"}
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="price-range-slider">
+              <div className="price-range-track">
+                <div
+                  className="price-range-track-fill"
+                  style={{
+                    left: `${(priceMin / 400000) * 100}%`,
+                    right: `${100 - (priceMax / 400000) * 100}%`,
+                  }}
+                ></div>
+              </div>
+              <input
+                type="range"
+                className="range-input range-min"
+                min="0"
+                max="400000"
+                step="5000"
+                value={priceMin}
+                onChange={(e) => handlePriceChange(e, "min")}
+              />
+              <input
+                type="range"
+                className="range-input range-max"
+                min="0"
+                max="400000"
+                step="5000"
+                value={priceMax}
+                onChange={(e) => handlePriceChange(e, "max")}
+              />
+            </div>
+          </div>
+
           {/* Active Filter Tags Row */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px" }}>
             <div className="active-filters" id="activeFiltersContainer" style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
@@ -447,7 +543,10 @@ export default function UniversitiesPage() {
                     onClick={() => {
                       if (tag.category === "search") setSearchQuery("");
                       else if (tag.category === "rank") setRankFilter("all");
-                      else handleFilterToggle(tag.category as any, tag.value);
+                      else if (tag.category === "price") {
+                        setPriceMin(0);
+                        setPriceMax(400000);
+                      } else handleFilterToggle(tag.category as any, tag.value);
                     }}
                   >
                     ×
