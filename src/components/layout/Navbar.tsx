@@ -2,15 +2,16 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSession, signOut } from "@/lib/auth-client";
-import Image from "next/image";
+import { LogOut, User } from "lucide-react";
 
 export function Navbar() {
   const { language, toggleLanguage, t } = useLanguage();
-  const { data: session } = useSession();
+  const { data: session, isPending } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -38,6 +39,15 @@ export function Navbar() {
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      window.location.href = "/";
+    } catch {
+      window.location.href = "/";
+    }
   };
 
   return (
@@ -71,23 +81,52 @@ export function Navbar() {
       </nav>
 
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        {/* Authentication Navigation Control */}
         {session?.user ? (
-          <button
-            className="auth-nav-btn"
-            onClick={() => signOut()}
-            style={{
-              padding: "8px 18px",
-              borderRadius: "var(--radius-full)",
-              background: "rgba(255, 255, 255, 0.08)",
-              border: "1px solid var(--border)",
-              color: "#fff",
-              fontSize: "13px",
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            {t("navLogout")}
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Link
+              href="/dashboard"
+              className="auth-nav-btn"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "7px 14px",
+                borderRadius: "var(--radius-full)",
+                background: "rgba(124, 58, 237, 0.15)",
+                border: "1px solid rgba(124, 58, 237, 0.3)",
+                color: "#c084fc",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>{session.user.name?.split(" ")[0] || session.user.email?.split("@")[0] || t("navDashboard")}</span>
+            </Link>
+
+            <button
+              className="auth-nav-btn"
+              onClick={handleLogout}
+              title={t("navLogout")}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "7px 14px",
+                borderRadius: "var(--radius-full)",
+                background: "rgba(255, 255, 255, 0.08)",
+                border: "1px solid var(--border)",
+                color: "#fff",
+                fontSize: "13px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              <LogOut className="w-3.5 h-3.5 text-rose-400" />
+              <span>{t("navLogout")}</span>
+            </button>
+          </div>
         ) : (
           <Link
             href="/auth/login"

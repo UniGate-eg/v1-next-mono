@@ -17,6 +17,7 @@ export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(true);
   const { language } = useLanguage();
+  const isAr = language === "ar";
 
   const {
     register,
@@ -44,7 +45,7 @@ export function RegisterForm() {
   const onSubmit = async (data: SignUpInput) => {
     if (!acceptTerms) {
       toast.error(
-        language === "ar"
+        isAr
           ? "يرجى الموافقة على شروط الاستخدام وسياسة الخصوصية للمتابعة."
           : "Please agree to the Terms of Service to continue."
       );
@@ -61,13 +62,13 @@ export function RegisterForm() {
 
       if (res.error) {
         toast.error(
-          language === "ar"
+          isAr
             ? "تعذر إنشاء الحساب. قد يكون البريد الإلكتروني مسجلاً مسبقاً."
             : res.error.message || "Registration failed. Please try again."
         );
       } else {
         toast.success(
-          language === "ar"
+          isAr
             ? "تم إنشاء حساب الطالب بنجاح! مرحباً بك في UniGate."
             : "Account created successfully! Welcome to UniGate."
         );
@@ -76,7 +77,7 @@ export function RegisterForm() {
       }
     } catch (err) {
       toast.error(
-        language === "ar"
+        isAr
           ? "حدث خطأ غير متوقع أثناء إنشاء الحساب."
           : "An unexpected error occurred."
       );
@@ -86,158 +87,174 @@ export function RegisterForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-      {/* Full Name */}
-      <div className="space-y-2">
-        <label className="block text-xs font-medium text-slate-300 tracking-wide">
-          {language === "ar" ? "الاسم الكامل" : "Full Name"}
-        </label>
-        <input
-          type="text"
-          autoComplete="name"
-          placeholder={language === "ar" ? "مثال: أحمد محمود" : "e.g. Ahmed Mahmoud"}
-          {...register("name")}
-          disabled={loading}
-          className="w-full h-12 px-4 rounded-xl bg-[#0e1027]/90 border border-purple-500/20 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 transition-all duration-200"
-        />
-        {errors.name && (
-          <p className="text-xs text-rose-400 font-medium pl-1">{errors.name.message}</p>
-        )}
+    <div className="w-full">
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <div className="text-center mb-6">
+        <h1 className="text-2xl font-bold text-white tracking-tight">
+          {isAr ? "إنشاء حساب جديد" : "Create an account"}
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          {isAr
+            ? "سجّل الآن لتتبع قبولك الجامعي وحفظ برامجك المفضلة"
+            : "Start tracking university admissions and deadlines"}
+        </p>
       </div>
 
-      {/* Email Address */}
-      <div className="space-y-2">
-        <label className="block text-xs font-medium text-slate-300 tracking-wide">
-          {language === "ar" ? "البريد الإلكتروني" : "Email Address"}
-        </label>
-        <input
-          type="email"
-          autoComplete="email"
-          placeholder={language === "ar" ? "student@example.com" : "student@example.com"}
-          {...register("email")}
-          disabled={loading}
-          className="w-full h-12 px-4 rounded-xl bg-[#0e1027]/90 border border-purple-500/20 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 transition-all duration-200"
-        />
-        {errors.email && (
-          <p className="text-xs text-rose-400 font-medium pl-1">{errors.email.message}</p>
-        )}
-      </div>
-
-      {/* Password */}
-      <div className="space-y-2">
-        <label className="block text-xs font-medium text-slate-300 tracking-wide">
-          {language === "ar" ? "كلمة المرور (8 أحرف على الأقل)" : "Password (min 8 characters)"}
-        </label>
-        <div className="relative">
+      {/* ── Form ──────────────────────────────────────────────────────────── */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        {/* Full Name */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-slate-300">
+            {isAr ? "الاسم الكامل" : "Full name"}
+          </label>
           <input
-            type={showPassword ? "text" : "password"}
-            autoComplete="new-password"
-            placeholder="••••••••"
-            {...register("password")}
+            type="text"
+            autoComplete="name"
+            placeholder={isAr ? "مثال: أحمد محمود" : "e.g. Ahmed Mahmoud"}
+            {...register("name")}
             disabled={loading}
-            className="w-full h-12 px-4 pr-11 rounded-xl bg-[#0e1027]/90 border border-purple-500/20 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 transition-all duration-200"
+            className="w-full h-11 px-3.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 focus:bg-white/[0.07] text-white placeholder:text-slate-500 text-sm transition-all duration-200 outline-none disabled:opacity-50"
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors p-1"
-          >
-            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
+          {errors.name && (
+            <p className="text-xs text-rose-400 font-medium pl-1 animate-in fade-in">{errors.name.message}</p>
+          )}
         </div>
-        {errors.password && (
-          <p className="text-xs text-rose-400 font-medium pl-1">{errors.password.message}</p>
-        )}
 
-        {/* Password Strength Indicator */}
-        {passwordVal.length > 0 && (
-          <div className="mt-2 space-y-1.5 pt-1">
-            <div className="flex gap-1.5">
-              {[1, 2, 3, 4].map((step) => (
-                <div
-                  key={step}
-                  className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                    strength >= step
-                      ? strength <= 1
-                        ? "bg-rose-500"
-                        : strength <= 2
-                        ? "bg-amber-400"
-                        : strength <= 3
-                        ? "bg-blue-400"
-                        : "bg-emerald-400"
-                      : "bg-slate-800"
-                  }`}
-                />
-              ))}
-            </div>
-            <p className="text-[11px] text-slate-400">
-              {strength <= 1
-                ? (language === "ar" ? "ضعيفة — أضف أرقاماً ورموزاً" : "Weak — add symbols and numbers")
-                : strength <= 2
-                ? (language === "ar" ? "متوسطة" : "Fair")
-                : strength <= 3
-                ? (language === "ar" ? "جيدة" : "Good")
-                : (language === "ar" ? "قوية جداً" : "Strong password")}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Terms & Privacy */}
-      <div className="pt-1">
-        <label className="flex items-start gap-2.5 cursor-pointer select-none">
+        {/* Email Address */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-slate-300">
+            {isAr ? "البريد الإلكتروني" : "Email address"}
+          </label>
           <input
-            type="checkbox"
-            checked={acceptTerms}
-            onChange={(e) => setAcceptTerms(e.target.checked)}
-            className="mt-0.5 w-4 h-4 rounded border-purple-500/40 bg-slate-900 text-purple-600 focus:ring-purple-500/30"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            placeholder={isAr ? "student@example.com" : "student@example.com"}
+            {...register("email")}
+            disabled={loading}
+            className="w-full h-11 px-3.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 focus:bg-white/[0.07] text-white placeholder:text-slate-500 text-sm transition-all duration-200 outline-none disabled:opacity-50"
           />
-          <span className="text-xs text-slate-300 leading-normal">
-            {language === "ar" ? (
-              <>
-                أوافق على <span className="text-purple-400 hover:underline">شروط الخدمة</span> و{" "}
-                <span className="text-purple-400 hover:underline">سياسة الخصوصية</span>.
-              </>
-            ) : (
-              <>
-                I agree to the <span className="text-purple-400 hover:underline">Terms of Service</span> and{" "}
-                <span className="text-purple-400 hover:underline">Privacy Policy</span>.
-              </>
-            )}
-          </span>
-        </label>
-      </div>
+          {errors.email && (
+            <p className="text-xs text-rose-400 font-medium pl-1 animate-in fade-in">{errors.email.message}</p>
+          )}
+        </div>
 
-      {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full h-12 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold text-sm shadow-lg shadow-purple-600/25 hover:shadow-purple-600/40 flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed group cursor-pointer mt-2"
-      >
-        {loading ? (
-          <>
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span>{language === "ar" ? "جاري إنشاء الحساب..." : "Creating Account..."}</span>
-          </>
-        ) : (
-          <>
-            <UserPlus className="w-4 h-4" />
-            <span>{language === "ar" ? "إنشاء حساب طالب مجاني" : "Create Free Account"}</span>
-            <ArrowRight className="w-4 h-4 opacity-80 group-hover:translate-x-1 transition-transform" />
-          </>
-        )}
-      </button>
+        {/* Password */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-medium text-slate-300">
+            {isAr ? "كلمة المرور (8 أحرف على الأقل)" : "Password (min 8 characters)"}
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder="••••••••"
+              {...register("password")}
+              disabled={loading}
+              className={`w-full h-11 px-3.5 ${isAr ? "pl-11" : "pr-11"} rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 focus:bg-white/[0.07] text-white placeholder:text-slate-500 text-sm transition-all duration-200 outline-none disabled:opacity-50`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className={`absolute ${isAr ? "left-3" : "right-3"} top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-colors cursor-pointer`}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+          {errors.password && (
+            <p className="text-xs text-rose-400 font-medium pl-1 animate-in fade-in">{errors.password.message}</p>
+          )}
 
-      {/* Switch to Login */}
-      <div className="text-center text-xs text-slate-400 pt-2">
-        {language === "ar" ? "لديك حساب بالفعل؟ " : "Already have an account? "}
-        <Link
-          href="/auth/login"
-          className="font-semibold text-purple-400 hover:text-purple-300 underline underline-offset-4 transition-colors"
+          {/* Password Strength Indicator */}
+          {passwordVal.length > 0 && (
+            <div className="mt-2 space-y-1.5 pt-1">
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4].map((step) => (
+                  <div
+                    key={step}
+                    className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                      strength >= step
+                        ? strength <= 1
+                          ? "bg-rose-500"
+                          : strength <= 2
+                          ? "bg-amber-400"
+                          : strength <= 3
+                          ? "bg-blue-400"
+                          : "bg-emerald-400"
+                        : "bg-slate-800"
+                    }`}
+                  />
+                ))}
+              </div>
+              <p className="text-[11px] font-medium text-slate-400">
+                {strength <= 1
+                  ? (isAr ? "ضعيفة — أضف أرقاماً ورموزاً" : "Weak — add symbols and numbers")
+                  : strength <= 2
+                  ? (isAr ? "متوسطة" : "Fair")
+                  : strength <= 3
+                  ? (isAr ? "جيدة" : "Good")
+                  : (isAr ? "قوية جداً" : "Strong password")}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Terms & Privacy */}
+        <div className="pt-1">
+          <label className="flex items-start gap-2.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={acceptTerms}
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded border-white/20 bg-slate-900 text-purple-600 focus:ring-purple-500/30 cursor-pointer"
+            />
+            <span className="text-xs text-slate-400 leading-normal">
+              {isAr ? (
+                <>
+                  أوافق على <span className="text-purple-400 hover:underline">شروط الخدمة</span> و{" "}
+                  <span className="text-purple-400 hover:underline">سياسة الخصوصية</span>.
+                </>
+              ) : (
+                <>
+                  I agree to the <span className="text-purple-400 hover:underline">Terms of Service</span> and{" "}
+                  <span className="text-purple-400 hover:underline">Privacy Policy</span>.
+                </>
+              )}
+            </span>
+          </label>
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full h-11 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold text-sm shadow-lg shadow-purple-600/25 hover:shadow-purple-600/40 flex items-center justify-center gap-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed group cursor-pointer mt-2"
         >
-          {language === "ar" ? "تسجيل الدخول" : "Sign In"}
-        </Link>
-      </div>
-    </form>
+          {loading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>{isAr ? "جاري إنشاء الحساب..." : "Creating Account..."}</span>
+            </>
+          ) : (
+            <>
+              <UserPlus className="w-4 h-4" />
+              <span>{isAr ? "إنشاء حساب مجاني" : "Create Account"}</span>
+              <ArrowRight className="w-4 h-4 opacity-80 group-hover:translate-x-0.5 transition-transform" />
+            </>
+          )}
+        </button>
+
+        {/* Switch to Login */}
+        <div className="text-center text-xs text-slate-400 pt-4">
+          {isAr ? "لديك حساب بالفعل؟ " : "Already have an account? "}
+          <Link
+            href="/auth/login"
+            className="font-medium text-purple-400 hover:text-purple-300 underline underline-offset-4 transition-colors"
+          >
+            {isAr ? "تسجيل الدخول" : "Sign in"}
+          </Link>
+        </div>
+      </form>
+    </div>
   );
 }
