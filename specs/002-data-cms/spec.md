@@ -411,3 +411,36 @@ As a lead platform administrator, I want a complete audit log of all data modifi
 - **Database Availability**: A PostgreSQL-compatible relational database is provisioned and accessible via standard connection pooling.
 - **Language Support**: English and Arabic are the two primary languages required for all academic profiles; right-to-left (RTL) layout switching is fully handled by the existing design system.
 - **Asset Hosting**: University logos and external media assets continue to be served via optimized web assets in `public/` or cloud storage buckets.
+
+---
+
+## Story 6 — Major Browsing: Precision Academic Discovery (Priority: P1)
+
+**As** a student in Egypt who already knows their intended major or field of study,
+**I want** to browse universities by academic discipline and see only institutions that
+genuinely offer accredited programs in that field,
+**So that** I can quickly narrow my university shortlist from 100+ institutions to my
+final 3–5 candidates without wading through irrelevant results.
+
+**Why P1**: Without precision matching, the Majors page shows 100+ universities for every
+field (e.g. CS: 117 of 124) — making it functionally useless for decision-making. This
+story restores the page to its intended utility as a precision browsing tool.
+
+**Acceptance Criteria**:
+
+| # | Given | When | Then | SLO |
+|---|:---|:---|:---|:---|
+| 6a | Student opens `/majors` | Page loads | All 19 major cards visible; university counts reflect only genuine academic offerings | < 1s (SSR) |
+| 6b | Student expands "Computer Science" card | Click on card header | ≤ 40 universities shown (down from 117); only universities with CS faculty, CS dept, or CS degree program | Instant (pre-scored on mount) |
+| 6c | Universities are listed inside a major card | Expanded state | Universities sorted by academic alignment confidence score, highest first | Pre-computed, 0ms |
+| 6d | Student clicks "Private" filter chip | Inside expanded card | List instantly filters to private universities only; count badge updates; no page reload | < 1ms (sync) |
+| 6e | Card has more than 6 matching universities | Expanded with > 6 results | Top 6 shown by default; "Show More (+N)" button reveals the rest with smooth animation | < 16ms |
+| 6f | Student clicks "View in Directory" | Inside expanded card | Navigates to `/universities?search={majorName}` with full filter drawer | Standard navigation |
+| 6g | Student types "صيدلة" in the search box | Arabic query | Pharmacy card surfaces; other cards that don't match are hidden | < 16ms (memoized) |
+| 6h | Purely prose text contains academic words | e.g. overview says "information technology systems" | University does NOT match CS — only structural academic entities (faculties, departments, degree programs) qualify | Always |
+
+**Success Metrics**:
+- `SM-6.1`: CS returns ≤ 40 universities (from 117 baseline).
+- `SM-6.2`: Psychology, Mechanical Engineering, Media Engineering show > 0 results.
+- `SM-6.3`: A purely medical/dental university scores 0 against CS major.
+- `SM-6.4`: Mount-time scoring computation completes in < 5ms.

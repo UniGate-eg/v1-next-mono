@@ -446,7 +446,86 @@ export async function updateUniversityAction(
 
 ---
 
+---
+
 ### Phase 5: Testing, Verification & Rollout
+
+**Unit Tests (Vitest)**:
+
+| Test File | Covers |
+|:---|:---|
+| `src/server/mappers/UniversityMapper.test.ts` | `toDTO()`, `toSlimIndex()`, `toAdminDTO()` — null safety, bilingual fallback |
+| `src/server/services/AdminUniversityService.test.ts` | Mutation flow; audit log write; rejects invalid roles |
+| `src/server/repositories/PostgresUniversityRepository.test.ts` | Prisma mock; filter query construction; pagination |
+| `src/server/repositories/FallbackUniversityRepository.test.ts` | Returns static data; write methods throw `NotSupportedError` |
+| `prisma/etl/validate.test.ts` | Valid records pass; invalid records captured to error log |
+| `prisma/etl/transform.test.ts` | String tuition `"EGP 85,000 / Year"` → integer `85000`; slug generation |
+
+**Acceptance Verification Checklist**:
+- [ ] `pnpm prisma db push` runs without errors on expanded schema
+- [ ] `pnpm tsx prisma/etl/seed-deep.ts` completes in < 30s; `etl-errors.jsonl` has 0 entries for valid dataset
+- [ ] `pnpm generate-index` produces `public/search-index.json` ≤ 35 KB
+- [ ] Lighthouse mobile audit: LCP < 2.5s, initial JS ≤ 150 KB
+- [ ] Admin saves a tuition change; public catalog reflects it in < 2.0s
+- [ ] `pnpm test` all tests pass; zero `any` type errors in `pnpm run type-check`
+
+---
+
+### Phase 6: Academic Major Matching Engine v2 — Precision, Scalability & Progressive UX
+
+**Goal**: Replace broad full-text keyword matching (117 false positives for CS) with a
+precision SOLID-compliant matching engine scoped exclusively to academic structural entities
+(faculties, departments, degree programs), and upgrade the `/majors` UX with progressive
+disclosure, inline type filters, and score-based ranking.
+
+**Architecture**: Strategy Pattern + Interface Segregation + Dependency Inversion
+
+```
+IMajorMatchEngine (DIP — consumers depend on interface, not class)
+    ↑ implemented by
+MajorMatchEngine  ← uses → IMatchSource[] (Strategy Pattern — OCP)
+                              ├── DegreeProgramMatchSource  (weight: 10)
+                              └── AcademicEntityMatchSource (weight: 7)
+
+MajorsClient (thin coordinator — SRP)
+    ├── MajorMatchEngine (injected via useMemo)
+    ├── MAJOR_DEFINITIONS (single source of truth)
+    └── MajorCard[] → MajorUniList → MajorTypeFilter
+```
+
+**New Files**:
+
+| File | Change | SOLID Principle |
+|:---|:---|:---|
+| `src/lib/majors/interfaces/IMatchSource.ts` | **NEW** — `weight`, `sourceName`, `extractTokens()` contract | ISP |
+| `src/lib/majors/interfaces/IMajorMatchEngine.ts` | **NEW** — `score()`, `getMatches()` contract | DIP |
+| `src/lib/majors/engine/DegreeProgramMatchSource.ts` | **NEW** — Degree program name extractor, weight=10 | SRP, OCP |
+| `src/lib/majors/engine/AcademicEntityMatchSource.ts` | **NEW** — Faculty + department name extractor, weight=7 | SRP, OCP |
+| `src/lib/majors/engine/MajorMatchEngine.ts` | **NEW** — Aggregates `IMatchSource[]`, normalizes score 0–1, sorts results | SRP, OCP |
+| `src/lib/majors/MajorDefinitions.ts` | **NEW** — 19 major definitions with compound academic-phrase keywords only | SRP |
+| `src/app/majors/components/MajorCard.tsx` | **NEW** — Isolated presentational card; expand/collapse state only | SRP |
+| `src/app/majors/components/MajorUniList.tsx` | **NEW** — Progressive disclosure: 6 preview, Show More, type filter, directory link | SRP |
+| `src/app/majors/components/MajorTypeFilter.tsx` | **NEW** — Inline filter chips with live counts from pre-scored list | SRP |
+| `src/app/majors/MajorsClient.tsx` | **MODIFY** — Thin coordinator: wire engine, memoize scored map, render cards | SRP |
+| `src/lib/majors/__tests__/MajorMatchEngine.test.ts` | **NEW** — Engine accuracy: GUC/AUC match CS; medical-only scores 0 for CS | |
+| `src/lib/majors/__tests__/MajorDefinitions.test.ts` | **NEW** — Keyword hygiene: no banned standalones, unique, lowercase, no cross-major dups | |
+
+**Keyword Hygiene Rule**:
+- ❌ `"engineering"`, `"arts"`, `"معلومات"` — too generic, contaminate prose
+- ✓ `"faculty of computers"`, `"department of computer science"`, `"b.sc. computer science"` — compound, academic-specific
+
+**Performance Guarantees**:
+| Metric | Constraint |
+|:---|:---|
+| Mount-time scoring (19 majors × 124 unis × 2 sources) | < 5ms |
+| Type filter interaction | < 1ms (sync `.filter()`) |
+| Additional JS bundle | < 4 KB gzipped |
+
+**Verification**:
+- `pnpm test` — all 17 existing + new engine/definition tests pass
+- `pnpm run type-check` — zero errors
+- Manual: CS shows ≤ 40 universities; Psychology/Mechanical/Media show > 0
+
 
 **Unit Tests (Vitest)**:
 

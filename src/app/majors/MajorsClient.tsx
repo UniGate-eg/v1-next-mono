@@ -3,516 +3,116 @@
 import React, { useState, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
-import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
+import {
+  UniversityModal,
+  type UniversityData,
+} from "@/components/university/UniversityModal";
 import type { SlimSearchToken } from "@/types/university.types";
 
-interface MajorDefinition {
-  id: string;
-  name: string;
-  name_ar: string;
-  icon: string;
-  color: string;
-  keywords: string[];
-}
+// Engine
+import { MajorMatchEngine } from "@/lib/majors/engine/MajorMatchEngine";
+import { DegreeProgramMatchSource } from "@/lib/majors/engine/DegreeProgramMatchSource";
+import { AcademicEntityMatchSource } from "@/lib/majors/engine/AcademicEntityMatchSource";
+import type { ScoredUniversity } from "@/lib/majors/interfaces/IMajorMatchEngine";
 
-const majors: MajorDefinition[] = [
-  {
-    id: "cs",
-    name: "Computer Science & Software",
-    name_ar: "علوم وهندسة الحاسب والبرمجيات",
-    icon: "💻",
-    color: "#E11D48",
-    keywords: [
-      "computer",
-      "computing",
-      "software",
-      "informatics",
-      "information technology",
-      "iet",
-      "met",
-      "حاسب",
-      "معلومات",
-      "برمجيات",
-      "تكنولوجيا المعلومات",
-    ],
-  },
-  {
-    id: "ai",
-    name: "Artificial Intelligence & Data",
-    name_ar: "الذكاء الاصطناعي وعلوم البيانات",
-    icon: "🤖",
-    color: "#99582a",
-    keywords: [
-      "artificial intelligence",
-      "ai",
-      "data science",
-      "machine learning",
-      "robotics",
-      "ذكاء اصطناعي",
-      "بيانات",
-      "روبوت",
-      "تعلم الآلة",
-    ],
-  },
-  {
-    id: "industrial-eng",
-    name: "Industrial & Manufacturing Engineering",
-    name_ar: "الهندسة الصناعية وهندسة التصنيع",
-    icon: "🏭",
-    color: "#bb9457",
-    keywords: [
-      "industrial",
-      "manufacturing",
-      "production",
-      "materials",
-      "systems",
-      "صناعي",
-      "إنتاج",
-      "تصنيع",
-      "مواد",
-      "نظم",
-    ],
-  },
-  {
-    id: "business",
-    name: "Business Administration & Finance",
-    name_ar: "إدارة الأعمال والمالية والمحاسبة",
-    icon: "📊",
-    color: "#ffe6a7",
-    keywords: [
-      "business",
-      "management",
-      "commerce",
-      "finance",
-      "marketing",
-      "accounting",
-      "economics",
-      "إدارة",
-      "أعمال",
-      "تجارة",
-      "مالية",
-      "تسويق",
-      "محاسبة",
-      "اقتصاد",
-    ],
-  },
-  {
-    id: "pharmacy",
-    name: "Pharmacy & Clinical Pharmacy",
-    name_ar: "الصيدلة والصيدلة الإكلينيكية",
-    icon: "💊",
-    color: "#E11D48",
-    keywords: [
-      "pharmacy",
-      "pharmaceutical",
-      "pharma",
-      "pharmd",
-      "صيدل",
-      "دواء",
-      "صيدلة إكلينيكية",
-      "عقاقير",
-    ],
-  },
-  {
-    id: "architectural-eng",
-    name: "Architectural Engineering & Urban Design",
-    name_ar: "الهندسة المعمارية والتصميم العمراني",
-    icon: "🏗️",
-    color: "#99582a",
-    keywords: [
-      "architect",
-      "architecture",
-      "urban design",
-      "urban",
-      "building",
-      "عمارة",
-      "معمار",
-      "تخطيط عمراني",
-      "تصميم عمراني",
-    ],
-  },
-  {
-    id: "mechatronics",
-    name: "Mechatronics & Robotics Engineering",
-    name_ar: "هندسة الميكاترونكس والروبوتات",
-    icon: "⚙️",
-    color: "#bb9457",
-    keywords: [
-      "mechatronic",
-      "robotics",
-      "automation",
-      "control",
-      "embedded",
-      "ميكاترون",
-      "روبوت",
-      "تحكم آلي",
-      "أنظمة مدمجة",
-    ],
-  },
-  {
-    id: "economics",
-    name: "Economics & Political Economy",
-    name_ar: "الاقتصاد والعلوم الاقتصادية",
-    icon: "📈",
-    color: "#ffe6a7",
-    keywords: [
-      "economic",
-      "finance",
-      "econometrics",
-      "banking",
-      "اقتصاد",
-      "علوم اقتصادية",
-      "بنوك",
-    ],
-  },
-  {
-    id: "medicine",
-    name: "Medicine & Surgery (MBBCh)",
-    name_ar: "الطب البشري والجراحة",
-    icon: "🩺",
-    color: "#E11D48",
-    keywords: [
-      "medicine",
-      "medical",
-      "surgery",
-      "mbbch",
-      "clinical",
-      "طب",
-      "بشري",
-      "جراحة",
-      "إكلينيكي",
-    ],
-  },
-  {
-    id: "dentistry",
-    name: "Dentistry & Oral Surgery",
-    name_ar: "طب وجراحة الفم والأسنان",
-    icon: "🦷",
-    color: "#99582a",
-    keywords: [
-      "dental",
-      "dentistry",
-      "oral",
-      "orthodontics",
-      "أسنان",
-      "فم",
-      "جراحة الأسنان",
-    ],
-  },
-  {
-    id: "law",
-    name: "Law & Legal Studies",
-    name_ar: "الحقوق والدراسات القانونية",
-    icon: "⚖️",
-    color: "#bb9457",
-    keywords: [
-      "law",
-      "legal",
-      "justice",
-      "jurisprudence",
-      "حقوق",
-      "قانون",
-      "شريعة",
-      "دراسات قانونية",
-    ],
-  },
-  {
-    id: "political-science",
-    name: "Political Science & International Relations",
-    name_ar: "العلوم السياسية والعلاقات الدولية",
-    icon: "🏛️",
-    color: "#ffe6a7",
-    keywords: [
-      "politic",
-      "international relations",
-      "diplomacy",
-      "public policy",
-      "global affairs",
-      "سياس",
-      "علاقات دولية",
-      "دبلوماسية",
-      "سياسة عامة",
-    ],
-  },
-  {
-    id: "journalism",
-    name: "Mass Communication & Media",
-    name_ar: "الإعلام والصحافة والاتصال الجماهيري",
-    icon: "📰",
-    color: "#E11D48",
-    keywords: [
-      "journalism",
-      "mass comm",
-      "media",
-      "communication",
-      "broadcasting",
-      "إعلام",
-      "صحافة",
-      "اتصال",
-      "إذاعة وتلفزيون",
-    ],
-  },
-  {
-    id: "graphic-design",
-    name: "Graphic Design & Applied Arts",
-    name_ar: "تصميم الجرافيك والفنون التطبيقية",
-    icon: "🎨",
-    color: "#99582a",
-    keywords: [
-      "design",
-      "applied arts",
-      "fine arts",
-      "graphic",
-      "visual arts",
-      "فنون",
-      "تصميم",
-      "فنون تطبيقية",
-      "جرافيك",
-      "فنون جميلة",
-    ],
-  },
-  {
-    id: "biotechnology",
-    name: "Biotechnology & Life Sciences",
-    name_ar: "التكنولوجيا الحيوية والعلوم البيولوجية",
-    icon: "🧬",
-    color: "#bb9457",
-    keywords: [
-      "biotech",
-      "biological",
-      "biochemistry",
-      "molecular",
-      "genetics",
-      "حيوية",
-      "بيوتكنولوجي",
-      "كيمياء حيوية",
-      "وراثة",
-    ],
-  },
-  {
-    id: "nanotechnology",
-    name: "Nanotechnology & Advanced Materials",
-    name_ar: "تكنولوجيا النانو وهندسة المواد",
-    icon: "🔬",
-    color: "#ffe6a7",
-    keywords: [
-      "nano",
-      "nanotech",
-      "advanced materials",
-      "materials engineering",
-      "نانو",
-      "مواد متقدمة",
-      "هندسة المواد",
-    ],
-  },
-  {
-    id: "psychology",
-    name: "Psychology & Behavioral Sciences",
-    name_ar: "علم النفس والعلوم السلوكية والاجتماعية",
-    icon: "🧠",
-    color: "#E11D48",
-    keywords: [
-      "psycholog",
-      "behavioral",
-      "humanities",
-      "social sciences",
-      "arts",
-      "نفس",
-      "سلوك",
-      "آداب",
-      "علوم إنسانية",
-      "علوم اجتماعية",
-    ],
-  },
-  {
-    id: "mechanical-eng",
-    name: "Mechanical & Automotive Engineering",
-    name_ar: "الهندسة الميكانيكية وهندسة السيارات",
-    icon: "🔧",
-    color: "#99582a",
-    keywords: [
-      "mechanic",
-      "automotive",
-      "thermal",
-      "power",
-      "production",
-      "engineering",
-      "ems",
-      "ميكانيك",
-      "سيارات",
-      "طاقة",
-      "هندسة",
-      "إنتاج وتصميم",
-    ],
-  },
-  {
-    id: "media-eng",
-    name: "Media Engineering & Digital Media",
-    name_ar: "هندسة وتكنولوجيا الوسائط الرقمية",
-    icon: "🎬",
-    color: "#bb9457",
-    keywords: [
-      "media engineering",
-      "met",
-      "digital media",
-      "multimedia",
-      "game development",
-      "media tech",
-      "إعلام رقمي",
-      "تكنولوجيا الإعلام",
-      "هندسة الإعلام",
-      "وسائط متعددة",
-    ],
-  },
-];
+// Definitions & Components
+import { MAJOR_DEFINITIONS } from "@/lib/majors/MajorDefinitions";
+import { MajorCard } from "@/app/majors/components/MajorCard";
 
 interface MajorsClientProps {
   initialUniversities?: SlimSearchToken[];
 }
 
+/**
+ * MajorsClient — Thin Coordinator Component
+ *
+ * Responsibilities:
+ *   1. Receive SSR-preloaded universities and hydrate the search index.
+ *   2. Instantiate MajorMatchEngine (once per lifecycle via useMemo).
+ *   3. Pre-score all major/university pairs (once on mount via useMemo).
+ *   4. Filter visible majors based on the search query.
+ *   5. Render MajorCard[] — all matching logic is delegated to the engine.
+ *   6. Own the UniversityModal selection state.
+ *
+ * NOT responsible for:
+ *   - Academic matching algorithm (MajorMatchEngine)
+ *   - Major keyword definitions (MajorDefinitions.ts)
+ *   - Card expand/collapse state (MajorCard)
+ *   - University list display (MajorUniList)
+ *   - Filter chip UI (MajorTypeFilter)
+ *
+ * Performance:
+ *   - Engine is a stateless singleton, instantiated once.
+ *   - All scoring is done in a single useMemo pass (~1–2ms on mount).
+ *   - Subsequent interactions (search, expand, filter, show more) are
+ *     purely synchronous operations on pre-computed data — zero re-scoring.
+ */
 export function MajorsClient({ initialUniversities = [] }: MajorsClientProps) {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const { index: universitiesDatabase } = useUniversitySearch(initialUniversities);
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedMajors, setExpandedMajors] = useState<Record<string, boolean>>({});
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
 
-  const getLangField = (obj: any, field: string): string => {
-    if (!obj) return "";
-    if (field === "name") {
-      if (language === "ar") {
-        return obj.nameAr || obj.name_ar || obj.nameEn || obj.name || "";
-      }
-      return obj.nameEn || obj.name || obj.nameAr || obj.name_ar || "";
-    }
-    if (field === "location" || field === "city") {
-      if (language === "ar") {
-        const val = obj.city_ar || obj.city || obj.governorate_ar || obj.governorate;
-        return val || "مصر";
-      }
-      return obj.city || obj.governorate || obj.location || "Egypt";
-    }
-    if (field === "type") {
-      const typeVal = obj.type || "";
-      if (language === "ar") {
-        if (typeVal === "PUBLIC") return "حكومية";
-        if (typeVal === "PRIVATE") return "خاصة";
-        if (typeVal === "NATIONAL") return "أهلية";
-        if (typeVal === "INTERNATIONAL") return "دولية";
-        if (typeVal === "TECHNOLOGICAL") return "تكنولوجية";
-        return typeVal;
-      }
-      return typeVal;
-    }
-    if (field === "model" || field === "educationModel") {
-      const model = obj.educationModel || obj.model || "EGYPTIAN";
-      return model.charAt(0).toUpperCase() + model.slice(1).toLowerCase();
-    }
-    if (language === "ar" && obj[field + "_ar"]) return obj[field + "_ar"];
-    if (language === "ar" && obj[field + "Ar"]) return obj[field + "Ar"];
-    return obj[field + "En"] || obj[field] || "";
-  };
+  // ─── Engine Instantiation (once per component lifecycle) ───────────────────
+  // Engine is stateless — safe to memoize with empty deps.
+  const engine = useMemo(
+    () =>
+      new MajorMatchEngine([
+        new DegreeProgramMatchSource(), // weight: 10 — highest authority
+        new AcademicEntityMatchSource(), // weight: 7  — structural academic proof
+      ]),
+    [],
+  );
 
-  const isOfferingMajor = (u: any, major: MajorDefinition): boolean => {
-    const textTokens: string[] = [];
-
-    if (u.nameEn) textTokens.push(u.nameEn.toLowerCase());
-    if (u.nameAr) textTokens.push(u.nameAr.toLowerCase());
-    if (u.shortName) textTokens.push(u.shortName.toLowerCase());
-    if (u.overviewEn) textTokens.push(u.overviewEn.toLowerCase());
-    if (u.overviewAr) textTokens.push(u.overviewAr.toLowerCase());
-    if (u.description) textTokens.push(u.description.toLowerCase());
-    if (u.description_ar) textTokens.push(u.description_ar.toLowerCase());
-
-    // Faculties strings
-    if (Array.isArray(u.faculties)) {
-      u.faculties.forEach((f: any) => {
-        if (typeof f === "string") textTokens.push(f.toLowerCase());
-        else if (f?.nameEn) textTokens.push(f.nameEn.toLowerCase());
-      });
+  // ─── Pre-Score All Major/University Pairs ──────────────────────────────────
+  // Computed once when universitiesDatabase is loaded. Re-runs only if the
+  // database reference changes (practically never during a client session).
+  const scoredByMajorId = useMemo<Map<string, ScoredUniversity[]>>(() => {
+    const map = new Map<string, ScoredUniversity[]>();
+    for (const major of MAJOR_DEFINITIONS) {
+      map.set(major.id, engine.getMatches(universitiesDatabase as SlimSearchToken[], major));
     }
-    if (Array.isArray(u.faculties_ar)) {
-      u.faculties_ar.forEach((f: any) => {
-        if (typeof f === "string") textTokens.push(f.toLowerCase());
-        else if (f?.nameAr) textTokens.push(f.nameAr.toLowerCase());
-      });
-    }
+    return map;
+  }, [universitiesDatabase, engine]);
 
-    // Structured Faculties & Departments
-    if (Array.isArray(u.structured_faculties)) {
-      u.structured_faculties.forEach((f: any) => {
-        if (f.nameEn) textTokens.push(f.nameEn.toLowerCase());
-        if (f.nameAr) textTokens.push(f.nameAr.toLowerCase());
-        if (f.descriptionEn) textTokens.push(f.descriptionEn.toLowerCase());
-        if (f.descriptionAr) textTokens.push(f.descriptionAr.toLowerCase());
-        if (Array.isArray(f.departments)) {
-          f.departments.forEach((d: string) => textTokens.push(d.toLowerCase()));
-        }
-      });
-    }
-
-    // Degree Programs
-    if (Array.isArray(u.degreePrograms)) {
-      u.degreePrograms.forEach((p: any) => {
-        if (p.nameEn) textTokens.push(p.nameEn.toLowerCase());
-        if (p.nameAr) textTokens.push(p.nameAr.toLowerCase());
-      });
-    }
-
-    // Strengths
-    if (Array.isArray(u.strengthsEn)) {
-      u.strengthsEn.forEach((s: string) => textTokens.push(s.toLowerCase()));
-    }
-    if (Array.isArray(u.strengthsAr)) {
-      u.strengthsAr.forEach((s: string) => textTokens.push(s.toLowerCase()));
-    }
-
-    const corpus = textTokens.join(" ");
-
-    // Check direct name match
-    if (corpus.includes(major.name.toLowerCase())) return true;
-    if (major.name_ar && corpus.includes(major.name_ar.toLowerCase())) return true;
-
-    // Check keywords
-    if (major.keywords && major.keywords.length > 0) {
-      return major.keywords.some((kw) => corpus.includes(kw.toLowerCase()));
-    }
-
-    return false;
-  };
-
+  // ─── Major Search Filter ───────────────────────────────────────────────────
+  // Cheap string filter on the 19-item definitions array — runs on every keystroke.
   const filteredMajors = useMemo(() => {
-    if (!searchQuery.trim()) return majors;
+    if (!searchQuery.trim()) return MAJOR_DEFINITIONS;
     const q = searchQuery.toLowerCase();
-    return majors.filter(
+    return MAJOR_DEFINITIONS.filter(
       (m) =>
         m.name.toLowerCase().includes(q) ||
-        (m.name_ar && m.name_ar.includes(q)) ||
-        m.keywords.some((k) => k.toLowerCase().includes(q))
+        m.name_ar.includes(q) ||
+        m.keywords.some((k) => k.toLowerCase().includes(q)),
     );
   }, [searchQuery]);
 
-  const toggleExpand = (majorId: string) => {
-    setExpandedMajors((prev) => ({
-      ...prev,
-      [majorId]: !prev[majorId],
-    }));
-  };
-
   return (
     <div className="majors-tab-container">
-      {/* Page Mini Hero */}
+      {/* ── Page Mini Hero ─────────────────────────────────────────────────── */}
       <div className="page-hero-mini">
         <div className="gradient-orb orb-mini-1"></div>
         <div className="gradient-orb orb-mini-2"></div>
         <div className="container">
-          <h1 className="page-title animate-in">{t("Explore Majors")}</h1>
+          <h1 className="page-title animate-in">
+            {language === "ar" ? "استكشف التخصصات" : "Explore Majors"}
+          </h1>
           <p className="page-subtitle animate-in">
-            {t("Start from what you want to study — see every university that offers it.")}
+            {language === "ar"
+              ? "ابدأ من ما تريد دراسته — اكتشف كل جامعة تقدمه."
+              : "Start from what you want to study — see every university that offers it."}
           </p>
           <div className="search-container search-sm animate-in">
             <div className="search-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.35-4.35" />
               </svg>
@@ -522,8 +122,8 @@ export function MajorsClient({ initialUniversities = [] }: MajorsClientProps) {
               id="majorSearchInput"
               placeholder={
                 language === "ar"
-                  ? "ابحث عن تخصص (مثال: هندسة، طب، ذكاء اصطناعي، صيدلة)..."
-                  : "Search majors (e.g. Computer Science, Mechanical Engineering)..."
+                  ? "ابحث عن تخصص (مثال: هندسة، طب، ذكاء اصطناعي)..."
+                  : "Search majors (e.g. Computer Science, Pharmacy, Law)..."
               }
               autoComplete="off"
               value={searchQuery}
@@ -533,88 +133,39 @@ export function MajorsClient({ initialUniversities = [] }: MajorsClientProps) {
         </div>
       </div>
 
+      {/* ── Major Cards Grid ───────────────────────────────────────────────── */}
       <div className="container">
         <div className="majors-grid" id="majorsGrid">
-          {filteredMajors.map((major, index) => {
-            const offeringUnis = universitiesDatabase.filter((u: any) => isOfferingMajor(u, major));
-            const isExpanded = !!expandedMajors[major.id];
+          {filteredMajors.map((major, index) => (
+            <MajorCard
+              key={major.id}
+              major={major}
+              scoredUniversities={scoredByMajorId.get(major.id) ?? []}
+              language={language as "en" | "ar"}
+              animationDelay={(index % 6) * 50}
+              onSelectUniversity={(u) => setSelectedUniModal(u as UniversityData)}
+            />
+          ))}
 
-            return (
-              <div
-                key={major.id}
-                className={`major-card animate-in ${isExpanded ? "expanded" : ""}`}
-                data-major={major.id}
-                style={{ animationDelay: `${(index % 6) * 50}ms` }}
-              >
-                <div className="major-card-header" onClick={() => toggleExpand(major.id)}>
-                  <div className="major-card-title">
-                    <span className="major-card-icon">{major.icon}</span>
-                    <span className="major-card-name">
-                      {language === "ar" ? major.name_ar : major.name}
-                    </span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <span className="major-card-count">
-                      {offeringUnis.length}{" "}
-                      {language === "ar"
-                        ? "جامعة"
-                        : offeringUnis.length === 1
-                        ? "university"
-                        : "universities"}
-                    </span>
-                    <div className="major-card-toggle">{isExpanded ? "▲" : "▼"}</div>
-                  </div>
-                </div>
-
-                <div className="major-card-body">
-                  <div className="major-card-body-inner">
-                    {offeringUnis.length === 0 ? (
-                      <div style={{ fontSize: "13px", color: "var(--text-muted)", padding: "12px 0" }}>
-                        {language === "ar"
-                          ? "يرجى مراجعة دليل الجامعات للبرامج الأكاديمية الجديدة."
-                          : "Explore the directory for specific academic tracks."}
-                      </div>
-                    ) : (
-                      offeringUnis.map((u: any) => (
-                        <div
-                          key={u.id || u.slug}
-                          className="major-uni-item"
-                          onClick={() => setSelectedUniModal(u)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          <div className="major-uni-info">
-                            <span className="major-uni-emoji">{u.emoji || "🏛️"}</span>
-                            <div>
-                              <div className="major-uni-name" style={{ fontWeight: 600 }}>
-                                {getLangField(u, "name")}
-                              </div>
-                              <div className="major-uni-meta">
-                                📍 {getLangField(u, "location")} · 🏛️ {getLangField(u, "type")}
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            className="view-details-btn"
-                            style={{ fontSize: "12px", padding: "4px 8px" }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedUniModal(u);
-                            }}
-                          >
-                            {language === "ar" ? "التفاصيل" : "Details"} →
-                          </button>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {filteredMajors.length === 0 && searchQuery.trim() && (
+            <div
+              style={{
+                gridColumn: "1 / -1",
+                textAlign: "center",
+                padding: "40px 20px",
+                color: "var(--text-muted)",
+                fontSize: "14px",
+              }}
+            >
+              {language === "ar"
+                ? `لا توجد تخصصات تطابق "${searchQuery}". جرب كلمة أخرى.`
+                : `No majors found for "${searchQuery}". Try a different keyword.`}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* University Modal */}
+      {/* ── University Detail Modal ────────────────────────────────────────── */}
       {selectedUniModal && (
         <UniversityModal
           uni={selectedUniModal}
