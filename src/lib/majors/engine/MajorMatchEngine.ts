@@ -12,27 +12,10 @@ import type { MajorDefinition } from "@/lib/majors/MajorDefinitions";
  * Aggregates multiple IMatchSource implementations using the Strategy pattern
  * to produce a normalized confidence score for each university/major pair.
  *
- * Design invariants:
- *   - This class is CLOSED to modification (OCP). Add a new signal source
- *     by implementing IMatchSource and passing it to the constructor — zero
- *     edits here required.
- *   - This class is OPEN to extension. Any IMatchSource can be injected
- *     (DIP). No concrete source class is imported here.
- *   - This class has ONE responsibility: aggregate sources and produce scores.
- *     It does NOT define major keywords, extract tokens, or render UI.
- *
- * Scoring algorithm:
- *   For each IMatchSource S:
- *     Let T = S.extractTokens(university)                (lowercased strings)
- *     Let C = T.join(" ")                               (corpus string)
- *     For each keyword K in major.keywords:
- *       If C.includes(K) → score += S.weight, break inner loop
- *   normalizedScore = rawScore / sum(all source weights)
- *
- * Performance:
- *   All string comparisons are O(n×m) where n = corpus length, m = keyword count.
- *   For 124 universities × 19 majors × 2 sources this is ~23,560 operations.
- *   Measured at ~1–2ms on a modern device — safely done once on mount.
+ * Sorting:
+ *   1. Primary: Match Confidence Score (e.g. university matching both degree programs AND departments).
+ *   2. Secondary: Institutional Prestige & Tier (QS/THE rankings, accreditation status, structured data completeness).
+ *   3. Tertiary: Alphabetical order by name.
  */
 export class MajorMatchEngine implements IMajorMatchEngine {
   private readonly maxPossibleScore: number;
@@ -71,6 +54,16 @@ export class MajorMatchEngine implements IMajorMatchEngine {
     };
   }
 
+  private calculatePrestigeScore(u: SlimSearchToken): number {
+    let prestige = 0;
+    if (u.qsRanking && u.qsRanking !== "N/A") prestige += 3;
+    if (u.theRanking && u.theRanking !== "N/A") prestige += 2;
+    if (u.featured) prestige += 2;
+    if (Array.isArray(u.structured_faculties) && u.structured_faculties.length > 0) prestige += 1;
+    if (Array.isArray(u.degreePrograms) && u.degreePrograms.length > 0) prestige += 1;
+    return prestige;
+  }
+
   getMatches(
     universities: SlimSearchToken[],
     major: MajorDefinition,
@@ -79,6 +72,21 @@ export class MajorMatchEngine implements IMajorMatchEngine {
     return universities
       .map((u) => this.score(u, major))
       .filter((r) => r.score >= minScore)
-      .sort((a, b) => b.score - a.score); // Highest confidence first
+      .sort((a, b) => {
+        // Primary: Match confidence score
+        if (Math.abs(b.score - a.score) > 0.05) {
+          return b.score - a.score;
+        }
+        // Secondary: Prestige & Institution Ranking / Completeness
+        const prestigeB = this.calculatePrestigeScore(b.university);
+        const prestigeA = this.calculatePrestigeScore(a.university);
+        if (prestigeB !== prestigeA) {
+          return prestigeB - prestigeA;
+        }
+        // Tertiary: Alphabetical
+        const nameA = a.university.nameEn || "";
+        const nameB = b.university.nameEn || "";
+        return nameA.localeCompare(nameB);
+      });
   }
 }
