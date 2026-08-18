@@ -2,25 +2,52 @@
 
 import React, { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { universitiesDatabase } from "@/data/database";
+import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useCompareStore } from "@/stores/compareStore";
 import Link from "next/link";
 
 export default function ComparePage() {
   const { language } = useLanguage();
+  const { index: universitiesDatabase } = useUniversitySearch();
   const { selectedIds, toggle, clear } = useCompareStore();
   const [selectorSearch, setSelectorSearch] = useState("");
 
   const getLangField = (obj: any, fieldName: string) => {
     if (!obj) return "";
-    if (language === "ar" && obj[fieldName + "_ar"]) return obj[fieldName + "_ar"];
+    if (language === "ar") {
+      if (fieldName === "name") return obj.nameAr || obj.name_ar || obj.nameEn || obj.name;
+      if (fieldName === "model") return obj.educationModel || obj.model || "Egyptian";
+      if (fieldName === "location" || fieldName === "city") return obj.city_ar || obj.city || obj.governorate || "مصر";
+      if (fieldName === "qs_ranking") return obj.qsRanking || obj.qs_ranking || "مصنفة في مصر";
+      if (fieldName === "type") return obj.type || "خاصة";
+      if (fieldName === "founded") return obj.established || obj.founded || "N/A";
+      if (fieldName === "tuition") return obj.tuition_ar || obj.tuition || "حسب الكلية";
+      if (obj[fieldName + "_ar"]) return obj[fieldName + "_ar"];
+    }
+    if (fieldName === "name") return obj.nameEn || obj.name || obj.nameAr;
+    if (fieldName === "model") return obj.educationModel || obj.model || "Egyptian";
+    if (fieldName === "location" || fieldName === "city") return obj.city || obj.governorate || "Egypt";
+    if (fieldName === "qs_ranking") return obj.qsRanking || obj.qs_ranking || "Ranked in Egypt";
+    if (fieldName === "type") return obj.type || "Private";
+    if (fieldName === "founded") return obj.established || obj.founded || "N/A";
+    if (fieldName === "tuition") return obj.tuition || "Per Faculty";
+    if (obj[fieldName + "En"]) return obj[fieldName + "En"];
     return obj[fieldName] || "";
   };
 
   const getLangArray = (obj: any, fieldName: string): string[] => {
     if (!obj) return [];
-    if (language === "ar" && obj[fieldName + "_ar"]) return obj[fieldName + "_ar"];
-    return obj[fieldName] || [];
+    if (language === "ar") {
+      if (fieldName === "strengths" && Array.isArray(obj.strengthsAr) && obj.strengthsAr.length > 0) return obj.strengthsAr;
+      if (fieldName === "faculties" && Array.isArray(obj.faculties_ar) && obj.faculties_ar.length > 0) return obj.faculties_ar;
+      if (Array.isArray(obj[fieldName + "_ar"])) return obj[fieldName + "_ar"];
+    }
+    if (fieldName === "strengths" && Array.isArray(obj.strengthsEn) && obj.strengthsEn.length > 0) return obj.strengthsEn;
+    if (fieldName === "faculties" && Array.isArray(obj.faculties) && obj.faculties.length > 0) {
+      return obj.faculties.map((f: any) => typeof f === "string" ? f : f.nameEn || f.name || "").filter(Boolean);
+    }
+    if (Array.isArray(obj[fieldName])) return obj[fieldName];
+    return [];
   };
 
   const selectedUnis = selectedIds

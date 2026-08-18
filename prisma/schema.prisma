@@ -13,6 +13,7 @@ model User {
   email         String       @unique
   emailVerified Boolean      @default(false)
   image         String?
+  role          UserRole     @default(STUDENT)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   sessions      Session[]
@@ -68,40 +69,137 @@ model Verification {
 }
 
 model University {
-  id          String         @id @default(cuid())
-  slug        String         @unique
-  nameAr      String
-  nameEn      String
-  type        UniversityType
-  governorate String
-  website     String?
-  logoUrl     String?
-  description String?
-  established Int?
-  majors      Major[]
-  bookmarks   Bookmark[]
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  shortName      String?
+  emoji          String?        @default("🏛️")
+  nameEn         String
+  nameAr         String
+  educationModel EducationModel @default(EGYPTIAN)
+  type           UniversityType @default(PUBLIC)
+  governorate    String
+  city           String?
+  addressEn      String?
+  addressAr      String?
+  overviewEn     String?        @db.Text
+  overviewAr     String?        @db.Text
+  website        String?
+  logoUrl        String?
+  established    Int?
+  qsRanking      String?
+  theRanking     String?
+  phones         String[]       @default([])
+  emails         String[]       @default([])
+  socialLinks    Json?
+  strengthsEn    String[]       @default([])
+  strengthsAr    String[]       @default([])
+  publishStatus  PublishStatus  @default(PUBLISHED)
 
+  // Relationships
+  accreditations Accreditation[]
+  faculties      Faculty[]
+  degreePrograms DegreeProgram[]
+  bookmarks      Bookmark[]
+  suggestions    Suggestion[]
+  auditLogs      AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([educationModel])
   @@index([type])
   @@index([governorate])
+  @@index([publishStatus])
   @@map("universities")
 }
 
-model Major {
-  id           String     @id @default(cuid())
-  slug         String
-  nameAr       String
-  nameEn       String
-  universityId String
-  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
-  duration     Int        // duration in years
-  degree       String     // e.g. "B.Sc.", "B.A.", "Pharm.D."
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+model Faculty {
+  id            String   @id @default(cuid())
+  universityId  String
+  nameEn        String
+  nameAr        String
+  descriptionEn String?  @db.Text
+  descriptionAr String?  @db.Text
+  deanName      String?
+  departments   String[] @default([])
+
+  // Relationships
+  university     University      @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  degreePrograms DegreeProgram[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([universityId])
+  @@map("faculties")
+}
+
+model DegreeProgram {
+  id                  String   @id @default(cuid())
+  slug                String
+  universityId        String
+  facultyId           String?
+  nameEn              String
+  nameAr              String
+  degreeType          String
+  durationYears       Int      @default(4)
+  studyLanguage       String   @default("English")
+  tuitionEgpPerYear   Int?
+  tuitionUsdPerYear   Int?
+  careerOpportunities String[] @default([])
+  dualDegreePartner   String?
+
+  // Relationships
+  university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  faculty    Faculty?   @relation(fields: [facultyId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([slug, universityId])
-  @@map("majors")
+  @@index([universityId])
+  @@index([facultyId])
+  @@index([tuitionEgpPerYear])
+  @@map("degree_programs")
+}
+
+model Accreditation {
+  id           String  @id @default(cuid())
+  universityId String
+  name         String
+  fullName     String?
+
+  // Relationships
+  university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([universityId])
+  @@map("accreditations")
+}
+
+model AuditLog {
+  id           String  @id @default(cuid())
+  universityId String?
+  actorId      String
+  actorEmail   String?
+  action       String
+  entityType   String
+  entityId     String
+  beforeState  Json?
+  afterState   Json?
+  ipAddress    String?
+
+  // Relationships
+  university University? @relation(fields: [universityId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([actorId])
+  @@index([universityId])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
 }
 
 model Bookmark {
@@ -120,16 +218,32 @@ model Bookmark {
 }
 
 model Suggestion {
-  id        String           @id @default(cuid())
-  userId    String
-  content   String
-  type      SuggestionType
-  status    SuggestionStatus @default(PENDING)
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  id             String           @id @default(cuid())
+  userId         String?
+  universityId   String
+  suggestedField String
+  suggestedValue String           @db.Text
+  sourceUrl      String?
+  notes          String?          @db.Text
+  status         SuggestionStatus @default(PENDING)
+  adminNotes     String?          @db.Text
+
+  user       User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("suggestions")
+}
+
+enum EducationModel {
+  AMERICAN
+  GERMAN
+  BRITISH
+  EGYPTIAN
+  FRENCH
+  CANADIAN
 }
 
 enum UniversityType {
@@ -137,6 +251,19 @@ enum UniversityType {
   PRIVATE
   NATIONAL
   INTERNATIONAL
+}
+
+enum PublishStatus {
+  PUBLISHED
+  DRAFT
+  ARCHIVED
+}
+
+enum UserRole {
+  STUDENT
+  EDITOR
+  ADMIN
+  SUPER_ADMIN
 }
 
 enum AppStatus {
@@ -147,15 +274,8 @@ enum AppStatus {
   REJECTED
 }
 
-enum SuggestionType {
-  DATA_CORRECTION
-  MISSING_INFO
-  NEW_UNIVERSITY
-  GENERAL
-}
-
 enum SuggestionStatus {
   PENDING
-  REVIEWED
-  RESOLVED
+  MERGED
+  REJECTED
 }

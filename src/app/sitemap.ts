@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-import { UniversityRepository } from "@/server/repositories/UniversityRepository";
-import { UniversityService } from "@/server/services/UniversityService";
+import { universityRepository } from "@/lib/di";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://unicompass.eg";
@@ -27,11 +26,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const repository = new UniversityRepository();
-    const service = new UniversityService(repository);
-    const result = await service.getUniversities({ page: 1, limit: 100 });
+    const result = await universityRepository.findMany({}, 1, 100);
 
-    const universityRoutes: MetadataRoute.Sitemap = result.data.map((uni) => ({
+    const universityRoutes: MetadataRoute.Sitemap = result.data.map((uni: any) => ({
       url: `${baseUrl}/universities/${uni.slug}`,
       lastModified: new Date(),
       changeFrequency: "weekly",

@@ -14,10 +14,11 @@ import { MessageSquarePlus } from "lucide-react";
 import { SuggestionForm } from "@/components/forms/SuggestionForm";
 
 interface SuggestionDialogProps {
+  universityId: string;
   universityName?: string;
 }
 
-export function SuggestionDialog({ universityName }: SuggestionDialogProps) {
+export function SuggestionDialog({ universityId, universityName }: SuggestionDialogProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -41,6 +42,7 @@ export function SuggestionDialog({ universityName }: SuggestionDialogProps) {
 
         <div className="pt-2">
           <SuggestionForm
+            universityId={universityId}
             universityName={universityName}
             onSuccess={() => setOpen(false)}
           />

@@ -1,20 +1,45 @@
-import type { ISuggestionRepository, SuggestionRecord } from "@/server/repositories/interfaces/ISuggestionRepository";
-import { CreateSuggestionSchema } from "@/schemas/suggestion.schema";
+import { suggestionRepository, auditLogRepository } from "../../lib/di";
+import { CreateSuggestionInput } from "../../schemas/suggestion.schema";
+import { SuggestionDTO } from "../../types/audit.types";
 
 export class SuggestionService {
-  constructor(private readonly suggestionRepo: ISuggestionRepository) {}
+  static async createSuggestion(data: CreateSuggestionInput): Promise<SuggestionDTO> {
+    const suggestion = await suggestionRepository.create(data);
+    
+    // We log the suggestion creation, but since it's anonymous/public, actorId is system or the user's email
+    await auditLogRepository.create({
+      universityId: data.universityId,
+      actorId: data.suggestedByEmail || "ANONYMOUS",
+      action: "CREATE_SUGGESTION",
+      entityType: "Suggestion",
+      entityId: suggestion.id,
+      afterState: data,
+    });
 
-  async submitSuggestion(
-    userId: string,
-    rawInput: unknown
-  ): Promise<SuggestionRecord> {
-    if (!userId) throw new Error("User ID is required to submit a suggestion");
-    const input = CreateSuggestionSchema.parse(rawInput);
-    return this.suggestionRepo.create(userId, input.content, input.type);
+    return suggestion;
   }
 
-  async getUserSuggestions(userId: string): Promise<SuggestionRecord[]> {
-    if (!userId) throw new Error("User ID is required");
-    return this.suggestionRepo.findByUser(userId);
+  static async reviewSuggestion(
+    id: string, 
+    status: "MERGED" | "REJECTED", 
+    reviewerId: string, 
+    feedback?: string
+  ): Promise<SuggestionDTO> {
+    const original = await suggestionRepository.findById(id);
+    if (!original) throw new Error("Suggestion not found");
+
+    const updated = await suggestionRepository.updateStatus(id, status, reviewerId, feedback);
+
+    await auditLogRepository.create({
+      universityId: (updated as any).universityId,
+      actorId: reviewerId,
+      action: status === "MERGED" ? "APPROVE_SUGGESTION" : "REJECT_SUGGESTION",
+      entityType: "Suggestion",
+      entityId: id,
+      beforeState: original,
+      afterState: updated,
+    });
+
+    return updated;
   }
 }

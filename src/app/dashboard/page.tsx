@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { universitiesDatabase } from "@/data/database";
+import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { NoteDialog } from "@/components/dashboard/NoteDialog";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
@@ -25,6 +25,7 @@ const colToStatusMap: Record<string, AppStatus> = {
 
 export default function DashboardPage() {
   const { language } = useLanguage();
+  const { index: universitiesDatabase } = useUniversitySearch();
   const { bookmarks, updateBookmark, deleteBookmark, isLoading } = useBookmarks();
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
 

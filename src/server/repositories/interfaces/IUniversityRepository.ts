@@ -1,21 +1,16 @@
-import type { University, UniversityFilters } from "@/schemas/university.schema";
+import { CreateUniversityInput, UpdateUniversityInput } from "../../../schemas/university.schema";
+import { UniversityDTO, SlimSearchToken, UniversityFilters } from "../../../types/university.types";
 
-export type UniversityWithMajors = University & {
-  majors: {
-    id: string;
-    slug: string;
-    nameAr: string;
-    nameEn: string;
-    universityId: string;
-    duration: number;
-    degree: string;
-  }[];
-};
+export interface IUniversityReader {
+  findMany(filters?: UniversityFilters, page?: number, limit?: number): Promise<{ data: UniversityDTO[], total: number }>;
+  findBySlug(slug: string): Promise<UniversityDTO | null>;
+  findById(id: string): Promise<UniversityDTO | null>;
+  findForSearch(): Promise<SlimSearchToken[]>;
+}
 
-export interface IUniversityRepository {
-  findAll(filters: UniversityFilters): Promise<UniversityWithMajors[]>;
-  findBySlug(slug: string): Promise<UniversityWithMajors | null>;
-  findByIds(ids: string[]): Promise<UniversityWithMajors[]>;
-  count(filters: UniversityFilters): Promise<number>;
-  getFeatured(): Promise<UniversityWithMajors[]>;
+export interface IUniversityWriter {
+  create(data: CreateUniversityInput): Promise<UniversityDTO>;
+  update(id: string, data: UpdateUniversityInput): Promise<UniversityDTO>;
+  archive(id: string): Promise<void>;
+  publish(id: string): Promise<void>;
 }

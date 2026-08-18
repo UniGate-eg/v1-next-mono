@@ -38,18 +38,34 @@ export function UniversityCard({
     if (language === "ar") {
       if (uniAny[fieldName + "_ar"]) return uniAny[fieldName + "_ar"];
       if (uniAny[fieldName + "Ar"]) return uniAny[fieldName + "Ar"];
+      if (fieldName === "description" || fieldName === "overview") {
+        return uniAny.overviewAr || uniAny.overview_ar || uniAny.description_ar || uniAny.description || uniAny.overviewEn;
+      }
+      if (fieldName === "location") return uniAny.city_ar || uniAny.city || uniAny.governorate || "مصر";
+      if (fieldName === "name") return uniAny.nameAr || uniAny.name_ar || uniAny.nameEn || uniAny.name;
     }
     if (uniAny[fieldName + "En"]) return uniAny[fieldName + "En"];
+    if (fieldName === "description" || fieldName === "overview") {
+      return uniAny.overviewEn || uniAny.overview_en || uniAny.description || uniAny.overviewAr;
+    }
+    if (fieldName === "location") return uniAny.city || uniAny.governorate || "Egypt";
+    if (fieldName === "name") return uniAny.nameEn || uniAny.name || uniAny.nameAr;
     return uniAny[fieldName] || "";
   };
 
   const getLangArray = (fieldName: string): string[] => {
     const uniAny = university as any;
     if (language === "ar") {
-      if (Array.isArray(uniAny[fieldName + "_ar"])) return uniAny[fieldName + "_ar"];
-      if (Array.isArray(uniAny[fieldName + "Ar"])) return uniAny[fieldName + "Ar"];
+      if (Array.isArray(uniAny[fieldName + "_ar"]) && uniAny[fieldName + "_ar"].length > 0) return uniAny[fieldName + "_ar"];
+      if (Array.isArray(uniAny[fieldName + "Ar"]) && uniAny[fieldName + "Ar"].length > 0) return uniAny[fieldName + "Ar"];
+      if (fieldName === "strengths" && Array.isArray(uniAny.strengthsAr) && uniAny.strengthsAr.length > 0) return uniAny.strengthsAr;
+      if (fieldName === "faculties" && Array.isArray(uniAny.faculties_ar) && uniAny.faculties_ar.length > 0) return uniAny.faculties_ar;
     }
-    if (Array.isArray(uniAny[fieldName + "En"])) return uniAny[fieldName + "En"];
+    if (Array.isArray(uniAny[fieldName + "En"]) && uniAny[fieldName + "En"].length > 0) return uniAny[fieldName + "En"];
+    if (fieldName === "strengths" && Array.isArray(uniAny.strengthsEn) && uniAny.strengthsEn.length > 0) return uniAny.strengthsEn;
+    if (fieldName === "faculties" && Array.isArray(uniAny.faculties) && uniAny.faculties.length > 0) {
+      return uniAny.faculties.map((item: any) => typeof item === "string" ? item : item.nameEn || item.name || "").filter(Boolean);
+    }
     if (Array.isArray(uniAny[fieldName])) {
       return uniAny[fieldName]
         .map((item: any) =>

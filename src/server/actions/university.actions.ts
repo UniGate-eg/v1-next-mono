@@ -1,11 +1,7 @@
 "use server";
 
-import { UniversityRepository } from "@/server/repositories/UniversityRepository";
-import { UniversityService } from "@/server/services/UniversityService";
+import { publicUniversityService as universityService } from "@/lib/di";
 import { UniversityFiltersSchema } from "@/schemas/university.schema";
-
-const universityRepository = new UniversityRepository();
-const universityService = new UniversityService(universityRepository);
 
 export async function getUniversitiesAction(rawFilters: unknown = {}) {
   try {

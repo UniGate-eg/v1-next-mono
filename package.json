@@ -10,10 +10,13 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:seed": "tsx prisma/etl/seed-deep.ts",
+    "db:seed-deep": "tsx prisma/etl/seed-deep.ts",
+    "generate-index": "tsx scripts/generate-search-index.ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
@@ -32,6 +35,7 @@
     "better-auth": "^1.1.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
     "lucide-react": "^0.475.0",
     "next": "^15.1.7",
     "pg": "^8.13.3",

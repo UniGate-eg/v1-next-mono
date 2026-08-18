@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    DATABASE_URL: z.string().min(1),
+    DATABASE_URL: z.string().url(),
     ACCELERATE_URL: z.string().optional(),
     BETTER_AUTH_SECRET: z.string().min(16).default("unicompass_development_secret_key_32bytes_minimum!"),
     BETTER_AUTH_URL: z.string().url().default("http://localhost:3000"),

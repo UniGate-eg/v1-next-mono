@@ -1,5 +1,5 @@
 import type { AppStatus } from "@/schemas/bookmark.schema";
-import type { UniversityWithMajors } from "./IUniversityRepository";
+import type { UniversityDTO } from "@/types/university.types";
 
 export type BookmarkWithUniversity = {
   id: string;
@@ -9,7 +9,7 @@ export type BookmarkWithUniversity = {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
-  university: UniversityWithMajors;
+  university: UniversityDTO;
 };
 
 export interface IBookmarkRepository {

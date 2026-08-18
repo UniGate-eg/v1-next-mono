@@ -48,33 +48,51 @@ export const universitiesDatabase = [
             "بنية تحتية حديثة للحرم الجامعي مع مرافق متطورة"
         ],
         "faculties": [
-            "Faculty of Engineering and Materials Science",
+            "Faculty of Information Engineering and Technology (IET)",
+            "Faculty of Media Engineering and Technology (MET)",
+            "Faculty of Engineering and Materials Science (EMS)",
             "Faculty of Management Technology",
+            "Faculty of Pharmacy and Biotechnology",
             "Faculty of Applied Sciences and Arts",
-            "Faculty of Dentistry"
+            "Faculty of Law and Legal Studies",
+            "Faculty of Postgraduate Studies and Scientific Research"
         ],
         "faculties_ar": [
-            "كلية الهندسة وعلوم المواد",
-            "كلية إدارة التكنولوجيا",
+            "كلية هندسة وتكنولوجيا المعلومات (IET)",
+            "كلية هندسة وتكنولوجيا الإعلام (MET)",
+            "كلية الهندسة وعلوم المواد (EMS)",
+            "كلية إدارة وتكنولوجيا الأعمال",
+            "كلية الصيدلة والتكنولوجيا الحيوية",
             "كلية العلوم والفنون التطبيقية",
-            "كلية طب الأسنان"
+            "كلية الحقوق والدراسات القانونية",
+            "كلية الدراسات العليا والبحث العلمي"
         ],
         "majors": [
+            "B.Sc. in Networks Engineering",
+            "B.Sc. in Communications Engineering",
+            "B.Sc. in Electronics Engineering",
+            "B.Sc. in Computer Science & Engineering",
+            "B.Sc. in Digital Media Engineering",
             "B.Sc. in Civil Engineering",
-            "B.Sc. in Computer Engineering",
-            "B.Sc. in Architecture and Urban Design",
-            "B.Sc. in Information Engineering and Technology",
-            "B.Sc. in Business Administration",
-            "B.Sc. in Economics",
-            "B.Sc. in Pharmacy and Biotechnology",
-            "B.Sc. in Media Engineering Technology",
+            "B.Sc. in Architecture & Urban Design",
+            "B.Sc. in Materials Engineering",
             "B.Sc. in Mechatronics Engineering",
-            "M.Sc. in Business Administration (MBA)",
+            "B.Sc. in Design and Production Engineering",
+            "B.Sc. in Business Informatics",
+            "B.Sc. in General Management",
+            "B.Sc. in Marketing",
+            "B.Sc. in Finance & Accounting",
+            "B.Sc. in Strategic Management",
+            "PharmD in Clinical Pharmacy",
+            "B.Sc. in Biotechnology",
+            "B.Sc. in Graphic Design",
+            "B.Sc. in Media Design",
+            "B.Sc. in Product Design",
+            "LL.B. in Comparative Law & Legal Studies",
             "M.Sc. in Computer Science",
-            "M.Sc. in Architecture",
-            "M.Sc. in Pharmacy",
-            "Ph.D. in Engineering",
-            "Ph.D. in Business Administration"
+            "M.Sc. in Engineering",
+            "MBA in Business Administration",
+            "Ph.D. in Engineering & Sciences"
         ],
         "accentGradient": "linear-gradient(135deg, #00F5D4, #7C3AED)",
         "featured": true,
@@ -102,52 +120,110 @@ export const universitiesDatabase = [
             "ABET (Accreditation Board for Engineering and Technology)",
             "RIBA (Royal Institute of British Architects)",
             "AACSB (Association to Advance Collegiate Schools of Business)",
-            "NAQAAE (National Authority for Quality Assurance and Accreditation of Education)"
+            "NAQAAE (National Authority for Quality Assurance and Accreditation of Education)",
+            "ACQUIN (Accreditation, Certification and Quality Assurance Institute, Germany)"
         ],
         "structured_faculties": [
             {
-                "name_en": "Faculty of Engineering and Materials Science",
+                "name_en": "Faculty of Information Engineering and Technology (IET)",
+                "name_ar": "كلية هندسة وتكنولوجيا المعلومات",
+                "description_en": "Offers premier German-standard programs in communications, electronics, and network engineering.",
+                "description_ar": "تقدم برامج رائدة بالمعايير الألمانية في هندسة الاتصالات، الإلكترونيات، وهندسة الشبكات.",
+                "dean_name": "Prof. Dr. Hani Amin",
+                "departments": [
+                    "Networks Engineering",
+                    "Communications Engineering",
+                    "Electronics Engineering"
+                ]
+            },
+            {
+                "name_en": "Faculty of Media Engineering and Technology (MET)",
+                "name_ar": "كلية هندسة وتكنولوجيا الإعلام",
+                "description_en": "Focuses on computer science, software engineering, and digital media technologies.",
+                "description_ar": "تركز على علوم وهندسة الحاسب وتطوير البرمجيات وتكنولوجيا الوسائط الرقمية.",
+                "dean_name": "Prof. Dr. Slim Abdennadher",
+                "departments": [
+                    "Computer Science & Engineering",
+                    "Digital Media Engineering & Technology"
+                ]
+            },
+            {
+                "name_en": "Faculty of Engineering and Materials Science (EMS)",
                 "name_ar": "كلية الهندسة وعلوم المواد",
-                "description_en": "Offers accredited engineering programs with a focus on innovation, research, and practical training. Programs include Civil Engineering, Computer Engineering, Architecture and Urban Design, and Information Engineering and Technology.",
-                "description_ar": "تقدم برامج هندسية معتمدة مع التركيز على الابتكار والبحث والتدريب العملي. تشمل البرامج الهندسة المدنية، الهندسة الحاسوبية، العمارة والتصميم الحضري، وهندسة المعلومات والتكنولوجيا.",
+                "description_en": "Offers accredited civil, architecture, mechatronics, and design & production engineering programs.",
+                "description_ar": "تقدم برامج معتمدة في الهندسة المدنية، العمارة، الميكاترونكس، والتصميم والإنتاج.",
                 "dean_name": "Prof. Dr. Ashraf El-Bayoumi",
                 "departments": [
                     "Civil Engineering",
-                    "Computer Engineering",
                     "Architecture and Urban Design",
-                    "Information Engineering and Technology",
-                    "Mechatronics Engineering"
+                    "Materials Engineering",
+                    "Mechatronics Engineering",
+                    "Design and Production Engineering"
                 ]
             },
             {
                 "name_en": "Faculty of Management Technology",
-                "name_ar": "كلية إدارة التكنولوجيا",
-                "description_en": "Provides business and management education with a focus on technology, entrepreneurship, and global perspectives. Programs include Business Administration, Economics, Accounting, and Finance.",
-                "description_ar": "تقدم تعليمًا في إدارة الأعمال مع التركيز على التكنولوجيا، ريادة الأعمال، والمنظورات العالمية. تشمل البرامج إدارة الأعمال، الاقتصاد، المحاسبة، والمالية.",
+                "name_ar": "كلية تكنولوجيا الإدارة",
+                "description_en": "Provides comprehensive business administration, informatics, and finance education.",
+                "description_ar": "تقدم تعليماً شاملاً في إدارة الأعمال، نظم المعلومات الإدارية، والمالية والمحاسبة.",
                 "dean_name": "Prof. Dr. Sherwat Elwan",
-                "departments": []
+                "departments": [
+                    "General Management",
+                    "Business Informatics",
+                    "Technology-based Management",
+                    "Marketing",
+                    "Finance & Accounting",
+                    "Strategic Management"
+                ]
+            },
+            {
+                "name_en": "Faculty of Pharmacy and Biotechnology",
+                "name_ar": "كلية الصيدلة والتكنولوجيا الحيوية",
+                "description_en": "Offers clinical pharmacy and advanced biotechnology research programs.",
+                "description_ar": "تقدم برامج الصيدلة الإكلينيكية وأبحاث التكنولوجيا الحيوية المتقدمة.",
+                "dean_name": "Prof. Dr. Mohamed El-Azizi",
+                "departments": [
+                    "PharmD Clinical Pharmacy",
+                    "Biotechnology Program",
+                    "Pharmaceutical Chemistry",
+                    "Pharmacology & Toxicology"
+                ]
             },
             {
                 "name_en": "Faculty of Applied Sciences and Arts",
                 "name_ar": "كلية العلوم والفنون التطبيقية",
-                "description_en": "Offers interdisciplinary programs combining science, arts, and applied fields. Programs include Pharmacy and Biotechnology, Media Engineering Technology, and German Language and Culture.",
-                "description_ar": "تقدم برامج متعددة التخصصات تجمع بين العلوم والفنون والمجالات التطبيقية. تشمل البرامج الصيدلة والتكنولوجيا الحيوية، هندسة تكنولوجيا الإعلام، واللغة الألمانية والثقافة.",
-                "dean_name": "Prof. Dr. Tarek El-Bialy",
+                "description_en": "Combines creative design disciplines including graphic, media, and product design.",
+                "description_ar": "تجمع بين تخصصات التصميم الإبداعي مثل الجرافيك، تصميم الوسائط، وتصميم المنتجات.",
+                "dean_name": "Prof. Dr. Sabine Schiller",
                 "departments": [
-                    "Pharmacy and Biotechnology",
-                    "Media Engineering Technology",
-                    "German Language and Culture",
-                    "Applied Arts"
+                    "Graphic Design",
+                    "Media Design",
+                    "Product Design"
                 ]
             },
             {
-                "name_en": "Faculty of Dentistry",
-                "name_ar": "كلية طب الأسنان",
-                "description_en": "Provides comprehensive dental education with modern facilities and clinical training. The faculty is affiliated with the Dental Institute for Specialized Knowledge (DISK).",
-                "description_ar": "تقدم تعليمًا شاملاً في طب الأسنان مع مرافق حديثة وتدريب سريري. الكلية affiliated مع معهد الأسنان للمعرفة المتخصصة (DISK).",
-                "dean_name": "Prof. Dr. Amr El-Bialy",
+                "name_en": "Faculty of Law and Legal Studies",
+                "name_ar": "كلية الحقوق والدراسات القانونية",
+                "description_en": "Provides comparative legal studies with an emphasis on international and commercial law.",
+                "description_ar": "تقدم دراسات قانونية مقارنة مع التركيز على القانون الدولي والتجاري.",
+                "dean_name": "Prof. Dr. Michael Traest",
                 "departments": [
-                    "Dentistry"
+                    "Comparative Law",
+                    "International Commercial Law",
+                    "Legal Studies"
+                ]
+            },
+            {
+                "name_en": "Faculty of Postgraduate Studies and Scientific Research",
+                "name_ar": "كلية الدراسات العليا والبحث العلمي",
+                "description_en": "Supervises Master's, MBA, and Ph.D. degree programs in collaboration with German partner universities.",
+                "description_ar": "تشرف على برامج الماجستير والماجستير المهني والدكتوراه بالتعاون مع الجامعات الألمانية الشريكة.",
+                "dean_name": "Prof. Dr. Hoda Mostafa",
+                "departments": [
+                    "Master of Business Administration (MBA)",
+                    "M.Sc. in Computer Science",
+                    "M.Sc. in Engineering",
+                    "Ph.D. Programs"
                 ]
             }
         ],
