@@ -7,7 +7,7 @@ import { SignUpSchema, type SignUpInput } from "@/schemas/auth.schema";
 import { signUp } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Eye, EyeOff, UserPlus, ArrowRight, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, UserPlus, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -29,7 +29,6 @@ export function RegisterForm() {
 
   const passwordVal = watch("password", "");
 
-  // Apple-grade dynamic password strength indicator
   const calculateStrength = (pwd: string) => {
     if (!pwd) return 0;
     let score = 0;
@@ -87,10 +86,10 @@ export function RegisterForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Full Name */}
-      <div>
-        <label className="block text-xs font-medium text-slate-300 mb-1.5">
+      <div className="space-y-2">
+        <label className="block text-xs font-medium text-slate-300 tracking-wide">
           {language === "ar" ? "الاسم الكامل" : "Full Name"}
         </label>
         <input
@@ -99,16 +98,16 @@ export function RegisterForm() {
           placeholder={language === "ar" ? "مثال: أحمد محمود" : "e.g. Ahmed Mahmoud"}
           {...register("name")}
           disabled={loading}
-          className="w-full h-11 px-3.5 rounded-xl bg-slate-900/80 border border-purple-500/25 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/25 transition-all"
+          className="w-full h-12 px-4 rounded-xl bg-[#0e1027]/90 border border-purple-500/20 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 transition-all duration-200"
         />
         {errors.name && (
-          <p className="mt-1 text-xs text-rose-400">{errors.name.message}</p>
+          <p className="text-xs text-rose-400 font-medium pl-1">{errors.name.message}</p>
         )}
       </div>
 
       {/* Email Address */}
-      <div>
-        <label className="block text-xs font-medium text-slate-300 mb-1.5">
+      <div className="space-y-2">
+        <label className="block text-xs font-medium text-slate-300 tracking-wide">
           {language === "ar" ? "البريد الإلكتروني" : "Email Address"}
         </label>
         <input
@@ -117,16 +116,16 @@ export function RegisterForm() {
           placeholder={language === "ar" ? "student@example.com" : "student@example.com"}
           {...register("email")}
           disabled={loading}
-          className="w-full h-11 px-3.5 rounded-xl bg-slate-900/80 border border-purple-500/25 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/25 transition-all"
+          className="w-full h-12 px-4 rounded-xl bg-[#0e1027]/90 border border-purple-500/20 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 transition-all duration-200"
         />
         {errors.email && (
-          <p className="mt-1 text-xs text-rose-400">{errors.email.message}</p>
+          <p className="text-xs text-rose-400 font-medium pl-1">{errors.email.message}</p>
         )}
       </div>
 
       {/* Password */}
-      <div>
-        <label className="block text-xs font-medium text-slate-300 mb-1.5">
+      <div className="space-y-2">
+        <label className="block text-xs font-medium text-slate-300 tracking-wide">
           {language === "ar" ? "كلمة المرور (8 أحرف على الأقل)" : "Password (min 8 characters)"}
         </label>
         <div className="relative">
@@ -136,23 +135,23 @@ export function RegisterForm() {
             placeholder="••••••••"
             {...register("password")}
             disabled={loading}
-            className="w-full h-11 px-3.5 pr-10 rounded-xl bg-slate-900/80 border border-purple-500/25 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/25 transition-all"
+            className="w-full h-12 px-4 pr-11 rounded-xl bg-[#0e1027]/90 border border-purple-500/20 text-white placeholder:text-slate-500 text-sm focus:outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 transition-all duration-200"
           />
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors p-1"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors p-1"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
         {errors.password && (
-          <p className="mt-1 text-xs text-rose-400">{errors.password.message}</p>
+          <p className="text-xs text-rose-400 font-medium pl-1">{errors.password.message}</p>
         )}
 
-        {/* Dynamic Password Strength Bars */}
+        {/* Password Strength Indicator */}
         {passwordVal.length > 0 && (
-          <div className="mt-2 space-y-1">
+          <div className="mt-2 space-y-1.5 pt-1">
             <div className="flex gap-1.5">
               {[1, 2, 3, 4].map((step) => (
                 <div
@@ -171,14 +170,14 @@ export function RegisterForm() {
                 />
               ))}
             </div>
-            <p className="text-[10px] text-slate-400">
+            <p className="text-[11px] text-slate-400">
               {strength <= 1
                 ? (language === "ar" ? "ضعيفة — أضف أرقاماً ورموزاً" : "Weak — add symbols and numbers")
                 : strength <= 2
                 ? (language === "ar" ? "متوسطة" : "Fair")
                 : strength <= 3
                 ? (language === "ar" ? "جيدة" : "Good")
-                : (language === "ar" ? "قوية جداً" : "Strong")}
+                : (language === "ar" ? "قوية جداً" : "Strong password")}
             </p>
           </div>
         )}
@@ -191,9 +190,9 @@ export function RegisterForm() {
             type="checkbox"
             checked={acceptTerms}
             onChange={(e) => setAcceptTerms(e.target.checked)}
-            className="mt-0.5 w-4 h-4 rounded border-purple-500/40 bg-slate-900/80 text-purple-600 focus:ring-purple-500/30"
+            className="mt-0.5 w-4 h-4 rounded border-purple-500/40 bg-slate-900 text-purple-600 focus:ring-purple-500/30"
           />
-          <span className="text-xs text-slate-300 leading-tight">
+          <span className="text-xs text-slate-300 leading-normal">
             {language === "ar" ? (
               <>
                 أوافق على <span className="text-purple-400 hover:underline">شروط الخدمة</span> و{" "}
@@ -213,7 +212,7 @@ export function RegisterForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full h-11 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold text-sm shadow-lg shadow-purple-600/30 hover:shadow-purple-600/50 flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed group cursor-pointer"
+        className="w-full h-12 rounded-xl bg-gradient-to-r from-purple-600 via-purple-500 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold text-sm shadow-lg shadow-purple-600/25 hover:shadow-purple-600/40 flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed group cursor-pointer mt-2"
       >
         {loading ? (
           <>
@@ -222,9 +221,9 @@ export function RegisterForm() {
           </>
         ) : (
           <>
-            <UserPlus className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-            <span>{language === "ar" ? "إنشاء حساب طالب مجاني" : "Create Free Student Account"}</span>
-            <ArrowRight className="w-4 h-4 opacity-70 group-hover:translate-x-0.5 transition-transform" />
+            <UserPlus className="w-4 h-4" />
+            <span>{language === "ar" ? "إنشاء حساب طالب مجاني" : "Create Free Account"}</span>
+            <ArrowRight className="w-4 h-4 opacity-80 group-hover:translate-x-1 transition-transform" />
           </>
         )}
       </button>
