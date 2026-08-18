@@ -43,13 +43,7 @@ function getUniTypeLabel(u: SlimSearchToken, language: "en" | "ar"): string {
 }
 
 /**
- * MajorUniList — Progressive Disclosure University List
- *
- * Displays a ranked list of universities offering a major with:
- *   1. Type filter tabs (All, Public, Private, National, etc.)
- *   2. Fast inline search bar for majors with > 8 institutions
- *   3. Stepwise pagination (Initial 6 -> +10 increments)
- *   4. "View in Directory" deep-link
+ * MajorUniList — Progressive Disclosure University List (Dark Glassmorphism)
  */
 export function MajorUniList({
   scoredUniversities,
@@ -61,8 +55,9 @@ export function MajorUniList({
   const [activeFilter, setActiveFilter] = useState<TypeFilter>("ALL");
   const [filterQuery, setFilterQuery] = useState("");
   const [visibleLimit, setVisibleLimit] = useState(INITIAL_PREVIEW_COUNT);
+  const [hoveredUniId, setHoveredUniId] = useState<string | null>(null);
 
-  // 1. Filter by University Type (Public / Private / National)
+  // 1. Filter by University Type
   const typeFiltered = useMemo(() => {
     if (activeFilter === "ALL") return scoredUniversities;
     return scoredUniversities.filter(
@@ -70,14 +65,14 @@ export function MajorUniList({
     );
   }, [scoredUniversities, activeFilter]);
 
-  // 2. Filter by Inline Sub-Search (Name, City, Governorate, or ShortCode)
+  // 2. Filter by Inline Sub-Search
   const searchFiltered = useMemo(() => {
     if (!filterQuery.trim()) return typeFiltered;
     const q = filterQuery.toLowerCase().trim();
     return typeFiltered.filter((r) => {
       const u = r.university;
       const nameEn = (u.nameEn || "").toLowerCase();
-      const nameAr = (u.nameAr || "");
+      const nameAr = u.nameAr || "";
       const shortName = (u.shortName || "").toLowerCase();
       const city = (u.city || "").toLowerCase();
       const gov = (u.governorate || "").toLowerCase();
@@ -95,7 +90,6 @@ export function MajorUniList({
   const visibleScored = searchFiltered.slice(0, visibleLimit);
   const remainingCount = Math.max(0, total - visibleLimit);
 
-  // Reset pagination when type filter or search query changes
   const handleFilterChange = (filter: TypeFilter) => {
     setActiveFilter(filter);
     setVisibleLimit(INITIAL_PREVIEW_COUNT);
@@ -130,7 +124,7 @@ export function MajorUniList({
 
       {/* Inline Sub-Search for High-Volume Majors (> 8 results) */}
       {scoredUniversities.length > 8 && (
-        <div style={{ marginBottom: "10px", position: "relative" }}>
+        <div style={{ marginBottom: "12px", position: "relative" }}>
           <input
             type="text"
             value={filterQuery}
@@ -142,13 +136,15 @@ export function MajorUniList({
             }
             style={{
               width: "100%",
-              padding: "6px 12px",
-              fontSize: "12px",
-              borderRadius: "8px",
-              border: "1px solid var(--border-subtle, #e5e7eb)",
-              background: "var(--surface-elevated, #fff)",
-              color: "var(--text-primary, #111827)",
+              padding: "8px 14px",
+              fontSize: "12.5px",
+              borderRadius: "var(--radius-sm, 10px)",
+              border: "1px solid var(--border, rgba(168, 85, 247, 0.22))",
+              background: "rgba(10, 11, 30, 0.65)",
+              color: "var(--text-primary, #FFFFFF)",
+              backdropFilter: "blur(12px)",
               outline: "none",
+              transition: "border-color var(--transition-fast, 0.2s ease)",
             }}
           />
           {filterQuery && (
@@ -156,16 +152,21 @@ export function MajorUniList({
               onClick={() => handleSearchChange("")}
               style={{
                 position: "absolute",
-                right: language === "ar" ? "auto" : "8px",
-                left: language === "ar" ? "8px" : "auto",
+                right: language === "ar" ? "auto" : "10px",
+                left: language === "ar" ? "10px" : "auto",
                 top: "50%",
                 transform: "translateY(-50%)",
-                background: "none",
+                background: "rgba(255, 255, 255, 0.1)",
                 border: "none",
-                color: "var(--text-muted, #9ca3af)",
+                borderRadius: "50%",
+                width: "20px",
+                height: "20px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "var(--text-muted, #A0AEC0)",
                 cursor: "pointer",
-                fontSize: "12px",
-                padding: "2px 4px",
+                fontSize: "11px",
               }}
             >
               ✕
@@ -179,8 +180,8 @@ export function MajorUniList({
         <div
           style={{
             fontSize: "13px",
-            color: "var(--text-muted)",
-            padding: "16px 0",
+            color: "var(--text-muted, #A0AEC0)",
+            padding: "20px 0",
             textAlign: "center",
             fontStyle: "italic",
           }}
@@ -194,48 +195,95 @@ export function MajorUniList({
       {/* University rows */}
       {total > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          {visibleScored.map(({ university: u, score, matchedSources }) => {
+          {visibleScored.map(({ university: u }) => {
+            const isHovered = hoveredUniId === (u.id || u.slug);
             const hasRanking = Boolean(u.qsRanking && u.qsRanking !== "N/A");
 
             return (
               <div
                 key={u.id || u.slug}
                 className="major-uni-item"
+                onMouseEnter={() => setHoveredUniId(u.id || u.slug)}
+                onMouseLeave={() => setHoveredUniId(null)}
                 onClick={() => onSelectUniversity(u)}
                 style={{
                   cursor: "pointer",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid var(--border-subtle, #f3f4f6)",
-                  transition: "background 0.15s ease",
+                  padding: "10px 14px",
+                  borderRadius: "var(--radius-sm, 10px)",
+                  background: isHovered
+                    ? "rgba(124, 58, 237, 0.12)"
+                    : "rgba(255, 255, 255, 0.02)",
+                  border: isHovered
+                    ? "1px solid rgba(192, 132, 252, 0.45)"
+                    : "1px solid rgba(255, 255, 255, 0.05)",
+                  transition: "all var(--transition-fast, 0.2s ease)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
+                  backdropFilter: "blur(8px)",
                 }}
               >
-                <div className="major-uni-info" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                  <span className="major-uni-emoji" style={{ fontSize: "20px" }}>
+                <div
+                  className="major-uni-info"
+                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
+                >
+                  <span
+                    className="major-uni-emoji"
+                    style={{
+                      fontSize: "22px",
+                      filter: isHovered ? "drop-shadow(0 0 8px rgba(124, 58, 237, 0.6))" : "none",
+                      transition: "filter 0.2s ease",
+                    }}
+                  >
                     {u.emoji || "🏛️"}
                   </span>
                   <div>
-                    <div className="major-uni-name" style={{ fontWeight: 600, fontSize: "13.5px" }}>
+                    <div
+                      className="major-uni-name"
+                      style={{
+                        fontWeight: 600,
+                        fontSize: "14px",
+                        color: isHovered ? "#FFFFFF" : "var(--text-secondary, #E2E8F0)",
+                        transition: "color 0.2s ease",
+                      }}
+                    >
                       {getUniName(u, language)}
                       {u.shortName && (
-                        <span style={{ fontSize: "11px", color: "var(--text-muted)", marginInlineStart: "6px" }}>
+                        <span
+                          style={{
+                            fontSize: "11px",
+                            color: "var(--text-muted, #A0AEC0)",
+                            marginInlineStart: "6px",
+                            fontWeight: 400,
+                          }}
+                        >
                           ({u.shortName})
                         </span>
                       )}
                     </div>
-                    <div className="major-uni-meta" style={{ fontSize: "11.5px", color: "var(--text-secondary, #6b7280)", marginTop: "2px" }}>
-                      📍 {getUniCity(u, language)} · 🏛️ {getUniTypeLabel(u, language)}
+                    <div
+                      className="major-uni-meta"
+                      style={{
+                        fontSize: "12px",
+                        color: "var(--text-muted, #A0AEC0)",
+                        marginTop: "2px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <span>📍 {getUniCity(u, language)}</span>
+                      <span>·</span>
+                      <span>🏛️ {getUniTypeLabel(u, language)}</span>
                       {hasRanking && (
                         <span
                           style={{
-                            marginInlineStart: "6px",
-                            padding: "1px 5px",
+                            padding: "1px 6px",
                             borderRadius: "4px",
-                            background: "rgba(225, 29, 72, 0.08)",
-                            color: "var(--accent-primary, #E11D48)",
+                            background: "rgba(251, 191, 36, 0.12)",
+                            border: "1px solid rgba(251, 191, 36, 0.3)",
+                            color: "var(--accent-gold, #FCD34D)",
                             fontSize: "10px",
                             fontWeight: 600,
                           }}
@@ -250,10 +298,19 @@ export function MajorUniList({
                 <button
                   className="view-details-btn"
                   style={{
-                    fontSize: "11.5px",
-                    padding: "4px 10px",
-                    borderRadius: "6px",
+                    fontSize: "12px",
+                    fontWeight: 600,
+                    padding: "6px 14px",
+                    borderRadius: "var(--radius-full, 999px)",
+                    background: isHovered
+                      ? "linear-gradient(135deg, rgba(124, 58, 237, 0.5), rgba(236, 72, 153, 0.5))"
+                      : "rgba(124, 58, 237, 0.15)",
+                    border: "1px solid rgba(168, 85, 247, 0.35)",
+                    color: isHovered ? "#FFFFFF" : "var(--primary-light, #C084FC)",
+                    cursor: "pointer",
                     flexShrink: 0,
+                    transition: "all var(--transition-fast, 0.2s ease)",
+                    boxShadow: isHovered ? "0 0 12px rgba(124, 58, 237, 0.4)" : "none",
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -275,28 +332,28 @@ export function MajorUniList({
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            marginTop: "12px",
-            paddingTop: "8px",
-            borderTop: "1px dashed var(--border-subtle, #e5e7eb)",
-            gap: "8px",
+            marginTop: "16px",
+            paddingTop: "12px",
+            borderTop: "1px solid rgba(168, 85, 247, 0.15)",
+            gap: "10px",
             flexWrap: "wrap",
           }}
         >
           {/* Pagination buttons */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             {remainingCount > 0 && (
               <button
                 onClick={handleShowMore}
                 style={{
                   fontSize: "12px",
                   fontWeight: 600,
-                  color: "var(--accent-primary, #E11D48)",
-                  background: "rgba(225, 29, 72, 0.06)",
-                  border: "1px solid rgba(225, 29, 72, 0.2)",
-                  borderRadius: "6px",
-                  padding: "4px 10px",
+                  color: "var(--primary-light, #C084FC)",
+                  background: "rgba(124, 58, 237, 0.15)",
+                  border: "1px solid rgba(168, 85, 247, 0.35)",
+                  borderRadius: "var(--radius-sm, 8px)",
+                  padding: "5px 12px",
                   cursor: "pointer",
-                  transition: "all 0.15s ease",
+                  transition: "all var(--transition-fast, 0.2s ease)",
                 }}
               >
                 {language === "ar"
@@ -309,12 +366,13 @@ export function MajorUniList({
               <button
                 onClick={handleShowAll}
                 style={{
-                  fontSize: "11.5px",
-                  color: "var(--text-muted, #6b7280)",
+                  fontSize: "12px",
+                  color: "var(--text-muted, #A0AEC0)",
                   background: "none",
                   border: "none",
                   cursor: "pointer",
                   textDecoration: "underline",
+                  textUnderlineOffset: "2px",
                 }}
               >
                 {language === "ar" ? `عرض الكل (${total})` : `Show all (${total})`}
@@ -325,11 +383,12 @@ export function MajorUniList({
               <button
                 onClick={handleShowLess}
                 style={{
-                  fontSize: "11.5px",
-                  color: "var(--text-muted, #6b7280)",
+                  fontSize: "12px",
+                  color: "var(--text-muted, #A0AEC0)",
                   background: "none",
                   border: "none",
                   cursor: "pointer",
+                  padding: "4px 0",
                 }}
               >
                 {language === "ar" ? "▲ إخفاء" : "▲ Show Less"}
@@ -342,12 +401,13 @@ export function MajorUniList({
             href={`/universities?search=${encodeURIComponent(majorName)}`}
             style={{
               fontSize: "12px",
-              fontWeight: 500,
-              color: "var(--text-secondary, #4b5563)",
+              fontWeight: 600,
+              color: "var(--accent-cyan, #00F5D4)",
               textDecoration: "none",
               display: "flex",
               alignItems: "center",
               gap: "4px",
+              transition: "color 0.2s ease",
             }}
             title={
               language === "ar"

@@ -2249,7 +2249,7 @@ body.rtl .search-result-info {
     transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.major-card.expanded .major-card-body { max-height: 600px; }
+.major-card.expanded .major-card-body { max-height: 3000px; }
 
 .major-card-body-inner {
     padding: 0 24px 22px;

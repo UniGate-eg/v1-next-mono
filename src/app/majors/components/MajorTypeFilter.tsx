@@ -30,12 +30,8 @@ const TYPE_META: Record<Exclude<TypeFilter, "ALL">, { label: string; labelAr: st
 /**
  * MajorTypeFilter
  *
- * Renders inline filter chips for university type (PUBLIC/PRIVATE/NATIONAL/etc.).
- * Counts are derived from the pre-scored list passed in — zero re-scoring.
- * State is owned by the parent MajorCard — no global state used.
- *
- * SRP: This component only renders filter chips and emits change events.
- * It does not manage which type is active; that state lives in MajorCard.
+ * Glassmorphic dark-theme filter chips for university types (Public, Private, National, etc.).
+ * Designed to seamlessly blend with UniCompass's purple-neon dark aesthetic.
  */
 export function MajorTypeFilter({
   universities,
@@ -43,7 +39,6 @@ export function MajorTypeFilter({
   language,
   onChange,
 }: MajorTypeFilterProps) {
-  // Compute counts per type — cheap O(n) on the already-filtered list
   const typeCounts = React.useMemo<TypeCount[]>(() => {
     const counts: Partial<Record<TypeFilter, number>> = {};
     for (const u of universities) {
@@ -73,7 +68,6 @@ export function MajorTypeFilter({
     return result;
   }, [universities]);
 
-  // Don't render chips if only one type exists (no useful filtering)
   if (typeCounts.length <= 2) return null;
 
   return (
@@ -81,8 +75,8 @@ export function MajorTypeFilter({
       style={{
         display: "flex",
         flexWrap: "wrap",
-        gap: "6px",
-        marginBottom: "12px",
+        gap: "8px",
+        marginBottom: "14px",
       }}
     >
       {typeCounts.map((tc) => {
@@ -92,26 +86,38 @@ export function MajorTypeFilter({
             key={tc.type}
             onClick={() => onChange(tc.type)}
             style={{
-              padding: "3px 10px",
-              borderRadius: "999px",
+              padding: "4px 12px",
+              borderRadius: "var(--radius-full, 999px)",
               border: isActive
-                ? "1.5px solid var(--accent-primary, #E11D48)"
-                : "1.5px solid var(--border-subtle, #e5e7eb)",
+                ? "1px solid rgba(192, 132, 252, 0.7)"
+                : "1px solid rgba(255, 255, 255, 0.08)",
               background: isActive
-                ? "var(--accent-primary, #E11D48)"
-                : "var(--surface-elevated, #fff)",
+                ? "linear-gradient(135deg, rgba(124, 58, 237, 0.45), rgba(236, 72, 153, 0.35))"
+                : "rgba(255, 255, 255, 0.03)",
               color: isActive
-                ? "#fff"
-                : "var(--text-secondary, #6b7280)",
-              fontSize: "11px",
-              fontWeight: 500,
+                ? "#FFFFFF"
+                : "var(--text-muted, #A0AEC0)",
+              fontSize: "11.5px",
+              fontWeight: isActive ? 600 : 500,
               cursor: "pointer",
-              transition: "all 0.15s ease",
+              transition: "all var(--transition-fast, 0.2s ease)",
               lineHeight: 1.6,
+              backdropFilter: "blur(8px)",
+              boxShadow: isActive
+                ? "0 0 14px rgba(124, 58, 237, 0.35)"
+                : "none",
             }}
           >
             {language === "ar" ? tc.labelAr : tc.label}{" "}
-            <span style={{ opacity: 0.8 }}>({tc.count})</span>
+            <span
+              style={{
+                opacity: isActive ? 1 : 0.65,
+                fontWeight: 600,
+                marginInlineStart: "2px",
+              }}
+            >
+              ({tc.count})
+            </span>
           </button>
         );
       })}
