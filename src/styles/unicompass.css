@@ -2249,7 +2249,33 @@ body.rtl .search-result-info {
     transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.major-card.expanded .major-card-body { max-height: 3000px; }
+.major-card.expanded .major-card-body { 
+    max-height: 2000px; 
+    overflow: visible;
+}
+
+.major-uni-list-scrollable {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(168, 85, 247, 0.4) rgba(255, 255, 255, 0.02);
+}
+
+.major-uni-list-scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.major-uni-list-scrollable::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+}
+
+.major-uni-list-scrollable::-webkit-scrollbar-thumb {
+    background: rgba(168, 85, 247, 0.4);
+    border-radius: 6px;
+}
+
+.major-uni-list-scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgba(168, 85, 247, 0.7);
+}
 
 .major-card-body-inner {
     padding: 0 24px 22px;

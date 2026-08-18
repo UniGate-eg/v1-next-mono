@@ -194,7 +194,18 @@ export function MajorUniList({
 
       {/* University rows */}
       {total > 0 && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div
+          className="major-uni-list-scrollable"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px",
+            maxHeight: visibleLimit > INITIAL_PREVIEW_COUNT ? "440px" : "none",
+            overflowY: visibleLimit > INITIAL_PREVIEW_COUNT ? "auto" : "visible",
+            paddingRight: visibleLimit > INITIAL_PREVIEW_COUNT ? "4px" : "0",
+            paddingBottom: "2px",
+          }}
+        >
           {visibleScored.map(({ university: u }) => {
             const isHovered = hoveredUniId === (u.id || u.slug);
             const hasRanking = Boolean(u.qsRanking && u.qsRanking !== "N/A");
