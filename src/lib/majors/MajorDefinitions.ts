@@ -113,6 +113,8 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
     keywords: [
       // Degree program names
       "industrial engineering",
+      "industrial",
+      "materials and manufacturing",
       "systems engineering",
       "manufacturing engineering",
       "industrial and systems engineering",
@@ -150,6 +152,7 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
       "marketing",
       "finance",
       "financial management",
+      "actuarial science",
       // Faculty / Department names
       "faculty of business",
       "faculty of management",
@@ -240,6 +243,10 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
     keywords: [
       // Degree program names
       "mechatronics engineering",
+      "mechatronics",
+      "robotics and automation",
+      "automation and control",
+      "automotive mechatronics",
       "mechatronics and robotics",
       "robotics engineering",
       "automation engineering",
@@ -301,6 +308,7 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
       "bachelor of medicine",
       "doctor of medicine",
       "general medicine",
+      "medicine and general surgery",
       "human medicine",
       // Faculty names
       "faculty of medicine",
@@ -328,6 +336,7 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
       "oral surgery",
       "oral medicine",
       "oral and dental medicine",
+      "dental laboratory",
       "orthodontics",
       // Faculty names
       "faculty of dentistry",
@@ -408,6 +417,7 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
     keywords: [
       // Degree program names
       "journalism",
+      "print and electronic press",
       "mass communication",
       "broadcasting",
       "media studies",
@@ -445,8 +455,13 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
       "visual arts",
       "interior design",
       "industrial design",
+      "media design",
+      "product design",
+      "faculty of design",
+      "design program",
       "fashion design",
       "game design",
+      "games design",
       "industrial product design",
       "animation",
       "digital design",
@@ -482,6 +497,7 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
       "bioinformatics",
       "life sciences",
       "biological sciences",
+      "biomedical sciences",
       // Faculty / Department names
       "faculty of biotechnology",
       "school of life sciences",
@@ -659,6 +675,10 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
     keywords: [
       "civil engineering",
       "construction engineering",
+      "construction and building",
+      "construction materials",
+      "construction management",
+      "infrastructure",
       "structural engineering",
       "architecture and civil engineering",
       "department of civil engineering",
@@ -707,6 +727,9 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
       "radiology",
       "medical laboratory technology",
       "clinical nutrition",
+      "food technology",
+      "nutrition sciences",
+      "health administration",
       "nutrition program",
       "respiratory care",
       "faculty of applied health sciences",
@@ -745,6 +768,8 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
       "electrical engineering",
       "electronics",
       "communications",
+      "communication systems",
+      "electrical power and machines",
       "telecommunications",
       "networks",
       "power and electrical machines",
@@ -807,12 +832,14 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
 
   {
     id: "petroleum-eng",
-    name: "Petroleum & Mining Engineering",
+    name: "Chemical, Petroleum & Mining Engineering",
     name_ar: "هندسة البترول والتعدين",
     icon: "🛢️",
     color: "#a8a29e",
     keywords: [
       "petroleum engineering",
+      "chemical engineering",
+      "pharmaceutical production",
       "mining engineering",
       "petrochemical engineering",
       "petrochemical industry",
@@ -820,5 +847,71 @@ export const MAJOR_DEFINITIONS: MajorDefinition[] = [
       "هندسة البترول",
       "البترول والتعدين",
     ],
+  },
+
+  {
+    id: "education",
+    name: "Education & Teaching",
+    name_ar: "التربية والتعليم",
+    icon: "🏫",
+    color: "#fbbf24",
+    keywords: [
+      "education",
+      "special education",
+      "teaching",
+      "educational",
+      "early childhood",
+      "faculty of education",
+      "school of education",
+      "college of special education",
+      "التربية",
+      "كلية التربية",
+    ]
+  },
+  {
+    id: "biomedical-eng",
+    name: "Biomedical & Healthcare Engineering",
+    name_ar: "الهندسة الطبية الحيوية",
+    icon: "🧬",
+    color: "#f43f5e",
+    keywords: [
+      "biomedical engineering",
+      "healthcare engineering",
+      "medical equipment technology",
+      "school of biomedical engineering",
+      "الهندسة الطبية",
+    ]
+  },
+  {
+    id: "renewable-energy",
+    name: "Renewable Energy & Environmental Engineering",
+    name_ar: "الطاقة المتجددة والهندسة البيئية",
+    icon: "🌱",
+    color: "#84cc16",
+    keywords: [
+      "renewable energy",
+      "energy systems",
+      "solar energy",
+      "sustainable energy",
+      "environmental engineering",
+      "environmental science",
+      "environmental architecture",
+      "الطاقة المتجددة",
+      "الهندسة البيئية",
+    ]
+  },
+  {
+    id: "veterinary",
+    name: "Veterinary Medicine & Agriculture",
+    name_ar: "الطب البيطري والزراعة",
+    icon: "🐾",
+    color: "#a16207",
+    keywords: [
+      "veterinary medicine",
+      "agriculture",
+      "animal sciences",
+      "الطب البيطري",
+      "الزراعة",
+    ]
   },
 ];
