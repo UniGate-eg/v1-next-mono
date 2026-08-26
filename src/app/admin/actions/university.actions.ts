@@ -1,66 +1,44 @@
 "use server";
 
-import { headers } from "next/headers";
-import { auth } from "../../../lib/auth";
+import { withAdminAuth } from "../../../server/actions/withAdminAuth";
 import { AdminUniversityService } from "../../../server/services/AdminUniversityService";
+import { adminCatalogService } from "../../../lib/di";
 import { 
   CreateUniversitySchema, 
   UpdateUniversitySchema, 
   CreateUniversityInput, 
   UpdateUniversityInput 
 } from "../../../schemas/university.schema";
-import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
-async function requireAdmin() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
-  
-  // Note: Depending on how roles are loaded in Better Auth, you might check session.user.role
-  const user = session.user as any;
-  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN" && user.role !== "EDITOR") {
-    throw new Error("Forbidden: Requires Editor or Admin privileges");
-  }
-  
-  return user;
-}
-
-export async function createUniversityAction(data: CreateUniversityInput) {
-  try {
-    const user = await requireAdmin();
+export const createUniversityAction = withAdminAuth(
+  "universities:create_delete",
+  async (ctx, data: CreateUniversityInput) => {
     const validated = CreateUniversitySchema.parse(data);
-    const university = await AdminUniversityService.createUniversity(user.id, validated);
-    return { success: true, data: university };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { success: false, errors: error.errors };
-    }
-    return { success: false, error: (error as Error).message };
+    const university = await AdminUniversityService.createUniversity(ctx.id, validated);
+    await adminCatalogService.recalculateUniversityScore(university.id);
+    await adminCatalogService.invalidateUniversityCache(university.slug, university.id);
+    return university;
   }
-}
+);
 
-export async function updateUniversityAction(id: string, data: UpdateUniversityInput) {
-  try {
-    const user = await requireAdmin();
+export const updateUniversityAction = withAdminAuth(
+  "universities:edit_scoped",
+  async (ctx, { id, data }: { id: string; data: UpdateUniversityInput }) => {
     const validated = UpdateUniversitySchema.parse(data);
-    const university = await AdminUniversityService.updateUniversity(user.id, id, validated);
-    return { success: true, data: university };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return { success: false, errors: error.errors };
-    }
-    return { success: false, error: (error as Error).message };
-  }
-}
+    const university = await AdminUniversityService.updateUniversity(ctx.id, id, validated);
+    await adminCatalogService.recalculateUniversityScore(id);
+    await adminCatalogService.invalidateUniversityCache(university.slug, id);
+    return university;
+  },
+  { universityIdExtractor: (input) => input.id }
+);
 
-export async function archiveUniversityAction(id: string) {
-  try {
-    const user = await requireAdmin();
-    await AdminUniversityService.archiveUniversity(user.id, id);
+export const archiveUniversityAction = withAdminAuth(
+  "universities:create_delete",
+  async (ctx, id: string) => {
+    await AdminUniversityService.archiveUniversity(ctx.id, id);
+    await adminCatalogService.invalidateUniversityCache(undefined, id);
     return { success: true };
-  } catch (error) {
-    return { success: false, error: (error as Error).message };
   }
-}
+);
