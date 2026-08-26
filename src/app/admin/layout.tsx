@@ -49,11 +49,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       }}
       initialPermissions={Array.from(userContext.permissions)}
     >
-      <div className="admin-portal-root flex min-h-screen w-full bg-slate-100/70 font-sans antialiased text-slate-900">
+      <div className="admin-body admin-portal-root flex min-h-screen w-full bg-[#F8FAFC] font-sans antialiased text-slate-900">
         <AdminSidebar />
-        <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-slate-100/70">
+        <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-[#F8FAFC]">
           <AdminHeader />
-          <main className="flex-1 p-6 sm:p-8 overflow-y-auto">{children}</main>
+          <main className="flex-1 p-6 sm:p-8 overflow-y-auto bg-[#F8FAFC] text-slate-900">{children}</main>
         </div>
       </div>
     </PermissionProvider>
