@@ -9,7 +9,7 @@
 
 The UniGate Admin Dashboard provides an enterprise-grade, secure, and extensible management portal for platform administrators, in-house editors, external university partner representatives, and moderation staff. 
 
-Following the Zero-Trust / Least-Privilege architecture design, the platform features a **5-Tier Initial Role Matrix** backed by a **Database-Driven Dynamic RBAC Engine**, an **Immutable Audit & Atomic Rollback Subsystem**, **Real-Time Live Session Defense**, and **Automated Data Quality & Completeness Monitoring**:
+Following the Zero-Trust / Least-Privilege architecture design, the platform features a **5-Tier Initial Role Matrix** backed by a **Database-Driven Dynamic RBAC Engine**, a **Secure One-Time Bootstrap Provisioning Protocol**, an **Immutable Audit & Atomic Rollback Subsystem**, **Real-Time Live Session Defense**, and **Automated Data Quality & Completeness Monitoring**:
 
 ```mermaid
 graph TD
@@ -87,6 +87,21 @@ graph TD
 | `moderation:review` | Review, approve, and reject community suggestions | ✅ | ✅ | ✅ | ✅ *(Scoped)* | ✅ | ❌ |
 | `audit:view` | View and filter immutable system mutation logs | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | `data:export_snapshot` | Export complete database JSON snapshots | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+
+---
+
+### 2.3 Secure Super Admin Bootstrap & Permanent Lockout Protocol
+
+To eliminate manual SQL manipulation during deployment while preventing privilege escalation or web backdoor vulnerabilities:
+
+1. **CLI-Only Provisioning**:
+   * Provisioning the root Super Admin is executed strictly via CLI terminal execution during database setup (`npm run db:seed`).
+   * The script inspects the server environment variable `INITIAL_SUPER_ADMIN_EMAIL`.
+2. **Permanent One-Time Lock**:
+   * The seed script first evaluates if any user with role `SUPER_ADMIN` already exists in PostgreSQL.
+   * If a `SUPER_ADMIN` is already present, the script **shuts off the bootstrap path permanently** and exits cleanly without modifying any roles.
+3. **Subsequent Staff Onboarding**:
+   * Once bootstrapped, all future user role promotions (`ADMIN`, `CONTENT_EDITOR`, `UNIVERSITY_REP`, etc.) must be executed through the authenticated User Management UI (`/admin/users`) by an authorized administrator, generating an immutable audit log record.
 
 ---
 
@@ -231,6 +246,7 @@ As a Community Moderator, Editor, or Admin, I want a centralized moderation queu
 
 ### Edge Cases & Safeguards
 
+- **Bootstrap One-Time Lock**: The CLI seed script strictly checks for existing `SUPER_ADMIN` records and aborts if already provisioned, preventing re-elevation exploits.
 - **Concurrent Admin Edits**: Optimistic concurrency locking via `updatedAt` timestamps detects simultaneous saves and presents a side-by-side conflict resolution dialog.
 - **Sole Admin Safeguard**: System blocks self-demotion, self-suspension, or self-deletion if the user is the last active `ADMIN` or `SUPER_ADMIN`.
 - **Immediate Session Invalidation**: Role demotions or account suspensions immediately revoke permissions on the next incoming request.
@@ -245,63 +261,68 @@ As a Community Moderator, Editor, or Admin, I want a centralized moderation queu
 
 ### Functional Requirements
 
+#### Bootstrap Provisioning Subsystem
+- **FR-001**: System MUST provide a secure CLI-only database seed script (`prisma/seed.ts` via `npm run db:seed`) to provision the initial `SUPER_ADMIN` matching `INITIAL_SUPER_ADMIN_EMAIL`.
+- **FR-002**: The seed script MUST verify if a `SUPER_ADMIN` already exists in PostgreSQL, and if present, MUST abort elevation and lock the bootstrap path permanently.
+- **FR-003**: The seed script MUST automatically initialize the 5 default system roles (`SUPER_ADMIN`, `ADMIN`, `CONTENT_EDITOR`, `UNIVERSITY_REP`, `COMMUNITY_MODERATOR`, `STUDENT`) and their default permission matrices.
+
 #### User & Role Management
-- **FR-001**: System MUST provide a secure User Management dashboard accessible exclusively to authorized Admin roles.
-- **FR-002**: System MUST support searching, sorting, and filtering registered platform users by email, name, role, status (`Active`, `Suspended`), and institution affiliation.
-- **FR-003**: System MUST allow Admins to promote existing registered platform users to administrative or editing roles.
-- **FR-004**: System MUST allow Admins to assign, change, or revoke roles for existing user accounts subject to hierarchical privilege rules.
-- **FR-005**: System MUST allow Admins to toggle user account status between `Active` and `Suspended`.
-- **FR-006**: System MUST enforce protection rules preventing the last active Administrator from demoting, suspending, or deleting their own account.
-- **FR-007**: System MUST enforce strict hierarchical privilege boundaries (`SUPER_ADMIN` > `ADMIN` > Custom Roles / `CONTENT_EDITOR` / `UNIVERSITY_REP` / `COMMUNITY_MODERATOR` > `STUDENT`).
-- **FR-008**: System MUST immediately terminate active sessions and revoke permissions upon account suspension or role demotion.
+- **FR-004**: System MUST provide a secure User Management dashboard accessible exclusively to authorized Admin roles.
+- **FR-005**: System MUST support searching, sorting, and filtering registered platform users by email, name, role, status (`Active`, `Suspended`), and institution affiliation.
+- **FR-006**: System MUST allow Admins to promote existing registered platform users to administrative or editing roles.
+- **FR-007**: System MUST allow Admins to assign, change, or revoke roles for existing user accounts subject to hierarchical privilege rules.
+- **FR-008**: System MUST allow Admins to toggle user account status between `Active` and `Suspended`.
+- **FR-009**: System MUST enforce protection rules preventing the last active Administrator from demoting, suspending, or deleting their own account.
+- **FR-010**: System MUST enforce strict hierarchical privilege boundaries (`SUPER_ADMIN` > `ADMIN` > Custom Roles / `CONTENT_EDITOR` / `UNIVERSITY_REP` / `COMMUNITY_MODERATOR` > `STUDENT`).
+- **FR-011**: System MUST immediately terminate active sessions and revoke permissions upon account suspension or role demotion.
 
 #### Extensible Dynamic RBAC
-- **FR-009**: System MUST persist dynamic roles and permissions in relational database tables (`Role`, `Permission`, `RolePermission`, `UserRoleAssignment`, `InstitutionAssignment`).
-- **FR-010**: System MUST support the 5 default system roles on launch: `SUPER_ADMIN`, `ADMIN`, `CONTENT_EDITOR`, `UNIVERSITY_REP`, `COMMUNITY_MODERATOR`, and `STUDENT`.
-- **FR-011**: System MUST allow Super Admins to create, edit, and delete custom roles with custom keys, display names, and descriptions.
-- **FR-012**: System MUST provide a granular permission registry supporting toggles across domains (e.g., `roles:manage`, `users:manage_admins`, `users:manage_staff`, `universities:create_delete`, `universities:edit_global`, `universities:edit_scoped`, `content:draft`, `content:publish`, `data:rollback`, `data:bulk_mutate`, `moderation:review`, `audit:view`, `data:export_snapshot`).
-- **FR-013**: System MUST support institution-scoped permissions via `InstitutionAssignment`, allowing specific editors and university reps to be bound to one or more designated university IDs (or global access).
-- **FR-014**: System MUST support independent toggling of `content:draft` and `content:publish` per role.
+- **FR-012**: System MUST persist dynamic roles and permissions in relational database tables (`Role`, `Permission`, `RolePermission`, `UserRoleAssignment`, `InstitutionAssignment`).
+- **FR-013**: System MUST support the 5 default system roles on launch: `SUPER_ADMIN`, `ADMIN`, `CONTENT_EDITOR`, `UNIVERSITY_REP`, `COMMUNITY_MODERATOR`, and `STUDENT`.
+- **FR-014**: System MUST allow Super Admins to create, edit, and delete custom roles with custom keys, display names, and descriptions.
+- **FR-015**: System MUST provide a granular permission registry supporting toggles across domains (e.g., `roles:manage`, `users:manage_admins`, `users:manage_staff`, `universities:create_delete`, `universities:edit_global`, `universities:edit_scoped`, `content:draft`, `content:publish`, `data:rollback`, `data:bulk_mutate`, `moderation:review`, `audit:view`, `data:export_snapshot`).
+- **FR-016**: System MUST support institution-scoped permissions via `InstitutionAssignment`, allowing specific editors and university reps to be bound to one or more designated university IDs (or global access).
+- **FR-017**: System MUST support independent toggling of `content:draft` and `content:publish` per role.
 
 #### Academic Catalog & Data Quality Management
-- **FR-015**: System MUST provide visual management interfaces for Universities, Faculties, Departments, Degree Programs, Accreditations, and Contacts.
-- **FR-016**: System MUST allow editors and reps to browse all universities in read-only mode, with mutation controls enabled only for assigned institutions.
-- **FR-017**: System MUST support bilingual (Arabic and English) editing across all textual entity fields.
-- **FR-018**: System MUST calculate and display a real-time Profile Completeness Score (0–100%) for each university profile based on mandatory data checkpoints.
-- **FR-019**: System MUST automatically flag universities untouched for > 6 months with a "Needs Annual Review" stale badge.
-- **FR-020**: System MUST support `DRAFT`, `PUBLISHED`, and `ARCHIVED` lifecycle states for university profiles and degree programs.
-- **FR-021**: System MUST automatically trigger public ISR cache invalidation (`revalidateTag`, `revalidatePath`) within 2 seconds whenever published data is modified.
-- **FR-022**: System MUST enforce optimistic concurrency locking via version timestamps to prevent silent overwrites.
+- **FR-018**: System MUST provide visual management interfaces for Universities, Faculties, Departments, Degree Programs, Accreditations, and Contacts.
+- **FR-019**: System MUST allow editors and reps to browse all universities in read-only mode, with mutation controls enabled only for assigned institutions.
+- **FR-020**: System MUST support bilingual (Arabic and English) editing across all textual entity fields.
+- **FR-021**: System MUST calculate and display a real-time Profile Completeness Score (0–100%) for each university profile based on mandatory data checkpoints.
+- **FR-022**: System MUST automatically flag universities untouched for > 6 months with a "Needs Annual Review" stale badge.
+- **FR-023**: System MUST support `DRAFT`, `PUBLISHED`, and `ARCHIVED` lifecycle states for university profiles and degree programs.
+- **FR-024**: System MUST automatically trigger public ISR cache invalidation (`revalidateTag`, `revalidatePath`) within 2 seconds whenever published data is modified.
+- **FR-025**: System MUST enforce optimistic concurrency locking via version timestamps to prevent silent overwrites.
 
 #### Data Rollback & Revision History Subsystem
-- **FR-023**: System MUST allow Admins and Super Admins to execute atomic entity-level rollbacks from any historical audit log entry.
-- **FR-024**: Rollback execution MUST restore the target entity's state from the `beforeState` JSON snapshot inside a database transaction and create a new `AuditLog` entry with action `ROLLBACK`.
-- **FR-025**: Rollback execution MUST run pre-flight integrity validation to ensure all required foreign-key relations exist prior to reversion.
-- **FR-026**: Rollback execution MUST trigger public ISR cache invalidation within 2.0 seconds of successful execution.
+- **FR-026**: System MUST allow Admins and Super Admins to execute atomic entity-level rollbacks from any historical audit log entry.
+- **FR-027**: Rollback execution MUST restore the target entity's state from the `beforeState` JSON snapshot inside a database transaction and create a new `AuditLog` entry with action `ROLLBACK`.
+- **FR-028**: Rollback execution MUST run pre-flight integrity validation to ensure all required foreign-key relations exist prior to reversion.
+- **FR-029**: Rollback execution MUST trigger public ISR cache invalidation within 2.0 seconds of successful execution.
 
 #### Real-Time Live Session Defense
-- **FR-027**: Every administrative Server Action MUST re-validate the acting user's live account status (`ACTIVE`) and current role/institution permissions directly against PostgreSQL inside the execution boundary.
-- **FR-028**: Server Actions MUST reject requests from suspended or demoted users with an immediate typed `403 Forbidden` response and session invalidation.
+- **FR-030**: Every administrative Server Action MUST re-validate the acting user's live account status (`ACTIVE`) and current role/institution permissions directly against PostgreSQL inside the execution boundary.
+- **FR-031**: Server Actions MUST reject requests from suspended or demoted users with an immediate typed `403 Forbidden` response and session invalidation.
 
 #### In-App Notification Center
-- **FR-029**: System MUST persist administrative notifications in an `AdminNotification` relational table.
-- **FR-030**: System MUST display an unread badge counter in the Admin Header and provide a notification drawer with direct deep-links for events (New Suggestions, Draft Submissions, Moderation Decisions).
+- **FR-032**: System MUST persist administrative notifications in an `AdminNotification` relational table.
+- **FR-033**: System MUST display an unread badge counter in the Admin Header and provide a notification drawer with direct deep-links for events (New Suggestions, Draft Submissions, Moderation Decisions).
 
 #### Batch / Bulk Catalog Operations
-- **FR-031**: System MUST provide multi-select checkboxes in catalog tables triggering a floating action bar for bulk status changes (`Bulk Publish`, `Bulk Archive`) and bulk exports.
-- **FR-032**: Bulk operations MUST execute atomically in a single transaction, emit individual `AuditLog` records for every affected entity, and revalidate public caches.
+- **FR-034**: System MUST provide multi-select checkboxes in catalog tables triggering a floating action bar for bulk status changes (`Bulk Publish`, `Bulk Archive`) and bulk exports.
+- **FR-035**: Bulk operations MUST execute atomically in a single transaction, emit individual `AuditLog` records for every affected entity, and revalidate public caches.
 
 #### Community Suggestion Moderation
-- **FR-033**: System MUST provide a dedicated moderation queue interface displaying community data corrections with status indicators (`PENDING`, `MERGED`, `REJECTED`).
-- **FR-034**: System MUST display a side-by-side visual diff comparing current live data against submitted proposed changes.
-- **FR-035**: System MUST allow moderators to approve & apply, modify before applying, or reject suggestions with one click.
-- **FR-036**: System MUST record moderation decisions and automatically update live university records upon approval.
+- **FR-036**: System MUST provide a dedicated moderation queue interface displaying community data corrections with status indicators (`PENDING`, `MERGED`, `REJECTED`).
+- **FR-037**: System MUST display a side-by-side visual diff comparing current live data against submitted proposed changes.
+- **FR-038**: System MUST allow moderators to approve & apply, modify before applying, or reject suggestions with one click.
+- **FR-039**: System MUST record moderation decisions and automatically update live university records upon approval.
 
 #### Governance & Audit Trail
-- **FR-037**: System MUST create an immutable, append-only audit record for 100% of administrative mutations (data create/update/delete, rollbacks, bulk actions, role assignments, user status changes, moderation decisions).
-- **FR-038**: System MUST record actor ID, email, IP address, timestamp, action type, entity ID, and before/after state payloads for every audit log entry.
-- **FR-039**: System MUST provide an interactive Audit Log explorer with filtering by actor, entity type, action type, and date range.
-- **FR-040**: System MUST support exporting filtered audit records to CSV and JSON formats.
+- **FR-040**: System MUST create an immutable, append-only audit record for 100% of administrative mutations (data create/update/delete, rollbacks, bulk actions, role assignments, user status changes, moderation decisions).
+- **FR-041**: System MUST record actor ID, email, IP address, timestamp, action type, entity ID, and before/after state payloads for every audit log entry.
+- **FR-042**: System MUST provide an interactive Audit Log explorer with filtering by actor, entity type, action type, and date range.
+- **FR-043**: System MUST support exporting filtered audit records to CSV and JSON formats.
 
 ---
 
@@ -327,15 +348,16 @@ As a Community Moderator, Editor, or Admin, I want a centralized moderation queu
 ### Measurable Outcomes
 
 - **SC-001**: Role-based access control and navigation gating enforce 100% authorization checks across all UI views and server mutation endpoints with zero permission leakage.
-- **SC-002**: An administrator can execute an atomic data rollback from the Audit Log in **under 2.0 seconds** with full forward-audit trail and cache revalidation.
-- **SC-003**: Account suspension or role demotion takes effect instantaneously (< 50ms) on the very next Server Action invocation with zero stale session vulnerability.
-- **SC-004**: An administrator can find a registered platform user and promote/assign their role and institution scope in **under 30 seconds**.
-- **SC-005**: Authorized editors can modify academic data (tuition, program details, faculty info) with live public updates reflected in **under 2.0 seconds** without application redeployment.
-- **SC-006**: Creation and assignment of a new custom role with distinct permissions takes effect immediately across all dashboard operations without system downtime or code changes.
-- **SC-007**: 100% of administrative create, update, delete, rollback, bulk action, role change, and moderation events produce an immutable audit log record.
-- **SC-008**: Moderation team can review and resolve (approve/reject) a community suggestion in **under 30 seconds** using the side-by-side visual diff interface.
-- **SC-009**: Bulk status operations on 50+ degree programs execute transactionally in **under 3 seconds**.
-- **SC-010**: User management, catalog lists, and audit log views load and filter 10,000+ records in **under 500ms**.
+- **SC-002**: Initial Super Admin bootstrapping executes in **under 5 seconds** via CLI seed script and locks out permanently against subsequent re-elevation attempts.
+- **SC-003**: An administrator can execute an atomic data rollback from the Audit Log in **under 2.0 seconds** with full forward-audit trail and cache revalidation.
+- **SC-004**: Account suspension or role demotion takes effect instantaneously (< 50ms) on the very next Server Action invocation with zero stale session vulnerability.
+- **SC-005**: An administrator can find a registered platform user and promote/assign their role and institution scope in **under 30 seconds**.
+- **SC-006**: Authorized editors can modify academic data (tuition, program details, faculty info) with live public updates reflected in **under 2.0 seconds** without application redeployment.
+- **SC-007**: Creation and assignment of a new custom role with distinct permissions takes effect immediately across all dashboard operations without system downtime or code changes.
+- **SC-008**: 100% of administrative create, update, delete, rollback, bulk action, role change, and moderation events produce an immutable audit log record.
+- **SC-009**: Moderation team can review and resolve (approve/reject) a community suggestion in **under 30 seconds** using the side-by-side visual diff interface.
+- **SC-010**: Bulk status operations on 50+ degree programs execute transactionally in **under 3 seconds**.
+- **SC-011**: User management, catalog lists, and audit log views load and filter 10,000+ records in **under 500ms**.
 
 ---
 

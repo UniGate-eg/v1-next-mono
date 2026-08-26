@@ -31,5 +31,6 @@
 
 ## Notes
 
-- Fully validated specification with 5-tier initial role architecture, dynamic RBAC engine, atomic data rollback subsystem, live session defense, profile completeness monitoring, in-app notifications, and bulk catalog operations.
-- Ready for technical implementation planning (`/speckit-plan`).
+- Includes secure CLI-only one-time bootstrap provisioning and permanent lockout protocol.
+- Includes 5-tier initial role architecture, dynamic RBAC engine, atomic data rollback subsystem, live session defense, profile completeness monitoring, in-app notifications, and bulk catalog operations.
+- Specification is complete, validated, and ready for planning (`/speckit-plan`).
