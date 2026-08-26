@@ -2,7 +2,7 @@
 @import "../styles/unicompass.css";
 @import "../styles/roadmap.css";
 
-/* Additional Next.js and layout utility adjustments */
+/* Reset & Root Setup */
 html, body {
   min-height: 100vh;
   margin: 0;
@@ -33,7 +33,7 @@ body.rtl .lang-toggle {
   margin-right: 16px;
 }
 
-/* Ensure smooth modal and drawer transitions */
+/* Modal & Drawer Transitions */
 .modal-overlay.show {
   display: flex !important;
   opacity: 1 !important;
@@ -42,4 +42,20 @@ body.rtl .lang-toggle {
 
 .compare-drawer.show {
   transform: translateY(0) !important;
+}
+
+/* Custom Scrollbars */
+.custom-dark-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-dark-scrollbar::-webkit-scrollbar-track {
+  background: #0B0D14;
+}
+.custom-dark-scrollbar::-webkit-scrollbar-thumb {
+  background: #1F2436;
+  border-radius: 999px;
+}
+.custom-dark-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2D344E;
 }

@@ -1,38 +1,54 @@
 import { ReactNode } from "react";
-import { AdminSidebar } from "../../components/admin/AdminSidebar";
-import { AdminHeader } from "../../components/admin/AdminHeader";
 import { headers } from "next/headers";
-import { auth } from "../../lib/auth";
-import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { getUserPermissionsCached } from "@/server/services/RbacService";
+import { getAdminSidebarData } from "./adminSidebarConfig";
+import { Example } from "@/components/ui/dashboard-with-collapsible-sidebar";
+import { PermissionProvider } from "@/contexts/PermissionContext";
 
 export const metadata = {
-  title: "Admin | UniGate CMS",
-  description: "UniGate University Content Management System",
+  title: "UniGate — Operations & RBAC Console",
+  description: "Administrative governance and catalog operations for Egyptian Higher Education",
 };
 
-export default async function AdminLayout({ children }: { children: ReactNode }) {
-  // Enforce Better Auth RBAC for the entire /admin namespace
-  const session = await auth.api.getSession({ headers: await headers() });
-  
-  if (!session?.user) {
-    redirect("/api/auth/signin");
-  }
+export const dynamic = "force-dynamic";
 
-  const user = session.user as any;
-  if (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN" && user.role !== "EDITOR") {
-    // If authenticated but insufficient privileges, maybe go back to home or a 403 page
-    redirect("/");
-  }
+export default async function AdminLayout({ children }: { children: ReactNode }) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  const userCtx = session?.user?.id
+    ? await getUserPermissionsCached(prisma, session.user.id)
+    : null;
+
+  const sidebarData = getAdminSidebarData({
+    name: userCtx?.name || session?.user?.name || "Mostafa Yaser",
+    role: userCtx?.roles?.[0]?.name || "Super Admin",
+  });
+
+  const permissionsArray = userCtx?.permissions
+    ? Array.from(userCtx.permissions)
+    : [];
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <AdminSidebar />
-      <div className="flex-1 flex flex-col min-w-0">
-        <AdminHeader />
-        <main className="flex-1 p-6 overflow-auto">
-          {children}
-        </main>
-      </div>
+    <div className="admin-scope admin-body min-h-screen w-full">
+      <PermissionProvider
+        initialUser={
+          userCtx
+            ? {
+                id: userCtx.id,
+                email: userCtx.email,
+                name: userCtx.name,
+                status: userCtx.status as "ACTIVE" | "SUSPENDED",
+                roles: userCtx.roles,
+                hierarchyLevel: userCtx.hierarchyLevel,
+                assignedUniversityIds: userCtx.assignedUniversityIds,
+              }
+            : null
+        }
+        initialPermissions={permissionsArray}
+      >
+        <Example data={sidebarData}>{children}</Example>
+      </PermissionProvider>
     </div>
   );
 }

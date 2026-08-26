@@ -48,3 +48,8 @@ next-env.d.ts
 .agents/
 .claude/
 skills-lock.json
+
+# Python cache & scratch
+__pycache__/
+*.pyc
+scratch/

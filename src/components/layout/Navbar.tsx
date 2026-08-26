@@ -27,6 +27,11 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Do not render public Navbar inside the Admin Portal
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   const tabs = [
     { href: "/", label: t("navHome"), key: "home" },
     { href: "/universities", label: t("navUniversities"), key: "universities" },
@@ -64,112 +69,101 @@ export function Navbar() {
             style={{ height: "60px", borderRadius: "10px", objectFit: "contain" }}
           />
         </Link>
-        <span className="logo-badge">{language === "ar" ? "مصر" : "Egypt"}</span>
       </div>
 
-      <nav className={`nav-links ${mobileMenuOpen ? "open" : ""}`} id="navLinks">
+      <nav className="nav-tabs" id="navTabs">
         {tabs.map((tab) => (
           <Link
             key={tab.key}
             href={tab.href}
-            onClick={() => setMobileMenuOpen(false)}
-            className={`nav-link ${isActive(tab.href) ? "active" : ""}`}
+            className={`nav-tab ${isActive(tab.href) ? "active" : ""}`}
+            data-page={tab.key}
           >
             {tab.label}
           </Link>
         ))}
       </nav>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        {/* Authentication Navigation Control */}
-        {session?.user ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <Link
-              href="/dashboard"
-              className="auth-nav-btn"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "7px 14px",
-                borderRadius: "var(--radius-full)",
-                background: "rgba(124, 58, 237, 0.15)",
-                border: "1px solid rgba(124, 58, 237, 0.3)",
-                color: "#c084fc",
-                fontSize: "13px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              <User className="w-3.5 h-3.5" />
-              <span>{session.user.name?.split(" ")[0] || session.user.email?.split("@")[0] || t("navDashboard")}</span>
-            </Link>
-
-            <button
-              className="auth-nav-btn"
-              onClick={handleLogout}
-              title={t("navLogout")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                padding: "7px 14px",
-                borderRadius: "var(--radius-full)",
-                background: "rgba(255, 255, 255, 0.08)",
-                border: "1px solid var(--border)",
-                color: "#fff",
-                fontSize: "13px",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              <LogOut className="w-3.5 h-3.5 text-rose-400" />
-              <span>{t("navLogout")}</span>
-            </button>
-          </div>
-        ) : (
-          <Link
-            href="/auth/login"
-            className="auth-nav-btn"
-            style={{
-              padding: "8px 18px",
-              borderRadius: "var(--radius-full)",
-              background: "linear-gradient(135deg, var(--primary), var(--primary-dark))",
-              color: "#fff",
-              fontSize: "13px",
-              fontWeight: 600,
-              display: "inline-block",
-            }}
-          >
-            {t("navLogin")}
-          </Link>
-        )}
-
-        <button className="lang-toggle" onClick={toggleLanguage} aria-label="Toggle language">
-          <span className="lang-text">{language === "en" ? "عربي" : "English"}</span>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-          </svg>
+      <div className="nav-actions">
+        <button
+          onClick={toggleLanguage}
+          className="lang-toggle"
+          id="langToggle"
+          title="Toggle Language"
+        >
+          <span className="lang-text">{language === "ar" ? "English" : "عربي"}</span>
         </button>
 
+        {!isPending && (
+          <div className="nav-auth">
+            {session?.user ? (
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-glass border border-white/10 hover:border-primary/40 text-sm font-medium transition-all"
+                >
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold">
+                    {session.user.name?.[0]?.toUpperCase() || <User className="w-3.5 h-3.5" />}
+                  </div>
+                  <span className="max-w-[100px] truncate text-xs">
+                    {session.user.name || session.user.email}
+                  </span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-full hover:bg-white/5 text-text-muted hover:text-red-400 transition-colors"
+                  title={language === "ar" ? "تسجيل الخروج" : "Sign Out"}
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-accent-coral text-white text-xs font-bold shadow-glow hover:opacity-90 transition-opacity"
+              >
+                {language === "ar" ? "تسجيل الدخول" : "Sign In"}
+              </Link>
+            )}
+          </div>
+        )}
+
         <button
-          className={`nav-mobile-toggle ${mobileMenuOpen ? "open" : ""}`}
-          id="mobileToggle"
+          className="mobile-menu-toggle"
+          id="mobileMenuToggle"
           aria-label="Toggle menu"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
-          <span></span>
-          <span></span>
-          <span></span>
+          <span className={`hamburger ${mobileMenuOpen ? "open" : ""}`}></span>
         </button>
       </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="mobile-nav-drawer show">
+          <div className="mobile-nav-links">
+            {tabs.map((tab) => (
+              <Link
+                key={tab.key}
+                href={tab.href}
+                className={`mobile-nav-tab ${isActive(tab.href) ? "active" : ""}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {tab.label}
+              </Link>
+            ))}
+            {!isPending && !session?.user && (
+              <Link
+                href="/auth/login"
+                className="mobile-nav-tab text-primary font-bold"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {language === "ar" ? "تسجيل الدخول" : "Sign In"}
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

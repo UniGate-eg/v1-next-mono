@@ -2,10 +2,17 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Footer() {
   const { language } = useLanguage();
+  const pathname = usePathname();
+
+  // Do not render public Footer inside the Admin Portal
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <footer className="footer">
@@ -41,29 +48,32 @@ export function Footer() {
         </div>
 
         <div className="footer-links-group">
-          <h4>{language === "ar" ? "المصادر" : "Resources"}</h4>
-          <Link href="/universities">{language === "ar" ? "دليل الطالب" : "Student Guide"}</Link>
-          <Link href="/about">{language === "ar" ? "الأسئلة الشائعة" : "FAQ"}</Link>
-          <Link href="/about">{language === "ar" ? "اتصل بنا" : "Contact"}</Link>
+          <h4>{language === "ar" ? "أنواع الجامعات" : "University Types"}</h4>
+          <Link href="/universities?type=PUBLIC">
+            {language === "ar" ? "جامعات حكومية" : "Public Universities"}
+          </Link>
+          <Link href="/universities?type=PRIVATE">
+            {language === "ar" ? "جامعات خاصة" : "Private Universities"}
+          </Link>
+          <Link href="/universities?type=NATIONAL">
+            {language === "ar" ? "جامعات أهلية" : "National Universities"}
+          </Link>
+          <Link href="/universities?type=INTERNATIONAL">
+            {language === "ar" ? "جامعات دولية" : "International Universities"}
+          </Link>
         </div>
       </div>
 
-      <div className="footer-bottom">
+      <div className="container footer-bottom">
         <p>
-          © 2026 {language === "ar" ? "بوابة الجامعة (University Gate)" : "University Gate"}.{" "}
-          {language === "ar"
-            ? "دليلك الشامل لاختيار جامعتك."
-            : "Your comprehensive guide to universities."}{" "}
-          Made by{" "}
-          <a
-            href="https://gizahost.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "inherit", textDecoration: "underline" }}
-          >
-            GizaHost
-          </a>
+          © {new Date().getFullYear()} UniGate (بوابة الجامعة).{" "}
+          {language === "ar" ? "جميع الحقوق محفوظة." : "All rights reserved."}
         </p>
+        <div className="footer-bottom-links">
+          <Link href="/about">{language === "ar" ? "عن المنصة" : "About"}</Link>
+          <Link href="/privacy">{language === "ar" ? "الخصوصية" : "Privacy"}</Link>
+          <Link href="/terms">{language === "ar" ? "الشروط" : "Terms"}</Link>
+        </div>
       </div>
     </footer>
   );

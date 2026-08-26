@@ -18,6 +18,8 @@ export const primary =
     log: env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
   });
 
+export const prisma = primary;
+
 if (env.NODE_ENV !== "production") globalForPrisma.prisma = primary;
 
 // ── Backup: Prisma Accelerate, lazy-init on failover ──────────────────────────

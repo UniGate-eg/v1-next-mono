@@ -57,7 +57,7 @@
 }
 
 /* ── Reset & Base ──────────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; }
 
 html {
     scroll-behavior: smooth;
@@ -65,7 +65,7 @@ html {
     -moz-osx-font-smoothing: grayscale;
 }
 
-body {
+body:not(.admin-body) {
     font-family: var(--font-body);
     background: var(--bg-body);
     color: var(--text-primary);
@@ -74,9 +74,7 @@ body {
     min-height: 100vh;
 }
 
-a { text-decoration: none; color: inherit; cursor: pointer; }
-button { border: none; background: none; cursor: pointer; font-family: inherit; color: inherit; }
-input { border: none; outline: none; font-family: inherit; }
+.public-scope a { text-decoration: none; color: inherit; cursor: pointer; }
 img { max-width: 100%; display: block; }
 ul, ol { list-style: none; }
 

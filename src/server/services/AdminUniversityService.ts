@@ -1,12 +1,17 @@
-import { universityRepository, auditLogRepository } from "../../lib/di";
+import { universityRepository, auditLogRepository } from "@/lib/di";
 import { CreateUniversityInput, UpdateUniversityInput } from "../../schemas/university.schema";
 import { CacheInvalidator } from "../../lib/cache-invalidator";
 
 export class AdminUniversityService {
-  static async createUniversity(actorId: string, data: CreateUniversityInput) {
-    const university = await universityRepository.create(data);
+  static async createUniversity(
+    actorId: string, 
+    data: CreateUniversityInput,
+    repo = universityRepository,
+    audit = auditLogRepository
+  ) {
+    const university = await repo.create(data);
     
-    await auditLogRepository.create({
+    await audit.create({
       actorId,
       action: "CREATE_UNIVERSITY",
       entityType: "University",
@@ -18,13 +23,19 @@ export class AdminUniversityService {
     return university;
   }
 
-  static async updateUniversity(actorId: string, id: string, data: UpdateUniversityInput) {
-    const original = await universityRepository.findById(id);
+  static async updateUniversity(
+    actorId: string, 
+    id: string, 
+    data: UpdateUniversityInput,
+    repo = universityRepository,
+    audit = auditLogRepository
+  ) {
+    const original = await repo.findById(id);
     if (!original) throw new Error("University not found");
 
-    const university = await universityRepository.update(id, data);
+    const university = await repo.update(id, data);
 
-    await auditLogRepository.create({
+    await audit.create({
       universityId: id,
       actorId,
       action: "UPDATE_UNIVERSITY",
@@ -38,22 +49,28 @@ export class AdminUniversityService {
     return university;
   }
 
-  static async archiveUniversity(actorId: string, id: string) {
-    const original = await universityRepository.findById(id);
+  static async archiveUniversity(
+    actorId: string, 
+    id: string,
+    repo = universityRepository,
+    audit = auditLogRepository
+  ) {
+    const original = await repo.findById(id);
     if (!original) throw new Error("University not found");
 
-    await universityRepository.archive(id);
+    await repo.update(id, { id, publishStatus: "ARCHIVED" });
 
-    await auditLogRepository.create({
+    await audit.create({
       universityId: id,
       actorId,
       action: "ARCHIVE_UNIVERSITY",
       entityType: "University",
       entityId: id,
-      beforeState: { publishStatus: original.publishStatus },
+      beforeState: original,
       afterState: { publishStatus: "ARCHIVED" },
     });
 
     CacheInvalidator.invalidateUniversity(original.slug);
+    CacheInvalidator.invalidateGlobalLists();
   }
 }

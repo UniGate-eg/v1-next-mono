@@ -8,18 +8,21 @@ datasource db {
 }
 
 model User {
-  id            String       @id @default(cuid())
-  name          String
-  email         String       @unique
-  emailVerified Boolean      @default(false)
-  image         String?
-  role          UserRole     @default(STUDENT)
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  bookmarks     Bookmark[]
-  suggestions   Suggestion[]
+  id                 String               @id @default(cuid())
+  name               String
+  email              String               @unique
+  emailVerified      Boolean              @default(false)
+  image              String?
+  role               UserRole             @default(STUDENT)
+  status             UserStatus           @default(ACTIVE)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  bookmarks          Bookmark[]
+  suggestions        Suggestion[]
+  roleAssignments    UserRoleAssignment[]
+  adminNotifications AdminNotification[]
 
   @@map("users")
 }
@@ -70,39 +73,41 @@ model Verification {
 }
 
 model University {
-  id             String         @id @default(cuid())
-  slug           String         @unique
-  shortName      String?
-  emoji          String?        @default("🏛️")
-  nameEn         String
-  nameAr         String
-  educationModel EducationModel @default(EGYPTIAN)
-  type           UniversityType @default(PUBLIC)
-  governorate    String
-  city           String?
-  addressEn      String?
-  addressAr      String?
-  overviewEn     String?        @db.Text
-  overviewAr     String?        @db.Text
-  website        String?
-  logoUrl        String?
-  established    Int?
-  qsRanking      String?
-  theRanking     String?
-  phones         String[]       @default([])
-  emails         String[]       @default([])
-  socialLinks    Json?
-  strengthsEn    String[]       @default([])
-  strengthsAr    String[]       @default([])
-  publishStatus  PublishStatus  @default(PUBLISHED)
+  id                String         @id @default(cuid())
+  slug              String         @unique
+  shortName         String?
+  emoji             String?        @default("🏛️")
+  nameEn            String
+  nameAr            String
+  educationModel    EducationModel @default(EGYPTIAN)
+  type              UniversityType @default(PUBLIC)
+  governorate       String
+  city              String?
+  addressEn         String?
+  addressAr         String?
+  overviewEn        String?        @db.Text
+  overviewAr        String?        @db.Text
+  website           String?
+  logoUrl           String?
+  established       Int?
+  qsRanking         String?
+  theRanking        String?
+  phones            String[]       @default([])
+  emails            String[]       @default([])
+  socialLinks       Json?
+  strengthsEn       String[]       @default([])
+  strengthsAr       String[]       @default([])
+  publishStatus     PublishStatus  @default(PUBLISHED)
+  completenessScore Int            @default(0)
 
   // Relationships
-  accreditations Accreditation[]
-  faculties      Faculty[]
-  degreePrograms DegreeProgram[]
-  bookmarks      Bookmark[]
-  suggestions    Suggestion[]
-  auditLogs      AuditLog[]
+  accreditations         Accreditation[]
+  faculties              Faculty[]
+  degreePrograms         DegreeProgram[]
+  bookmarks              Bookmark[]
+  suggestions            Suggestion[]
+  auditLogs              AuditLog[]
+  institutionAssignments InstitutionAssignment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -111,6 +116,8 @@ model University {
   @@index([type])
   @@index([governorate])
   @@index([publishStatus])
+  @@index([publishStatus, updatedAt])
+  @@index([completenessScore])
   @@map("universities")
 }
 
@@ -238,6 +245,98 @@ model Suggestion {
   @@map("suggestions")
 }
 
+// ----------------------------------------------------
+// DYNAMIC RBAC MODELS
+// ----------------------------------------------------
+
+model Role {
+  id              String               @id @default(cuid())
+  key             String               @unique
+  name            String
+  description     String?
+  hierarchyLevel  Int                  @default(100)
+  isSystemDefault Boolean              @default(false)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  permissions     RolePermission[]
+  userAssignments UserRoleAssignment[]
+
+  @@index([hierarchyLevel])
+  @@map("roles")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  domain      String
+  action      String
+  description String?
+  createdAt   DateTime         @default(now())
+  roles       RolePermission[]
+
+  @@index([domain])
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model UserRoleAssignment {
+  id                     String                  @id @default(cuid())
+  userId                 String
+  roleId                 String
+  assignedBy             String
+  assignedAt             DateTime                @default(now())
+  expiresAt              DateTime?
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role                   Role                    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  institutionAssignments InstitutionAssignment[]
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_role_assignments")
+}
+
+model InstitutionAssignment {
+  id                   String             @id @default(cuid())
+  userRoleAssignmentId String
+  universityId         String
+  userRoleAssignment   UserRoleAssignment @relation(fields: [userRoleAssignmentId], references: [id], onDelete: Cascade)
+  university           University         @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@unique([userRoleAssignmentId, universityId])
+  @@index([universityId])
+  @@map("institution_assignments")
+}
+
+model AdminNotification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType
+  link      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("admin_notifications")
+}
+
+// ----------------------------------------------------
+// ENUMS
+// ----------------------------------------------------
+
 enum EducationModel {
   AMERICAN
   GERMAN
@@ -265,6 +364,19 @@ enum UserRole {
   EDITOR
   ADMIN
   SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum NotificationType {
+  NEW_SUGGESTION
+  DRAFT_SUBMITTED
+  MODERATION_DECISION
+  ROLE_CHANGE
+  SYSTEM_ALERT
 }
 
 enum AppStatus {

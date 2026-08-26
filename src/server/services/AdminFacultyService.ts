@@ -1,13 +1,13 @@
-import { auditLogRepository } from "../../lib/di";
+import { AuditLogRepository } from "../repositories/AuditLogRepository";
+import { prisma } from "../../lib/prisma";
 import { CreateFacultyInput, UpdateFacultyInput } from "../../schemas/faculty.schema";
 import { CacheInvalidator } from "../../lib/cache-invalidator";
-import { primary } from "../../lib/prisma";
-import { FacultyMapper } from "../mappers/FacultyMapper";
-import { FacultyDTO } from "../../types/university.types";
+
+const defaultAuditRepo = new AuditLogRepository(prisma);
 
 export class AdminFacultyService {
-  static async createFaculty(actorId: string, data: CreateFacultyInput): Promise<FacultyDTO> {
-    const faculty = await primary.faculty.create({
+  static async createFaculty(actorId: string, data: CreateFacultyInput, auditRepo = defaultAuditRepo) {
+    const faculty = await prisma.faculty.create({
       data: {
         universityId: data.universityId,
         nameEn: data.nameEn,
@@ -15,11 +15,16 @@ export class AdminFacultyService {
         descriptionEn: data.descriptionEn,
         descriptionAr: data.descriptionAr,
         deanName: data.deanName,
-        departments: data.departments,
+        departments: data.departments || [],
+      },
+      include: {
+        university: {
+          select: { slug: true }
+        }
       }
     });
-    
-    await auditLogRepository.create({
+
+    await auditRepo.create({
       universityId: data.universityId,
       actorId,
       action: "CREATE_FACULTY",
@@ -28,24 +33,34 @@ export class AdminFacultyService {
       afterState: data,
     });
 
-    const university = await primary.university.findUnique({ where: { id: data.universityId } });
-    if (university) CacheInvalidator.invalidateUniversity(university.slug);
-
-    return FacultyMapper.toDTO(faculty);
+    if (faculty.university?.slug) {
+      CacheInvalidator.invalidateUniversity(faculty.university.slug);
+    }
+    return faculty;
   }
 
-  static async updateFaculty(actorId: string, id: string, data: UpdateFacultyInput): Promise<FacultyDTO> {
-    const original = await primary.faculty.findUnique({ where: { id } });
+  static async updateFaculty(actorId: string, id: string, data: UpdateFacultyInput, auditRepo = defaultAuditRepo) {
+    const original = await prisma.faculty.findUnique({
+      where: { id },
+      include: { university: { select: { slug: true } } }
+    });
     if (!original) throw new Error("Faculty not found");
 
-    const { id: _ignore, ...updateData } = data;
-    const faculty = await primary.faculty.update({
+    const faculty = await prisma.faculty.update({
       where: { id },
-      data: updateData as any
+      data: {
+        nameEn: data.nameEn,
+        nameAr: data.nameAr,
+        descriptionEn: data.descriptionEn,
+        descriptionAr: data.descriptionAr,
+        deanName: data.deanName,
+        departments: data.departments,
+      },
+      include: { university: { select: { slug: true } } }
     });
 
-    await auditLogRepository.create({
-      universityId: faculty.universityId,
+    await auditRepo.create({
+      universityId: original.universityId,
       actorId,
       action: "UPDATE_FACULTY",
       entityType: "Faculty",
@@ -54,28 +69,35 @@ export class AdminFacultyService {
       afterState: data,
     });
 
-    const university = await primary.university.findUnique({ where: { id: faculty.universityId } });
-    if (university) CacheInvalidator.invalidateUniversity(university.slug);
-
-    return FacultyMapper.toDTO(faculty);
+    if (faculty.university?.slug) {
+      CacheInvalidator.invalidateUniversity(faculty.university.slug);
+    }
+    return faculty;
   }
 
-  static async deleteFaculty(actorId: string, id: string): Promise<void> {
-    const original = await primary.faculty.findUnique({ where: { id } });
+  static async deleteFaculty(actorId: string, id: string, auditRepo = defaultAuditRepo) {
+    const original = await prisma.faculty.findUnique({
+      where: { id },
+      include: { university: { select: { slug: true } } }
+    });
     if (!original) throw new Error("Faculty not found");
 
-    await primary.faculty.delete({ where: { id } });
+    await prisma.faculty.delete({
+      where: { id }
+    });
 
-    await auditLogRepository.create({
+    await auditRepo.create({
       universityId: original.universityId,
       actorId,
       action: "DELETE_FACULTY",
       entityType: "Faculty",
       entityId: id,
       beforeState: original,
+      afterState: null,
     });
 
-    const university = await primary.university.findUnique({ where: { id: original.universityId } });
-    if (university) CacheInvalidator.invalidateUniversity(university.slug);
+    if (original.university?.slug) {
+      CacheInvalidator.invalidateUniversity(original.university.slug);
+    }
   }
 }

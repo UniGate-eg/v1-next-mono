@@ -7,9 +7,9 @@ export class SearchIndexService {
     return path.join(process.cwd(), "public", "search-index.json");
   }
 
-  static async generateIndex(): Promise<void> {
+  static async generateIndex(repo = universityRepository): Promise<void> {
     console.log("Generating search index...");
-    const tokens = await universityRepository.findForSearch();
+    const tokens = await repo.findForSearch();
     
     // Ensure public directory exists
     const publicDir = path.join(process.cwd(), "public");
