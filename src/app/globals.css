@@ -43,3 +43,37 @@ body.rtl .lang-toggle {
 .compare-drawer.show {
   transform: translateY(0) !important;
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Admin Portal CSS Isolation & Modern Theme Enforcements
+   ───────────────────────────────────────────────────────────── */
+.admin-portal-root {
+  color: #0f172a !important;
+  background-color: #f1f5f9 !important;
+  min-height: 100vh;
+}
+
+.admin-portal-root,
+.admin-portal-root *,
+.admin-portal-root *::before,
+.admin-portal-root *::after {
+  box-sizing: border-box;
+}
+
+.admin-portal-root input,
+.admin-portal-root textarea,
+.admin-portal-root select {
+  color: #0f172a;
+  background-color: #ffffff;
+}
+
+.admin-portal-root input:focus,
+.admin-portal-root textarea:focus,
+.admin-portal-root select:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: -1px;
+}
+
+.admin-portal-root button {
+  font-family: inherit;
+}

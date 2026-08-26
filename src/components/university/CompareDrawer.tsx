@@ -2,15 +2,17 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCompareStore } from "@/stores/compareStore";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function CompareDrawer() {
   const { selectedUniversities, clear } = useCompareStore();
   const { language } = useLanguage();
+  const pathname = usePathname();
   const router = useRouter();
 
+  if (pathname?.startsWith("/admin")) return null;
   if (selectedUniversities.length === 0) return null;
 
   return (
@@ -38,17 +40,12 @@ export function CompareDrawer() {
             className="compare-drawer-btn"
             id="compareDrawerBtn"
             onClick={(e) => {
-              if (selectedUniversities.length < 2) {
-                e.preventDefault();
-                alert(
-                  language === "ar"
-                    ? "يرجى اختيار جامعتين على الأقل للمقارنة"
-                    : "Please select at least 2 universities to compare."
-                );
-              }
+              e.preventDefault();
+              const slugs = selectedUniversities.map((u) => u.slug).join(",");
+              router.push(`/compare?universities=${slugs}`);
             }}
           >
-            {language === "ar" ? "قارن الآن 📊" : "Compare Now 📊"}
+            {language === "ar" ? "قارن الآن" : "Compare Now"}
           </Link>
           <button className="compare-drawer-clear" id="compareDrawerClear" onClick={clear}>
             {language === "ar" ? "مسح" : "Clear"}

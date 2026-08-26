@@ -9,7 +9,7 @@ import { PermissionProvider } from "../../contexts/PermissionContext";
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Admin | UniGate CMS & RBAC",
+  title: "Admin | UniGate Operations Console",
   description: "UniGate Administrative Portal & Dynamic Role-Based Access Control",
 };
 
@@ -49,11 +49,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       }}
       initialPermissions={Array.from(userContext.permissions)}
     >
-      <div className="flex min-h-screen bg-slate-100/60 font-sans antialiased text-slate-900">
+      <div className="admin-portal-root flex min-h-screen w-full bg-slate-100/70 font-sans antialiased text-slate-900">
         <AdminSidebar />
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-slate-100/70">
           <AdminHeader />
-          <main className="flex-1 p-6 sm:p-8 overflow-auto">{children}</main>
+          <main className="flex-1 p-6 sm:p-8 overflow-y-auto">{children}</main>
         </div>
       </div>
     </PermissionProvider>
