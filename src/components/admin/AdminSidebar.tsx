@@ -13,12 +13,7 @@ import {
   Bell,
   Sparkles,
   ChevronDown,
-  Layers,
-  Coins,
-  ShieldAlert,
   Zap,
-  CheckCircle2,
-  Plus,
 } from "lucide-react";
 import { usePermissionContext } from "../../contexts/PermissionContext";
 
@@ -79,7 +74,6 @@ export function AdminSidebar() {
     },
   ];
 
-  // Pinned scoped institutions / active governance items
   const pinnedInstitutions = [
     { name: "Cairo University", code: "CU", score: "98.4%", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
     { name: "Ain Shams University", code: "ASU", score: "94.2%", color: "bg-amber-500/20 text-amber-400 border-amber-500/30" },
@@ -87,31 +81,31 @@ export function AdminSidebar() {
   ];
 
   return (
-    <aside className="w-72 flex-shrink-0 bg-[#080A11] border-r border-[#151926] flex flex-col min-h-screen p-5 justify-between select-none">
-      <div className="space-y-6">
-        {/* Top Brand & Profile Switcher */}
+    <aside className="w-80 flex-shrink-0 bg-[#080A11] border-r border-[#151926] flex flex-col min-h-screen p-7 justify-between select-none">
+      <div className="space-y-8">
+        {/* Top Brand */}
         <div className="flex items-center justify-between pb-2">
-          <Link href="/admin" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-lg shadow-purple-500/25 ring-1 ring-white/20">
-              <Zap className="w-5 h-5 fill-current" />
+          <Link href="/admin" className="flex items-center gap-3.5 group">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-xl shadow-purple-500/30 ring-1 ring-white/20">
+              <Zap className="w-6 h-6 fill-current" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-base font-extrabold text-white tracking-tight">UniGate</span>
-                <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-black text-white tracking-tight">UniGate</span>
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
                   PRO
                 </span>
               </div>
-              <p className="text-[10px] text-slate-400 font-medium">Higher Education OS</p>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">Operations Console</p>
             </div>
           </Link>
         </div>
 
-        {/* Segmented Pill Capsule (Stakent Style) */}
-        <div className="p-1 rounded-2xl bg-[#111422] border border-[#1C2236] flex items-center gap-1">
+        {/* Spacious Segmented Pill Capsule */}
+        <div className="p-1.5 rounded-2xl bg-[#111422] border border-[#1C2236] flex items-center gap-1.5">
           <button
             onClick={() => setActiveTab("catalog")}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
               activeTab === "catalog"
                 ? "bg-[#1C2238] text-white shadow-md shadow-black/40 border border-[#2F3854]"
                 : "text-slate-400 hover:text-white"
@@ -121,7 +115,7 @@ export function AdminSidebar() {
           </button>
           <button
             onClick={() => setActiveTab("governance")}
-            className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
               activeTab === "governance"
                 ? "bg-[#1C2238] text-white shadow-md shadow-black/40 border border-[#2F3854]"
                 : "text-slate-400 hover:text-white"
@@ -131,8 +125,8 @@ export function AdminSidebar() {
           </button>
         </div>
 
-        {/* Navigation Items */}
-        <nav className="space-y-1.5">
+        {/* Spacious Navigation List */}
+        <nav className="space-y-2">
           {navItems
             .filter((item) => item.show)
             .map((item) => {
@@ -146,15 +140,15 @@ export function AdminSidebar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-semibold transition-all duration-150 ${
+                  className={`flex items-center justify-between px-4.5 py-3.5 rounded-2xl text-xs font-bold transition-all duration-150 ${
                     isActive
-                      ? "bg-[#151929] text-white shadow-lg shadow-black/50 border border-[#28314A]"
+                      ? "bg-[#151929] text-white shadow-xl shadow-black/50 border border-[#28314A]"
                       : "text-slate-400 hover:bg-[#111422] hover:text-slate-200"
                   }`}
                 >
                   <div className="flex items-center gap-3.5">
                     <Icon
-                      className={`w-4 h-4 transition-colors ${
+                      className={`w-4.5 h-4.5 transition-colors ${
                         isActive ? "text-purple-400" : "text-slate-400"
                       }`}
                     />
@@ -163,7 +157,7 @@ export function AdminSidebar() {
 
                   {item.badge && (
                     <span
-                      className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                      className={`text-[10px] font-black px-2.5 py-0.5 rounded-full ${
                         isActive
                           ? "bg-purple-500/20 text-purple-300 border border-purple-500/40"
                           : "bg-[#171B2B] text-slate-400 border border-[#232A3E]"
@@ -177,33 +171,33 @@ export function AdminSidebar() {
             })}
         </nav>
 
-        {/* Pinned Scoped Institutions (Stakent "Active Staking" list style) */}
-        <div className="pt-2 space-y-3">
-          <div className="flex items-center justify-between px-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            <span>Pinned Institutions</span>
-            <span className="px-1.5 py-0.5 rounded-full bg-[#171B2B] text-slate-300 text-[10px]">
+        {/* Pinned Scoped Institutions */}
+        <div className="pt-2 space-y-3.5">
+          <div className="flex items-center justify-between px-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <span>Pinned Scope</span>
+            <span className="px-2 py-0.5 rounded-full bg-[#171B2B] text-slate-300 text-[10px] font-bold">
               {pinnedInstitutions.length}
             </span>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {pinnedInstitutions.map((inst) => (
               <div
                 key={inst.code}
-                className="p-3 rounded-2xl bg-[#0F121E] border border-[#1A2033] hover:border-[#2B3550] transition-colors flex items-center justify-between cursor-pointer group"
+                className="p-3.5 rounded-2xl bg-[#0F121E] border border-[#1A2033] hover:border-[#2B3550] transition-colors flex items-center justify-between cursor-pointer group"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-7 h-7 rounded-xl flex items-center justify-center font-extrabold text-[11px] border ${inst.color}`}>
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-xs border ${inst.color}`}>
                     {inst.code}
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-200 group-hover:text-white transition-colors">
                       {inst.name}
                     </p>
-                    <p className="text-[10px] text-slate-400">Quality Health</p>
+                    <p className="text-[11px] text-slate-400">Live Health</p>
                   </div>
                 </div>
-                <span className="text-xs font-extrabold text-emerald-400">{inst.score}</span>
+                <span className="text-xs font-black text-emerald-400">{inst.score}</span>
               </div>
             ))}
           </div>
@@ -211,20 +205,20 @@ export function AdminSidebar() {
       </div>
 
       {/* Bottom Glowing Feature Card */}
-      <div className="p-4 rounded-3xl bg-gradient-to-b from-[#18152E] to-[#100D22] border border-[#352B5E] shadow-xl relative overflow-hidden space-y-3">
+      <div className="p-5 rounded-3xl bg-gradient-to-b from-[#18152E] to-[#100D22] border border-[#352B5E] shadow-2xl relative overflow-hidden space-y-3.5 mt-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-purple-400" />
-            <span className="text-xs font-extrabold text-white">Super Admin Tier</span>
+            <ShieldCheck className="w-4.5 h-4.5 text-purple-400" />
+            <span className="text-xs font-black text-white">Super Admin Tier</span>
           </div>
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
         </div>
-        <p className="text-[11px] text-slate-300 leading-relaxed">
-          Platform-level authorization with live PostgreSQL security checks and atomic rollbacks.
+        <p className="text-xs text-slate-300 leading-relaxed">
+          Zero-trust live database authorization with transactional rollback protection.
         </p>
         <Link
           href="/admin/roles"
-          className="block text-center py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold border border-purple-500/40 transition-colors"
+          className="block text-center py-2.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-xs font-bold border border-purple-500/40 transition-colors"
         >
           Manage RBAC Matrix
         </Link>

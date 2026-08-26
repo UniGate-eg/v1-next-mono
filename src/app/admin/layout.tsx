@@ -20,14 +20,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     redirect("/auth/login?redirect=/admin");
   }
 
-  // Load LIVE user permissions from PostgreSQL (Zero-Trust live DB check)
   const userContext = await getUserPermissionsCached(prisma, session.user.id);
 
   if (!userContext || userContext.status === "SUSPENDED") {
     redirect("/?error=suspended");
   }
 
-  // Check if user has at least one administrative capability
   const hasAdminCapability =
     userContext.roles.length > 0 &&
     !userContext.roles.every((r) => r.key === "STUDENT");
@@ -53,8 +51,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-[#07080D]">
           <AdminHeader />
-          <main className="flex-1 p-6 sm:p-10 lg:p-12 overflow-y-auto custom-dark-scrollbar">
-            {children}
+          <main className="flex-1 px-8 sm:px-12 lg:px-16 py-10 lg:py-14 overflow-y-auto custom-dark-scrollbar">
+            <div className="w-full max-w-[1850px] mx-auto">
+              {children}
+            </div>
           </main>
         </div>
       </div>
