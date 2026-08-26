@@ -23,7 +23,7 @@ export function getAdminSidebarData(user?: { name?: string; role?: string }): Si
         href: "/admin/users",
       },
       {
-        icon: "settings",
+        icon: "shieldcheck",
         title: "Dynamic Roles",
         href: "/admin/roles",
       },
@@ -45,14 +45,14 @@ export function getAdminSidebarData(user?: { name?: string; role?: string }): Si
     ],
     accountNavItems: [
       {
-        icon: "settings",
-        title: "RBAC Settings",
-        href: "/admin/roles",
+        icon: "download",
+        title: "Export Center",
+        href: "/admin/export",
       },
       {
-        icon: "shieldcheck",
-        title: "Security Trail",
-        href: "/admin/audit-log",
+        icon: "globe",
+        title: "Public Portal",
+        href: "/",
       },
     ],
   };
