@@ -20,6 +20,9 @@ import {
   Inbox,
   Bell,
   ShieldCheck,
+  Download,
+  Globe,
+  LifeBuoy,
   type LucideIcon,
 } from "lucide-react";
 
@@ -41,6 +44,9 @@ const ICON_MAP: Record<string, LucideIcon | React.ComponentType<{ className?: st
   inbox: Inbox,
   bell: Bell,
   shieldcheck: ShieldCheck,
+  download: Download,
+  globe: Globe,
+  lifebuoy: LifeBuoy,
 };
 
 function resolveIcon(
@@ -153,7 +159,11 @@ export const Sidebar = ({ data = defaultSidebarData }: { data?: SidebarData }) =
         <div className="space-y-1 mb-8">
           {navItems.map((item) => {
             const isSelected = item.href
-              ? pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href))
+              ? item.href === "/"
+                ? pathname === "/"
+                : item.href === "/admin"
+                ? pathname === "/admin"
+                : pathname.startsWith(item.href)
               : selected === item.title;
 
             return (
@@ -171,23 +181,35 @@ export const Sidebar = ({ data = defaultSidebarData }: { data?: SidebarData }) =
           })}
         </div>
 
-        {open && accountNavItems.length > 0 && (
+        {accountNavItems.length > 0 && (
           <div className="border-t border-gray-200 dark:border-gray-800 pt-4 space-y-1">
-            <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-              Account
-            </div>
-            {accountNavItems.map((item) => (
-              <Option
-                key={item.title}
-                Icon={resolveIcon(item.icon, Settings)}
-                title={item.title}
-                href={item.href}
-                selected={item.href ? pathname.startsWith(item.href) : false}
-                setSelected={() => setSelected(item.title)}
-                open={open}
-                notifs={item.notifs}
-              />
-            ))}
+            {open && (
+              <div className="px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                Account & Systems
+              </div>
+            )}
+            {accountNavItems.map((item) => {
+              const isSelected = item.href
+                ? item.href === "/"
+                  ? pathname === "/"
+                  : item.href === "/admin"
+                  ? pathname === "/admin"
+                  : pathname.startsWith(item.href)
+                : selected === item.title;
+
+              return (
+                <Option
+                  key={item.title}
+                  Icon={resolveIcon(item.icon, Settings)}
+                  title={item.title}
+                  href={item.href}
+                  selected={isSelected}
+                  setSelected={() => setSelected(item.title)}
+                  open={open}
+                  notifs={item.notifs}
+                />
+              );
+            })}
           </div>
         )}
       </div>
