@@ -24,31 +24,31 @@ export default async function AdminUniversitiesPage({
   );
 
   return (
-    <div className="space-y-10 pb-20">
-      {/* Spacious Dark Header Banner */}
-      <div className="rounded-[36px] bg-[#101320] border border-[#1C2236] p-10 shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-8">
+    <div className="space-y-8 pb-16">
+      {/* Header Banner */}
+      <div className="rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-purple-400">
+          <div className="flex items-center gap-2 text-xs font-semibold text-purple-600 dark:text-purple-400">
             <Sparkles className="w-4 h-4" />
             <span>Academic Directory Governance</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 tracking-tight mt-1">
             Universities & Institutions Catalog
-          </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-3xl leading-relaxed">
+          </h1>
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1 max-w-2xl leading-relaxed">
             Manage institutional profiles, degree tuitions, bilingual overviews, NAQAAE accreditations, and live completeness scores.
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
-          <span className="px-5 py-2.5 rounded-2xl bg-[#151929] text-slate-300 text-xs font-bold border border-[#232A3E]">
-            {total} Institutions Total
+        <div className="flex items-center gap-3">
+          <span className="px-3.5 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs font-semibold border border-gray-200 dark:border-gray-700">
+            {total} Institutions
           </span>
           <Link
             href="/admin/universities/new"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-[#C4B5FD] hover:bg-[#DDD6FE] text-[#0A0B14] text-xs font-black shadow-xl shadow-purple-500/20 transition-all hover:scale-102"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold shadow-sm transition-all"
           >
-            <Plus className="w-4 h-4 stroke-[3]" /> Add University
+            <Plus className="w-4 h-4" /> Add University
           </Link>
         </div>
       </div>

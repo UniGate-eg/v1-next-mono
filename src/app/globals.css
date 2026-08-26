@@ -44,37 +44,7 @@ body.rtl .lang-toggle {
   transform: translateY(0) !important;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   Luxury Dark Admin Portal Custom Theme (Stakent-Style)
-   ───────────────────────────────────────────────────────────── */
-.admin-dark-theme {
-  background-color: #07080D !important;
-  color: #F8FAFC !important;
-  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  min-height: 100vh;
-}
-
-.admin-dark-theme input,
-.admin-dark-theme textarea,
-.admin-dark-theme select {
-  background-color: #121522;
-  color: #FFFFFF;
-  border: 1px solid #1E2436;
-}
-
-.admin-dark-theme input:focus,
-.admin-dark-theme textarea:focus,
-.admin-dark-theme select:focus {
-  border-color: #A78BFA;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25);
-}
-
-.admin-dark-theme table {
-  color: #F8FAFC;
-}
-
-/* Smooth custom scrollbars for dark theme */
+/* Custom Scrollbars */
 .custom-dark-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
