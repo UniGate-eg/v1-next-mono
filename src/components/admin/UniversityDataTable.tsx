@@ -3,10 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { UniversityDTO } from "../../types/university.types";
-import { Button } from "../ui/button";
 import { Input } from "../ui/input";
-import { Badge } from "../ui/badge";
-import { Edit, Eye, Filter, Plus, Building2, CheckSquare, Square } from "lucide-react";
+import { Edit, Eye, Filter, Plus, Building2, CheckSquare, Square, Search, Sparkles } from "lucide-react";
 import { CompletenessScore } from "./shared/CompletenessScore";
 import { StaleBadge } from "./shared/StaleBadge";
 import { BulkActionBar } from "./shared/BulkActionBar";
@@ -53,149 +51,139 @@ export function UniversityDataTable({ universities, total, currentPage }: Univer
     }
   };
 
-  const canCreate = hasPermission("universities:create_delete");
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Search & Actions Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          <Input
-            placeholder="Search universities by EN or AR name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-[320px] text-xs"
-          />
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-[#101320] p-5 rounded-3xl border border-[#1C2236] shadow-2xl">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-[360px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <input
+              placeholder="Search institutions by English or Arabic name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-11 pr-4 py-2.5 text-xs bg-[#151929] border border-[#222A40] rounded-2xl text-white placeholder:text-slate-500 focus:outline-none focus:border-purple-500"
+            />
+          </div>
+
           <button
             onClick={() => setStaleOnly(!staleOnly)}
-            className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-colors ${
+            className={`px-4 py-2.5 text-xs font-bold rounded-2xl border transition-colors cursor-pointer ${
               staleOnly
-                ? "bg-amber-100 text-amber-800 border-amber-300"
-                : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                : "bg-[#151929] text-slate-400 border-[#222A40] hover:text-white"
             }`}
           >
-            Needs Review
+            Needs Annual Review
           </button>
         </div>
 
-        {canCreate && (
-          <Link href="/admin/universities/new">
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-xs shadow-xs">
-              <Plus className="h-4 w-4 mr-1.5" />
-              Add University
-            </Button>
-          </Link>
-        )}
+        <div className="text-xs font-bold text-slate-400">
+          Showing {filtered.length} of {total} records
+        </div>
       </div>
 
-      {/* Table Container */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
+      {/* Spacious Dark Table */}
+      <div className="rounded-3xl border border-[#1C2236] bg-[#101320] shadow-2xl overflow-hidden">
+        <div className="overflow-x-auto custom-dark-scrollbar">
           <table className="w-full text-sm text-left border-collapse">
-            <thead className="text-[11px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50/80 border-b border-slate-200">
+            <thead className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider bg-[#0C0E18] border-b border-[#1A2033]">
               <tr>
-                <th className="px-4 py-3.5 w-10">
-                  <button onClick={toggleSelectAll} className="text-slate-400 hover:text-slate-600">
+                <th className="px-5 py-4 w-12 text-center">
+                  <button onClick={toggleSelectAll} className="text-slate-500 hover:text-white">
                     {selectedIds.length > 0 && selectedIds.length === filtered.length ? (
-                      <CheckSquare className="w-4 h-4 text-blue-600" />
+                      <CheckSquare className="w-4 h-4 text-purple-400" />
                     ) : (
                       <Square className="w-4 h-4" />
                     )}
                   </button>
                 </th>
-                <th className="px-4 py-3.5">Institution</th>
-                <th className="px-4 py-3.5">Type & Model</th>
-                <th className="px-4 py-3.5">Completeness</th>
-                <th className="px-4 py-3.5">Status</th>
-                <th className="px-4 py-3.5 text-right">Actions</th>
+                <th className="px-5 py-4">Institution Name</th>
+                <th className="px-5 py-4">Category / Model</th>
+                <th className="px-5 py-4">Status</th>
+                <th className="px-5 py-4">Profile Quality</th>
+                <th className="px-5 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
+            <tbody className="divide-y divide-[#161B2B] text-xs">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
-                    No universities found matching filters.
+                  <td colSpan={6} className="py-16 text-center text-slate-500 font-medium">
+                    No institutions match your search filters.
                   </td>
                 </tr>
               ) : (
                 filtered.map((uni) => {
                   const isSelected = selectedIds.includes(uni.id);
-                  const canEditThis = hasPermission("universities:edit_global") || isScopedTo(uni.id);
+                  const canEdit = hasPermission("universities:edit_global") || isScopedTo(uni.id);
 
                   return (
                     <tr
                       key={uni.id}
-                      className={`hover:bg-slate-50/70 transition-colors ${
-                        isSelected ? "bg-blue-50/40" : ""
+                      className={`hover:bg-[#14192A] transition-colors ${
+                        isSelected ? "bg-[#181630]" : ""
                       }`}
                     >
-                      <td className="px-4 py-4">
-                        <button onClick={() => toggleSelect(uni.id)} className="text-slate-400 hover:text-slate-600">
+                      <td className="px-5 py-4 text-center">
+                        <button onClick={() => toggleSelect(uni.id)} className="text-slate-500 hover:text-white">
                           {isSelected ? (
-                            <CheckSquare className="w-4 h-4 text-blue-600" />
+                            <CheckSquare className="w-4 h-4 text-purple-400" />
                           ) : (
                             <Square className="w-4 h-4" />
                           )}
                         </button>
                       </td>
-
-                      <td className="px-4 py-4">
+                      <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl p-1 bg-slate-50 rounded-lg border border-slate-100">{uni.emoji || "🏛️"}</span>
+                          <div className="w-9 h-9 rounded-2xl bg-[#181D30] text-purple-300 border border-[#252E48] flex items-center justify-center font-bold text-xs shrink-0">
+                            {uni.nameEn.slice(0, 2).toUpperCase()}
+                          </div>
                           <div>
-                            <div className="font-bold text-slate-900">{uni.nameEn}</div>
-                            <div className="text-[11px] text-slate-500 font-arabic">{uni.nameAr}</div>
-                            <div className="mt-1">
-                              <StaleBadge updatedAt={(uni as any).updatedAt || new Date()} />
-                            </div>
+                            <div className="font-extrabold text-white text-xs">{uni.nameEn}</div>
+                            <div className="text-[11px] text-slate-400 font-arabic">{uni.nameAr}</div>
                           </div>
                         </div>
                       </td>
-
-                      <td className="px-4 py-4">
-                        <div className="flex flex-col gap-1">
-                          <Badge variant="outline" className="w-fit text-[10px] font-bold">
-                            {uni.type}
-                          </Badge>
-                          <span className="text-[11px] text-slate-500">{uni.educationModel}</span>
-                        </div>
+                      <td className="px-5 py-4 text-slate-300">
+                        <span className="font-bold text-slate-200">{uni.type}</span>
+                        <span className="text-[10px] text-slate-500 ml-1">({uni.educationModel})</span>
                       </td>
-
-                      <td className="px-4 py-4">
-                        <CompletenessScore score={(uni as any).completenessScore ?? 80} size="md" />
-                      </td>
-
-                      <td className="px-4 py-4">
+                      <td className="px-5 py-4">
                         <span
-                          className={`px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
+                          className={`px-2.5 py-1 text-[10px] font-extrabold rounded-full ${
                             uni.publishStatus === "PUBLISHED"
-                              ? "bg-emerald-100 text-emerald-700"
+                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                               : uni.publishStatus === "DRAFT"
-                              ? "bg-amber-100 text-amber-700"
-                              : "bg-slate-100 text-slate-600"
+                              ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                              : "bg-slate-800 text-slate-400 border border-slate-700"
                           }`}
                         >
                           {uni.publishStatus}
                         </span>
                       </td>
-
-                      <td className="px-4 py-4 text-right">
-                        <div className="flex justify-end gap-1.5">
-                          <Link href={`/universities/${uni.slug}`} target="_blank">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700" title="View Public Page">
-                              <Eye className="h-4 w-4" />
-                            </Button>
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-2">
+                          <CompletenessScore score={(uni as any).completenessScore ?? 80} size="sm" />
+                          <StaleBadge updatedAt={(uni as any).updatedAt || new Date()} />
+                        </div>
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link
+                            href={`/universities/${uni.slug}`}
+                            target="_blank"
+                            className="p-2 rounded-xl bg-[#161B2B] hover:bg-[#20273D] text-slate-400 hover:text-white transition-colors"
+                            title="View Public Profile"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
                           </Link>
-                          {canEditThis ? (
-                            <Link href={`/admin/universities/${uni.id}/edit`}>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-800 hover:bg-blue-50" title="Edit Profile">
-                                <Edit className="h-4 w-4" />
-                              </Button>
+                          {canEdit && (
+                            <Link
+                              href={`/admin/universities/${uni.id}/edit`}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 text-xs font-bold transition-colors"
+                            >
+                              <Edit className="w-3.5 h-3.5" /> Edit
                             </Link>
-                          ) : (
-                            <Button variant="ghost" size="icon" disabled className="h-8 w-8 text-slate-300" title="Outside Assigned Scope">
-                              <Edit className="h-4 w-4" />
-                            </Button>
                           )}
                         </div>
                       </td>
@@ -208,29 +196,10 @@ export function UniversityDataTable({ universities, total, currentPage }: Univer
         </div>
       </div>
 
-      {/* Pagination Bar */}
-      <div className="flex items-center justify-between text-xs text-slate-500 px-2">
-        <div>
-          Showing {filtered.length} of {total} institutions
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" disabled={currentPage <= 1}>
-            Previous
-          </Button>
-          <Button variant="outline" size="sm" disabled={filtered.length < 20}>
-            Next
-          </Button>
-        </div>
-      </div>
-
-      {/* Floating Bulk Action Bar */}
       <BulkActionBar
         selectedIds={selectedIds}
+        entityType="University"
         onClearSelection={() => setSelectedIds([])}
-        onSuccess={() => {
-          setSelectedIds([]);
-          router.refresh();
-        }}
       />
     </div>
   );

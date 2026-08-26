@@ -2,7 +2,7 @@
 @import "../styles/unicompass.css";
 @import "../styles/roadmap.css";
 
-/* Additional Next.js and layout utility adjustments */
+/* Reset & Root Setup */
 html, body {
   min-height: 100vh;
   margin: 0;
@@ -33,7 +33,7 @@ body.rtl .lang-toggle {
   margin-right: 16px;
 }
 
-/* Ensure smooth modal and drawer transitions */
+/* Modal & Drawer Transitions */
 .modal-overlay.show {
   display: flex !important;
   opacity: 1 !important;
@@ -45,35 +45,47 @@ body.rtl .lang-toggle {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Admin Portal CSS Isolation & Modern Theme Enforcements
+   Luxury Dark Admin Portal Custom Theme (Stakent-Style)
    ───────────────────────────────────────────────────────────── */
-.admin-portal-root {
-  color: #0f172a !important;
-  background-color: #f1f5f9 !important;
+.admin-dark-theme {
+  background-color: #07080D !important;
+  color: #F8FAFC !important;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   min-height: 100vh;
 }
 
-.admin-portal-root,
-.admin-portal-root *,
-.admin-portal-root *::before,
-.admin-portal-root *::after {
-  box-sizing: border-box;
+.admin-dark-theme input,
+.admin-dark-theme textarea,
+.admin-dark-theme select {
+  background-color: #121522;
+  color: #FFFFFF;
+  border: 1px solid #1E2436;
 }
 
-.admin-portal-root input,
-.admin-portal-root textarea,
-.admin-portal-root select {
-  color: #0f172a;
-  background-color: #ffffff;
+.admin-dark-theme input:focus,
+.admin-dark-theme textarea:focus,
+.admin-dark-theme select:focus {
+  border-color: #A78BFA;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.25);
 }
 
-.admin-portal-root input:focus,
-.admin-portal-root textarea:focus,
-.admin-portal-root select:focus {
-  outline: 2px solid #2563eb;
-  outline-offset: -1px;
+.admin-dark-theme table {
+  color: #F8FAFC;
 }
 
-.admin-portal-root button {
-  font-family: inherit;
+/* Smooth custom scrollbars for dark theme */
+.custom-dark-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.custom-dark-scrollbar::-webkit-scrollbar-track {
+  background: #0B0D14;
+}
+.custom-dark-scrollbar::-webkit-scrollbar-thumb {
+  background: #1F2436;
+  border-radius: 999px;
+}
+.custom-dark-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2D344E;
 }

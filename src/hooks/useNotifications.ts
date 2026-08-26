@@ -24,8 +24,21 @@ export function useNotifications(initialUnreadCount = 0) {
     }
   }, []);
 
+  const markAsReadLocal = (id: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+    );
+    setUnreadCount((prev) => Math.max(0, prev - 1));
+  };
+
+  const markAllAsReadLocal = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    setUnreadCount(0);
+  };
+
   // Poll every 30 seconds for new alerts
   useEffect(() => {
+    fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, [fetchNotifications]);
@@ -36,5 +49,7 @@ export function useNotifications(initialUnreadCount = 0) {
     notifications,
     loading,
     refresh: fetchNotifications,
+    markAsReadLocal,
+    markAllAsReadLocal,
   };
 }

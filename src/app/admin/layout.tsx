@@ -9,8 +9,8 @@ import { PermissionProvider } from "../../contexts/PermissionContext";
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Admin | UniGate Operations Console",
-  description: "UniGate Administrative Portal & Dynamic Role-Based Access Control",
+  title: "UniGate — Operations & RBAC Console",
+  description: "High-performance administrative governance for Egyptian Higher Education",
 };
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     redirect("/auth/login?redirect=/admin");
   }
 
-  // Load LIVE user permissions from PostgreSQL (Zero-Trust)
+  // Load LIVE user permissions from PostgreSQL (Zero-Trust live DB check)
   const userContext = await getUserPermissionsCached(prisma, session.user.id);
 
   if (!userContext || userContext.status === "SUSPENDED") {
@@ -49,11 +49,13 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       }}
       initialPermissions={Array.from(userContext.permissions)}
     >
-      <div className="admin-body admin-portal-root flex min-h-screen w-full bg-[#F8FAFC] font-sans antialiased text-slate-900">
+      <div className="admin-dark-theme min-h-screen w-full flex bg-[#07080D] text-slate-100 antialiased selection:bg-purple-500/30 selection:text-white">
         <AdminSidebar />
-        <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-[#F8FAFC]">
+        <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-[#07080D]">
           <AdminHeader />
-          <main className="flex-1 p-6 sm:p-8 overflow-y-auto bg-[#F8FAFC] text-slate-900">{children}</main>
+          <main className="flex-1 p-6 sm:p-10 lg:p-12 overflow-y-auto custom-dark-scrollbar">
+            {children}
+          </main>
         </div>
       </div>
     </PermissionProvider>
