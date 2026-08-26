@@ -47,12 +47,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       }}
       initialPermissions={Array.from(userContext.permissions)}
     >
-      <div className="admin-dark-theme min-h-screen w-full flex bg-[#07080D] text-slate-100 antialiased selection:bg-purple-500/30 selection:text-white">
+      <div className="admin-dark-theme min-h-screen w-full flex bg-[#07080D] text-slate-100 antialiased selection:bg-purple-500/30 selection:text-white leading-relaxed">
         <AdminSidebar />
         <div className="flex-1 flex flex-col min-w-0 min-h-screen bg-[#07080D]">
           <AdminHeader />
-          <main className="flex-1 px-8 sm:px-12 lg:px-16 py-10 lg:py-14 overflow-y-auto custom-dark-scrollbar">
-            <div className="w-full max-w-[1850px] mx-auto">
+          <main className="flex-1 p-6 sm:p-8 lg:p-10 overflow-y-auto custom-dark-scrollbar">
+            <div className="w-full max-w-7xl mx-auto space-y-6">
               {children}
             </div>
           </main>
