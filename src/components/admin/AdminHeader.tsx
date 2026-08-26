@@ -1,53 +1,67 @@
 "use client";
 
-import { LogOut, UserCircle } from "lucide-react";
-import { Button } from "../ui/button";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { NotificationBell } from "./NotificationBell";
 import { usePermissionContext } from "../../contexts/PermissionContext";
+import {
+  ShieldCheck,
+  Building,
+  ChevronRight,
+  Sparkles,
+  Command,
+} from "lucide-react";
 
 export function AdminHeader() {
-  const { user, isSuperAdmin, isAdmin } = usePermissionContext();
+  const pathname = usePathname();
+  const { user, isSuperAdmin } = usePermissionContext();
 
-  const getRoleBadge = () => {
-    if (isSuperAdmin) return <span className="px-2 py-0.5 text-xs font-semibold rounded-md bg-indigo-100 text-indigo-800 border border-indigo-200">Super Admin</span>;
-    if (isAdmin) return <span className="px-2 py-0.5 text-xs font-semibold rounded-md bg-sky-100 text-sky-800 border border-sky-200">Admin</span>;
-    if (user?.roles.some(r => r.key === "CONTENT_EDITOR")) return <span className="px-2 py-0.5 text-xs font-semibold rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">Content Editor</span>;
-    if (user?.roles.some(r => r.key === "UNIVERSITY_REP")) return <span className="px-2 py-0.5 text-xs font-semibold rounded-md bg-amber-100 text-amber-800 border border-amber-200">University Rep</span>;
-    if (user?.roles.some(r => r.key === "COMMUNITY_MODERATOR")) return <span className="px-2 py-0.5 text-xs font-semibold rounded-md bg-violet-100 text-violet-800 border border-violet-200">Moderator</span>;
-    return <span className="px-2 py-0.5 text-xs font-semibold rounded-md bg-slate-100 text-slate-800">Staff</span>;
+  const getBreadcrumbTitle = (path: string) => {
+    if (path === "/admin") return "Overview";
+    if (path.startsWith("/admin/universities")) return "Universities";
+    if (path.startsWith("/admin/users")) return "User Management";
+    if (path.startsWith("/admin/roles")) return "Roles & Permissions";
+    if (path.startsWith("/admin/suggestions")) return "Suggestion Moderation";
+    if (path.startsWith("/admin/notifications")) return "Notifications";
+    if (path.startsWith("/admin/audit-log")) return "Audit Log";
+    return "Console";
   };
 
   return (
-    <header className="h-16 border-b bg-white px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
-      <div className="flex items-center gap-3">
-        <h1 className="font-semibold text-slate-800 tracking-tight text-lg">UniGate Operations</h1>
-        {getRoleBadge()}
+    <header className="h-18 sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200/80 px-6 sm:px-8 flex items-center justify-between transition-all">
+      {/* Breadcrumbs */}
+      <div className="flex items-center gap-2.5 text-xs text-slate-500">
+        <Link href="/admin" className="font-semibold text-slate-900 hover:text-blue-600 transition-colors">
+          Admin
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+        <span className="font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg">
+          {getBreadcrumbTitle(pathname)}
+        </span>
       </div>
-      
-      <div className="flex items-center gap-4">
-        <NotificationBell />
-        
-        <div className="h-6 w-px bg-slate-200" />
 
-        <div className="flex items-center gap-2">
-          <UserCircle className="w-6 h-6 text-slate-400" />
-          <div className="flex flex-col">
-            <span className="text-xs font-medium text-slate-900">{user?.name || "Admin User"}</span>
-            <span className="text-[10px] text-slate-500">{user?.email}</span>
+      {/* Right Controls */}
+      <div className="flex items-center gap-3.5">
+        {/* Role Badge */}
+        {user?.roles?.[0] && (
+          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200/80 text-xs font-semibold text-slate-700">
+            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+            <span>{user.roles[0].name}</span>
+            {user.assignedUniversityIds !== "GLOBAL" && (
+              <span className="text-[10px] text-slate-500 font-mono">
+                ({Array.isArray(user.assignedUniversityIds) ? user.assignedUniversityIds.length : 0} scoped)
+              </span>
+            )}
           </div>
-        </div>
+        )}
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            window.location.href = "/";
-          }}
-          className="text-xs text-slate-700 hover:text-red-600 hover:bg-red-50 border-slate-200"
-        >
-          <LogOut className="w-3.5 h-3.5 mr-1.5" />
-          Exit CMS
-        </Button>
+        {/* In-App Notifications Drawer */}
+        <NotificationBell />
+
+        {/* User Monogram */}
+        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-slate-900 to-slate-700 text-white flex items-center justify-center font-bold text-xs shadow-xs ring-2 ring-slate-100">
+          {user?.name ? user.name.slice(0, 2).toUpperCase() : "AD"}
+        </div>
       </div>
     </header>
   );

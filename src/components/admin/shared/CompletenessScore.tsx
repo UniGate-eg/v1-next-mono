@@ -8,34 +8,42 @@ interface CompletenessScoreProps {
   showLabel?: boolean;
 }
 
-export function CompletenessScore({ score, size = "md", showLabel = true }: CompletenessScoreProps) {
-  const normalizedScore = Math.min(100, Math.max(0, score || 0));
+export function CompletenessScore({
+  score,
+  size = "md",
+  showLabel = true,
+}: CompletenessScoreProps) {
+  const clamped = Math.min(100, Math.max(0, Math.round(score)));
 
+  // Color config based on health
   const getColor = (s: number) => {
-    if (s >= 80) return { stroke: "#10b981", bg: "bg-emerald-50 text-emerald-700 border-emerald-200" };
-    if (s >= 60) return { stroke: "#f59e0b", bg: "bg-amber-50 text-amber-700 border-amber-200" };
-    return { stroke: "#ef4444", bg: "bg-red-50 text-red-700 border-red-200" };
+    if (s >= 80) return { stroke: "#10B981", bg: "text-emerald-600 bg-emerald-50 border-emerald-200", label: "Complete" };
+    if (s >= 50) return { stroke: "#F59E0B", bg: "text-amber-600 bg-amber-50 border-amber-200", label: "Incomplete" };
+    return { stroke: "#EF4444", bg: "text-rose-600 bg-rose-50 border-rose-200", label: "Critical" };
   };
 
-  const { stroke, bg } = getColor(normalizedScore);
-  const radius = size === "sm" ? 10 : size === "lg" ? 22 : 14;
-  const strokeWidth = size === "sm" ? 2.5 : size === "lg" ? 4 : 3;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (normalizedScore / 100) * circumference;
+  const { stroke, bg, label } = getColor(clamped);
+
+  const radius = size === "sm" ? 14 : size === "lg" ? 28 : 20;
+  const strokeWidth = size === "sm" ? 3 : size === "lg" ? 5 : 4;
   const dimension = (radius + strokeWidth) * 2;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (clamped / 100) * circumference;
 
   return (
-    <div className="inline-flex items-center gap-2">
-      <div className="relative inline-flex items-center justify-center">
-        <svg width={dimension} height={dimension} className="-rotate-90">
+    <div className="inline-flex items-center gap-2.5 select-none" title={`Profile Quality: ${clamped}% (${label})`}>
+      <div className="relative flex items-center justify-center" style={{ width: dimension, height: dimension }}>
+        <svg className="transform -rotate-90" width={dimension} height={dimension}>
+          {/* Background circle */}
           <circle
             cx={dimension / 2}
             cy={dimension / 2}
             r={radius}
-            stroke="#e2e8f0"
+            stroke="#E2E8F0"
             strokeWidth={strokeWidth}
             fill="transparent"
           />
+          {/* Progress circle */}
           <circle
             cx={dimension / 2}
             cy={dimension / 2}
@@ -46,17 +54,21 @@ export function CompletenessScore({ score, size = "md", showLabel = true }: Comp
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
             fill="transparent"
-            className="transition-all duration-500 ease-out"
+            className="transition-all duration-700 ease-out"
           />
         </svg>
-        <span className={`absolute text-[10px] font-bold ${normalizedScore >= 80 ? "text-emerald-700" : normalizedScore >= 60 ? "text-amber-700" : "text-red-700"}`}>
-          {size !== "sm" && `${normalizedScore}%`}
+        <span
+          className={`absolute font-bold text-slate-900 ${
+            size === "sm" ? "text-[9px]" : size === "lg" ? "text-xs" : "text-[10px]"
+          }`}
+        >
+          {clamped}%
         </span>
       </div>
 
       {showLabel && (
-        <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded-md border ${bg}`}>
-          {normalizedScore >= 80 ? "Complete" : normalizedScore >= 60 ? "Needs Info" : "Incomplete"}
+        <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold border ${bg}`}>
+          {label}
         </span>
       )}
     </div>

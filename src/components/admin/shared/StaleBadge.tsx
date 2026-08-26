@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Clock } from "lucide-react";
+import { AlertCircle, Clock } from "lucide-react";
 import { CompletenessScoreEngine } from "../../../server/services/CompletenessScoreEngine";
 
 interface StaleBadgeProps {
@@ -15,10 +15,10 @@ export function StaleBadge({ updatedAt }: StaleBadgeProps) {
 
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-50 text-amber-800 border border-amber-200"
-      title={`Last updated ${new Date(updatedAt).toLocaleDateString()} (>6 months ago)`}
+      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80 shadow-2xs"
+      title="Record has not been modified in >6 months. Annual verification recommended."
     >
-      <Clock className="w-3 h-3 text-amber-600" />
+      <Clock className="w-3 h-3 text-amber-600 animate-pulse" />
       Needs Annual Review
     </span>
   );
