@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { universityRepository } from "@/lib/di";
+import { getPostHogClient } from "@/lib/posthog-server";
 import { Badge } from "@/components/ui/badge";
 import { CompareToggleButton } from "@/components/university/CompareToggleButton";
 import { SuggestionDialog } from "@/components/university/SuggestionDialog";
@@ -57,6 +58,20 @@ export default async function UniversityDetailPage({ params }: UniversityPagePro
   if (!university) {
     notFound();
   }
+
+  // Track server-side page view for the university detail page
+  const phClient = getPostHogClient();
+  phClient.capture({
+    distinctId: `anonymous-university-view-${university.id}`,
+    event: "university_detail_viewed",
+    properties: {
+      university_id: university.id,
+      university_slug: slug,
+      university_type: university.type,
+      university_governorate: university.governorate,
+    },
+  });
+  await phClient.flush();
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
