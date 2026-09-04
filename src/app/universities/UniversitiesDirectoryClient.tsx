@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { UniversityCard } from "@/components/university/UniversityCard";
@@ -67,6 +68,15 @@ export function UniversitiesDirectoryClient({ initialUniversities = [] }: Univer
   const { language, t } = useLanguage();
   const { index: universitiesDatabase } = useUniversitySearch(initialUniversities);
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<{
