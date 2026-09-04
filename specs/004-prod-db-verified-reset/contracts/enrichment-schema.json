@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UniversityEnrichmentRecord",
+  "type": "object",
+  "required": [
+    "shortName",
+    "nameAr",
+    "governorate",
+    "type",
+    "educationModel"
+  ],
+  "properties": {
+    "shortName": {
+      "type": "string"
+    },
+    "nameAr": {
+      "type": "string"
+    },
+    "governorate": {
+      "type": "string"
+    },
+    "city": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "PUBLIC",
+        "PRIVATE",
+        "NATIONAL",
+        "INTERNATIONAL"
+      ]
+    },
+    "educationModel": {
+      "type": "string",
+      "enum": [
+        "AMERICAN",
+        "GERMAN",
+        "BRITISH",
+        "EGYPTIAN",
+        "FRENCH",
+        "CANADIAN"
+      ]
+    },
+    "website": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "established": {
+      "type": [
+        "number",
+        "null"
+      ]
+    }
+  }
+}
