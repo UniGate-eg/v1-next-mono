@@ -15,10 +15,10 @@
 
 **Purpose**: Establish ETL interfaces, type contracts, and foundational abstractions for the SOLID pipeline.
 
-- [ ] T001 [P] Define pipeline step contracts, logger interfaces, and context in `src/server/etl/interfaces/IPipelineStep.ts`
-- [ ] T002 [P] Define workbook parser and row DTO interfaces in `src/server/etl/interfaces/IWorkbookParser.ts`
-- [ ] T003 [P] Define snapshot manager and manifest interfaces in `src/server/etl/interfaces/ISnapshotManager.ts`
-- [ ] T004 [P] Define bilingual enrichment provider interface in `src/server/etl/interfaces/IEnrichmentProvider.ts`
+- [x] T001 [P] Define pipeline step contracts, logger interfaces, and context in `src/server/etl/interfaces/IPipelineStep.ts`
+- [x] T002 [P] Define workbook parser and row DTO interfaces in `src/server/etl/interfaces/IWorkbookParser.ts`
+- [x] T003 [P] Define snapshot manager and manifest interfaces in `src/server/etl/interfaces/ISnapshotManager.ts`
+- [x] T004 [P] Define bilingual enrichment provider interface in `src/server/etl/interfaces/IEnrichmentProvider.ts`
 
 ---
 
@@ -28,11 +28,11 @@
 
 **⚠️ CRITICAL**: No user story ingestion or execution can occur until this phase is verified.
 
-- [ ] T005 [P] Create audited bilingual metadata dictionary for all 43 institutions in `src/server/etl/BilingualEnrichmentProvider.ts`
-- [ ] T006 [P] Implement SheetJS-based workbook parser in `src/server/etl/ExcelWorkbookParser.ts`
-- [ ] T007 [P] Implement catalog Zod validator and slug generation engine in `src/server/etl/CatalogValidator.ts`
-- [ ] T008 [P] Implement unit tests for workbook parsing in `tests/unit/etl/parser.test.ts`
-- [ ] T009 [P] Implement unit tests for catalog validation and enrichment in `tests/unit/etl/validator.test.ts`
+- [x] T005 [P] Create audited bilingual metadata dictionary for all 43 institutions in `src/server/etl/BilingualEnrichmentProvider.ts`
+- [x] T006 [P] Implement SheetJS-based workbook parser in `src/server/etl/ExcelWorkbookParser.ts`
+- [x] T007 [P] Implement catalog Zod validator and slug generation engine in `src/server/etl/CatalogValidator.ts`
+- [x] T008 [P] Implement unit tests for workbook parsing in `tests/unit/etl/parser.test.ts`
+- [x] T009 [P] Implement unit tests for catalog validation and enrichment in `tests/unit/etl/validator.test.ts`
 
 **Checkpoint**: Foundation ready — parser, validator, and enrichment pass all unit tests.
 
@@ -44,11 +44,11 @@
 
 **Independent Test**: Execute `npx tsx prisma/etl/reset-verified-catalog.ts --dry-run` and verify that exactly 43 universities, 381 faculties, and 1,448 programs are validated with 0 relational errors and advisory lock capability confirmed.
 
-- [ ] T010 [US1] Implement SRE-grade `StructuredLogger` emitting newline-delimited JSON in `src/server/etl/TransactionalResetPipeline.ts`
-- [ ] T011 [US1] Implement `AdvisoryLockStep` acquiring `pg_try_advisory_lock(42891402)` with unconditional unlock compensation in `src/server/etl/TransactionalResetPipeline.ts`
-- [ ] T012 [US1] Implement `CatalogResetAndIngestionStep` with split transactions (TX-A purge in FK-safe order, TX-B chunked batch insert) and snapshot rollback compensation in `src/server/etl/TransactionalResetPipeline.ts`
-- [ ] T013 [US1] Implement `TransactionalResetPipeline` orchestrator with dependency injection and reverse saga compensation in `src/server/etl/TransactionalResetPipeline.ts`
-- [ ] T014 [US1] Implement enterprise CLI entry point supporting `--dry-run`, `--confirm-production`, and mutex error handling in `prisma/etl/reset-verified-catalog.ts`
+- [x] T010 [US1] Implement SRE-grade `StructuredLogger` emitting newline-delimited JSON in `src/server/etl/TransactionalResetPipeline.ts`
+- [x] T011 [US1] Implement `AdvisoryLockStep` acquiring `pg_try_advisory_lock(42891402)` with unconditional unlock compensation in `src/server/etl/TransactionalResetPipeline.ts`
+- [x] T012 [US1] Implement `CatalogResetAndIngestionStep` with split transactions (TX-A purge in FK-safe order, TX-B chunked batch insert) and snapshot rollback compensation in `src/server/etl/TransactionalResetPipeline.ts`
+- [x] T013 [US1] Implement `TransactionalResetPipeline` orchestrator with dependency injection and reverse saga compensation in `src/server/etl/TransactionalResetPipeline.ts`
+- [x] T014 [US1] Implement enterprise CLI entry point supporting `--dry-run`, `--confirm-production`, and mutex error handling in `prisma/etl/reset-verified-catalog.ts`
 
 **Checkpoint**: User Story 1 MVP complete — transactional reset executes safely with advisory lock protection and split transaction windows.
 
@@ -60,9 +60,9 @@
 
 **Independent Test**: Navigate to `/`, `/universities`, and `/majors` post-reset to verify that cards, search filters, and profile routes render with HTTP 200 and zero broken links.
 
-- [ ] T015 [US2] Implement ISR cache revalidation (`revalidateTag`, `revalidatePath`) and search cache flusher in `src/server/etl/NextCacheInvalidationService.ts`
-- [ ] T016 [US2] Implement `CacheInvalidationStep` integrating cache flushing into the pipeline orchestrator in `src/server/etl/TransactionalResetPipeline.ts`
-- [ ] T017 [US2] Generate and synchronize static public search token catalog in `public/search-index.json`
+- [x] T015 [US2] Implement ISR cache revalidation (`revalidateTag`, `revalidatePath`) and search cache flusher in `src/server/etl/NextCacheInvalidationService.ts`
+- [x] T016 [US2] Implement `CacheInvalidationStep` integrating cache flushing into the pipeline orchestrator in `src/server/etl/TransactionalResetPipeline.ts`
+- [x] T017 [US2] Generate and synchronize static public search token catalog in `public/search-index.json`
 
 **Checkpoint**: User Story 2 complete — Next.js ISR caches refreshed and public search indexes accurately reflect all 43 verified institutions.
 
@@ -74,10 +74,10 @@
 
 **Independent Test**: Trigger `--backup-only`, verify JSON dumps and SHA-256 manifest exist in `backups/`, then test `--rollback <snapshotId>` restores database state.
 
-- [ ] T018 [US3] Implement catalog table JSON snapshot exporter and SHA-256 manifest generator in `src/server/etl/PostgresSnapshotManager.ts`
-- [ ] T019 [US3] Implement snapshot restoration and checksum verification engine in `src/server/etl/SnapshotRollbackService.ts`
-- [ ] T020 [US3] Implement `PreflightSnapshotStep` integrating pre-reset backups into the pipeline in `src/server/etl/TransactionalResetPipeline.ts`
-- [ ] T021 [US3] Wire `--backup-only`, `--list-backups`, and `--rollback <snapshotId>` commands into `prisma/etl/reset-verified-catalog.ts`
+- [x] T018 [US3] Implement catalog table JSON snapshot exporter and SHA-256 manifest generator in `src/server/etl/PostgresSnapshotManager.ts`
+- [x] T019 [US3] Implement snapshot restoration and checksum verification engine in `src/server/etl/SnapshotRollbackService.ts`
+- [x] T020 [US3] Implement `PreflightSnapshotStep` integrating pre-reset backups into the pipeline in `src/server/etl/TransactionalResetPipeline.ts`
+- [x] T021 [US3] Wire `--backup-only`, `--list-backups`, and `--rollback <snapshotId>` commands into `prisma/etl/reset-verified-catalog.ts`
 
 **Checkpoint**: User Story 3 complete — disaster recovery snapshot and automated rollback guarantee sub-60-second recovery SLA.
 
@@ -89,10 +89,10 @@
 
 **Independent Test**: Inspect `audit_logs` table for `CATALOG_RESET` entry and verify Super Admin access to catalog management in the Admin Dashboard.
 
-- [ ] T022 [P] [US4] Implement post-ingestion referential integrity audit (43 unis, 381 faculties, 1448 programs, 0 orphans) in `src/server/etl/PostIngestionAudit.ts`
-- [ ] T023 [US4] Implement `PostIngestionAuditStep` integrating automated integrity verification into the pipeline in `src/server/etl/TransactionalResetPipeline.ts`
-- [ ] T024 [US4] Implement `SystemAuditLogStep` recording `CATALOG_RESET` with pre/post record counts in `src/server/etl/TransactionalResetPipeline.ts`
-- [ ] T025 [P] [US4] Implement unit tests for post-ingestion integrity audit and orphan detection in `tests/unit/etl/audit.test.ts`
+- [x] T022 [P] [US4] Implement post-ingestion referential integrity audit (43 unis, 381 faculties, 1448 programs, 0 orphans) in `src/server/etl/PostIngestionAudit.ts`
+- [x] T023 [US4] Implement `PostIngestionAuditStep` integrating automated integrity verification into the pipeline in `src/server/etl/TransactionalResetPipeline.ts`
+- [x] T024 [US4] Implement `SystemAuditLogStep` recording `CATALOG_RESET` with pre/post record counts in `src/server/etl/TransactionalResetPipeline.ts`
+- [x] T025 [P] [US4] Implement unit tests for post-ingestion integrity audit and orphan detection in `tests/unit/etl/audit.test.ts`
 
 **Checkpoint**: User Story 4 complete — referential integrity guaranteed and SOC2-compliant audit records generated.
 
@@ -102,11 +102,11 @@
 
 **Purpose**: End-to-end validation, documentation updates, and operational runbook dry run.
 
-- [ ] T026 [P] Update npm execution script `"db:reset:verified"` in `package.json`
-- [ ] T027 Run full test suite across all ETL components via `npx vitest run tests/unit/etl/`
-- [ ] T028 Perform full dry-run simulation using `npx tsx prisma/etl/reset-verified-catalog.ts --dry-run`
-- [ ] T029 Execute TypeScript type-check with zero errors via `npx tsc --noEmit`
-- [ ] T030 Document SRE operational runbook and disaster recovery drill in `specs/004-prod-db-verified-reset/quickstart.md`
+- [x] T026 [P] Update npm execution script `"db:reset:verified"` in `package.json`
+- [x] T027 Run full test suite across all ETL components via `npx vitest run tests/unit/etl/`
+- [x] T028 Perform full dry-run simulation using `npx tsx prisma/etl/reset-verified-catalog.ts --dry-run`
+- [x] T029 Execute TypeScript type-check with zero errors via `npx tsc --noEmit`
+- [x] T030 Document SRE operational runbook and disaster recovery drill in `specs/004-prod-db-verified-reset/quickstart.md`
 
 ---
 
