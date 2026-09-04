@@ -17,7 +17,7 @@
  *   - SystemAuditLogStep writes SOC2-compliant CATALOG_RESET record to audit_logs
  */
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import {
   IPipelineStep,
   PipelineContext,
@@ -58,7 +58,7 @@ export interface IAuditService {
 }
 
 export interface ICacheInvalidationService {
-  invalidateCatalogCaches(): Promise<void>;
+  invalidateCatalogCaches(): Promise<unknown>;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -418,7 +418,7 @@ class SystemAuditLogStep implements IPipelineStep {
           action: "CATALOG_RESET",
           entityType: "University",
           entityId: "BULK",
-          beforeState: null, // State captured in snapshot manifest
+          beforeState: Prisma.JsonNull, // State captured in snapshot manifest
           afterState: {
             universitiesIngested: ctx.universitiesIngested ?? 0,
             facultiesIngested: ctx.facultiesIngested ?? 0,
