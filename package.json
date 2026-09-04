@@ -16,6 +16,7 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/etl/seed-deep.ts",
     "db:seed-deep": "tsx prisma/etl/seed-deep.ts",
+    "db:reset:verified": "tsx prisma/etl/reset-verified-catalog.ts",
     "generate-index": "tsx scripts/generate-search-index.ts",
     "type-check": "tsc --noEmit"
   },
