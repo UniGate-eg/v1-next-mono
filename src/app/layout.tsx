@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Cairo } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "@/components/providers/QueryProvider";
-import { Navbar } from "@/components/layout/Navbar";
+import Header from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { CompareDrawer } from "@/components/university/CompareDrawer";
 
@@ -34,7 +34,7 @@ export default function RootLayout({
       <body className="min-flex min-h-screen flex-col bg-slate-50 text-slate-900 antialiased font-sans dark:bg-slate-950 dark:text-slate-50">
         <AppProviders>
           <div className="flex min-h-screen flex-col">
-            <Navbar />
+            <Header />
             <main className="flex-1">{children}</main>
             <Footer />
             <CompareDrawer />
