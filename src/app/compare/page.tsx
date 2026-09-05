@@ -5,6 +5,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useCompareStore } from "@/stores/compareStore";
 import Link from "next/link";
+import posthog from "posthog-js";
 
 export default function ComparePage() {
   const { language } = useLanguage();
@@ -128,7 +129,15 @@ export default function ComparePage() {
                 <button
                   key={uni.id}
                   className={`compare-uni-btn ${isSelected ? "selected" : ""}`}
-                  onClick={() => toggle(String(uni.id))}
+                  onClick={() => {
+                    const wasSelected = isSelected;
+                    toggle(String(uni.id));
+                    posthog.capture("university_compared", {
+                      university_id: String(uni.id),
+                      action: wasSelected ? "removed" : "added",
+                      total_selected: wasSelected ? selectedIds.length - 1 : selectedIds.length + 1,
+                    });
+                  }}
                 >
                   <span className="check-indicator"></span>
                   <span>{uni.emoji || "🏛️"}</span>

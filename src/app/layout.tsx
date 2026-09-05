@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Cairo } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AppProviders } from "@/components/providers/QueryProvider";
 import Header from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -40,6 +42,8 @@ export default function RootLayout({
             <CompareDrawer />
           </div>
         </AppProviders>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { signIn, signUp } from "@/lib/auth-client";
+import posthog from "posthog-js";
 import { getSafeRedirectUrl } from "@/lib/auth/safe-redirect";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -230,6 +231,13 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
           );
         } else {
           toast.success(isAr ? "أهلاً بك مجدداً في UniGate!" : "Welcome back to UniGate!");
+          // Identify the authenticated user in PostHog
+          posthog.identify(res.data?.user?.id ?? email, {
+            name: res.data?.user?.name,
+          });
+          posthog.capture("user_logged_in", {
+            provider: "email",
+          });
           setTimeout(() => {
             window.location.href = targetUrl;
           }, 300);
@@ -255,6 +263,13 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
           );
         } else {
           toast.success(isAr ? "تم إنشاء الحساب بنجاح! مرحباً بك في UniGate." : "Account created successfully!");
+          // Identify the new user in PostHog and track signup
+          posthog.identify(res.data?.user?.id ?? email, {
+            name,
+          });
+          posthog.capture("user_signed_up", {
+            provider: "email",
+          });
           setTimeout(() => {
             window.location.href = targetUrl;
           }, 300);
@@ -268,6 +283,10 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
   };
 
   const handleSocialAuth = async (provider: "Google" | "GitHub" | "Apple") => {
+    posthog.capture("social_auth_initiated", {
+      provider: provider.toLowerCase(),
+      mode: isLogin ? "login" : "signup",
+    });
     try {
       const providerId = provider.toLowerCase() as "google" | "github" | "apple";
       await signIn.social({

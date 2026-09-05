@@ -9,6 +9,7 @@ import {
 } from "@/server/actions/bookmark.actions";
 import type { AppStatus } from "@/schemas/bookmark.schema";
 import { toast } from "sonner";
+import posthog from "posthog-js";
 
 export const BOOKMARKS_QUERY_KEY = ["bookmarks"];
 
@@ -32,9 +33,13 @@ export function useBookmarks() {
       if (!res.success) throw new Error(res.error);
       return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: BOOKMARKS_QUERY_KEY });
       toast.success("University added to your admissions tracker!");
+      posthog.capture("university_bookmarked", {
+        university_id: variables.universityId,
+        initial_status: variables.status ?? "INTERESTED",
+      });
     },
     onError: (err) => {
       toast.error(err.message || "Failed to save bookmark.");
@@ -66,6 +71,14 @@ export function useBookmarks() {
 
       return { previous };
     },
+    onSuccess: (data, variables) => {
+      if (variables.notes !== undefined) {
+        posthog.capture("application_note_saved", {
+          bookmark_id: variables.bookmarkId,
+          has_notes: Boolean(variables.notes),
+        });
+      }
+    },
     onError: (err, _, context) => {
       if (context?.previous) {
         queryClient.setQueryData(BOOKMARKS_QUERY_KEY, context.previous);
@@ -83,9 +96,12 @@ export function useBookmarks() {
       if (!res.success) throw new Error(res.error);
       return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (data, bookmarkId) => {
       queryClient.invalidateQueries({ queryKey: BOOKMARKS_QUERY_KEY });
       toast.success("Removed from application tracker.");
+      posthog.capture("university_bookmark_deleted", {
+        bookmark_id: bookmarkId,
+      });
     },
     onError: (err) => {
       toast.error(err.message || "Failed to delete bookmark.");

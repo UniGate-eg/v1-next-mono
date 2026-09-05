@@ -16,6 +16,7 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/etl/seed-deep.ts",
     "db:seed-deep": "tsx prisma/etl/seed-deep.ts",
+    "db:reset:verified": "tsx prisma/etl/reset-verified-catalog.ts",
     "generate-index": "tsx scripts/generate-search-index.ts",
     "type-check": "tsc --noEmit"
   },
@@ -32,6 +33,8 @@
     "@t3-oss/env-nextjs": "^0.12.0",
     "@tanstack/react-query": "^5.66.0",
     "@tanstack/react-query-devtools": "^5.66.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "better-auth": "^1.1.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -41,6 +44,9 @@
     "next": "^15.1.7",
     "pg": "^8.13.3",
     "radix-ui": "^1.6.7",
+    "posthog-js": "^1.257.0",
+    "posthog-node": "^4.17.0",
+
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",

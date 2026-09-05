@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
+import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { UniversityCard } from "@/components/university/UniversityCard";
@@ -67,6 +68,15 @@ export function UniversitiesDirectoryClient({ initialUniversities = [] }: Univer
   const { language, t } = useLanguage();
   const { index: universitiesDatabase } = useUniversitySearch(initialUniversities);
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState<{
@@ -295,7 +305,16 @@ export function UniversitiesDirectoryClient({ initialUniversities = [] }: Univer
                 placeholder={language === "ar" ? "البحث بالاسم، الموقع، التخصص..." : "Search by name, rank, location…"}
                 autoComplete="off"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+                  const q = e.target.value.trim();
+                  if (q.length >= 2) {
+                    searchDebounceRef.current = setTimeout(() => {
+                      posthog.capture("university_searched", { query_length: q.length });
+                    }, 800);
+                  }
+                }}
               />
             </div>
             <div className="filter-sort">
@@ -500,7 +519,14 @@ export function UniversitiesDirectoryClient({ initialUniversities = [] }: Univer
             <UniversityCard
               key={uni.id}
               university={uni}
-              onViewDetails={() => setSelectedUniModal(uni)}
+              onViewDetails={() => {
+                posthog.capture("university_card_viewed", {
+                  university_id: String(uni.id),
+                  university_type: uni.type,
+                  university_city: uni.city || uni.governorate,
+                });
+                setSelectedUniModal(uni);
+              }}
             />
           ))}
         </div>

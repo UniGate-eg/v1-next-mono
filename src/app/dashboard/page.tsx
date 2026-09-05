@@ -8,6 +8,7 @@ import { NoteDialog } from "@/components/dashboard/NoteDialog";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 import Link from "next/link";
 import type { AppStatus } from "@/schemas/bookmark.schema";
+import posthog from "posthog-js";
 
 const statusToColMap: Record<string, string> = {
   INTERESTED: "shortlisted",
@@ -77,8 +78,13 @@ export default function DashboardPage() {
     }
   });
 
-  const handleStageChange = (bookmarkId: string, newCol: string) => {
+  const handleStageChange = (bookmarkId: string, newCol: string, universityId?: string) => {
     const newStatus = colToStatusMap[newCol] || "INTERESTED";
+    posthog.capture("application_stage_updated", {
+      new_stage: newCol,
+      new_status: newStatus,
+      university_id: universityId,
+    });
     updateBookmark({
       bookmarkId,
       status: newStatus,
@@ -226,7 +232,7 @@ export default function DashboardPage() {
                             <div style={{ display: "flex", gap: "4px" }}>
                               {statusKey !== "shortlisted" && (
                                 <button
-                                  onClick={() => handleStageChange(bookmark.id, "shortlisted")}
+                                  onClick={() => handleStageChange(bookmark.id, "shortlisted", String(uni.id))}
                                   style={{
                                     fontSize: "11px",
                                     padding: "3px 8px",
@@ -242,7 +248,7 @@ export default function DashboardPage() {
                               )}
                               {statusKey !== "applied" && (
                                 <button
-                                  onClick={() => handleStageChange(bookmark.id, "applied")}
+                                  onClick={() => handleStageChange(bookmark.id, "applied", String(uni.id))}
                                   style={{
                                     fontSize: "11px",
                                     padding: "3px 8px",
@@ -258,7 +264,7 @@ export default function DashboardPage() {
                               )}
                               {statusKey !== "accepted" && (
                                 <button
-                                  onClick={() => handleStageChange(bookmark.id, "accepted")}
+                                  onClick={() => handleStageChange(bookmark.id, "accepted", String(uni.id))}
                                   style={{
                                     fontSize: "11px",
                                     padding: "3px 8px",
