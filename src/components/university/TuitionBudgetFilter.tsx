@@ -97,26 +97,30 @@ export function TuitionBudgetFilter({
   const minPercent = (priceMin / maxLimit) * 100;
   const maxPercent = (priceMax / maxLimit) * 100;
 
+  // Min thumb goes on top of max thumb only when they overlap/bunch up,
+  // so the inner handle can still be separated and dragged.
+  const minOnTop = priceMin > priceMax - 20000;
+
   return (
-    <div className="w-full bg-slate-50/80 dark:bg-slate-900/60 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-800 backdrop-blur-sm shadow-sm transition-all">
+    <div className="w-full bg-slate-50/80 dark:bg-slate-900/60 rounded-2xl p-4 sm:p-5 border border-slate-200/80 dark:border-slate-800 backdrop-blur-sm shadow-sm transition-all">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold shrink-0">
             <Banknote className="w-4 h-4" />
           </div>
           <div>
             <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
               {isArabic ? "ميزانية المصروفات السنوية" : "Annual Tuition Budget"}
-              <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400">
+              <span className="text-[11px] font-normal text-slate-500 dark:text-slate-400 hidden sm:inline">
                 ({isArabic ? "جنيه مصري / سنة" : "EGP / Year"})
               </span>
             </h4>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-semibold tracking-tight shadow-2xs">
+        <div className="flex items-center justify-start sm:justify-end gap-2">
+          <div className="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/70 border border-emerald-300 dark:border-emerald-800/80 text-emerald-800 dark:text-emerald-300 text-xs font-semibold tracking-tight shadow-2xs truncate max-w-[180px] sm:max-w-none">
             {priceMin === 0 && priceMax >= maxLimit
               ? isArabic
                 ? "جميع الأسعار"
@@ -127,27 +131,30 @@ export function TuitionBudgetFilter({
           {isFiltered && (
             <button
               onClick={onReset}
-              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
               title={isArabic ? "إعادة ضبط الميزانية" : "Reset budget filter"}
             >
               <RotateCcw className="w-3 h-3" />
-              <span className="text-[11px]">{isArabic ? "إعادة ضبط" : "Reset"}</span>
+              <span className="text-[11px] hidden sm:inline">{isArabic ? "إعادة ضبط" : "Reset"}</span>
             </button>
           )}
         </div>
       </div>
 
       {/* Preset Quick-Pill Chips */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-4 scrollbar-none">
+      <div
+        className="flex items-center gap-1.5 overflow-x-auto overscroll-x-contain pb-2 mb-4 -mx-1 px-1 scrollbar-none"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         {PRESET_TIERS.map((tier) => {
           const isSelected = activePreset?.id === tier.id;
           return (
             <button
               key={tier.id}
               onClick={() => onPriceChange(tier.min, tier.max)}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer min-h-8 ${
                 isSelected
-                  ? "bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-xs scale-102"
+                  ? "bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-xs scale-105"
                   : "bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-100/80 dark:hover:bg-slate-800"
               }`}
             >
@@ -159,7 +166,7 @@ export function TuitionBudgetFilter({
       </div>
 
       {/* Visual Histogram Density Bars */}
-      <div className="relative h-9 flex items-end gap-1 px-2 mb-1 pointer-events-none opacity-85">
+      <div className="relative h-7 sm:h-9 flex items-end gap-[3px] sm:gap-1 px-1 sm:px-2 mb-1 pointer-events-none opacity-85">
         {DENSITY_BARS.map((height, idx) => {
           const barPercent = (idx / (DENSITY_BARS.length - 1)) * 100;
           const isInRange = barPercent >= minPercent && barPercent <= maxPercent;
@@ -180,20 +187,21 @@ export function TuitionBudgetFilter({
       </div>
 
       {/* Dual Slider Control */}
-      <div className="relative py-2 flex items-center">
+      <div className="relative py-3 sm:py-2 flex items-center">
         {/* Track background */}
-        <div className="absolute left-0 right-0 h-2 bg-slate-200 dark:bg-slate-800 rounded-full"></div>
+        <div className="absolute left-0 right-0 h-2 bg-slate-200 dark:bg-slate-800 rounded-full pointer-events-none"></div>
 
         {/* Highlighted active range track */}
         <div
-          className="absolute h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-75"
+          className="absolute h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-75 pointer-events-none"
           style={{
-            left: `${minPercent}%`,
+            insetInlineStart: `${minPercent}%`,
             width: `${Math.max(0, maxPercent - minPercent)}%`,
           }}
         ></div>
 
-        {/* Min Input Slider */}
+        {/* Min Input Slider — only its thumb captures pointer events so the max
+            slider never blocks dragging the min handle away from 0. */}
         <input
           type="range"
           min={0}
@@ -201,8 +209,15 @@ export function TuitionBudgetFilter({
           step={5000}
           value={priceMin}
           onChange={handleMinSlider}
-          className="absolute left-0 right-0 w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer focus:outline-none accent-emerald-600"
-          style={{ zIndex: priceMin > maxLimit - 20000 ? 5 : 3 }}
+          aria-label={isArabic ? "الميزانية الدنيا" : "Minimum budget"}
+          className="absolute left-0 right-0 w-full appearance-none bg-transparent pointer-events-none cursor-grab active:cursor-grabbing focus:outline-none"
+          style={{
+            height: "40px",
+            margin: "0",
+            zIndex: minOnTop ? 6 : 3,
+            touchAction: "none",
+            WebkitAppearance: "none",
+          }}
         />
 
         {/* Max Input Slider */}
@@ -213,18 +228,25 @@ export function TuitionBudgetFilter({
           step={5000}
           value={priceMax}
           onChange={handleMaxSlider}
-          className="absolute left-0 right-0 w-full h-2 appearance-none bg-transparent pointer-events-auto cursor-pointer focus:outline-none accent-emerald-600"
-          style={{ zIndex: 4 }}
+          aria-label={isArabic ? "الميزانية القصوى" : "Maximum budget"}
+          className="absolute left-0 right-0 w-full appearance-none bg-transparent pointer-events-none cursor-grab active:cursor-grabbing focus:outline-none"
+          style={{
+            height: "40px",
+            margin: "0",
+            zIndex: 4,
+            touchAction: "none",
+            WebkitAppearance: "none",
+          }}
         />
       </div>
 
       {/* Range Min / Max Helper Badges */}
-      <div className="flex justify-between items-center text-[11px] font-semibold text-slate-400 dark:text-slate-500 mt-1 px-0.5">
-        <span>0 {isArabic ? "ج.م" : "EGP"}</span>
-        <span>100K</span>
-        <span>200K</span>
-        <span>300K</span>
-        <span>400K+ {isArabic ? "ج.م" : "EGP"}</span>
+      <div className="flex justify-between items-center text-[11px] font-semibold text-slate-400 dark:text-slate-500 mt-0 sm:mt-1 px-0.5">
+        <span className="whitespace-nowrap">0 {isArabic ? "ج.م" : "EGP"}</span>
+        <span className="hidden min-[480px]:inline">100K</span>
+        <span className="hidden sm:inline">200K</span>
+        <span className="hidden min-[480px]:inline sm:inline">300K</span>
+        <span className="whitespace-nowrap">400K+ {isArabic ? "ج.م" : "EGP"}</span>
       </div>
     </div>
   );
