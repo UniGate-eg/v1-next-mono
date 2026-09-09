@@ -282,13 +282,13 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
     }
   };
 
-  const handleSocialAuth = async (provider: "Google" | "GitHub" | "Apple") => {
+  const handleSocialAuth = async (provider: "Google") => {
     posthog.capture("social_auth_initiated", {
       provider: provider.toLowerCase(),
       mode: isLogin ? "login" : "signup",
     });
     try {
-      const providerId = provider.toLowerCase() as "google" | "github" | "apple";
+      const providerId = provider.toLowerCase() as "google";
       await signIn.social({
         provider: providerId,
         callbackURL: targetUrl,
@@ -299,18 +299,6 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
           ? `تعذر الاتصال بمزود ${provider}. يرجى التحقق من الإعدادات.`
           : `Failed to connect to ${provider}. Please check provider configuration.`
       );
-    }
-  };
-
-  const handleDemoFill = (role: "student" | "admin") => {
-    if (role === "student") {
-      setEmail("student.demo@unigate.eg");
-      setPassword("StudentPass2026!");
-      toast.info(isAr ? "تم إدخال بيانات حساب الطالب التجريبي." : "Pre-filled Student Demo credentials.");
-    } else {
-      setEmail("admin.demo@unigate.eg");
-      setPassword("AdminPass2026!");
-      toast.info(isAr ? "تم إدخال بيانات حساب المشرف التجريبي." : "Pre-filled Admin Demo credentials.");
     }
   };
 
@@ -347,7 +335,7 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
     transition: "border-color 0.2s ease, box-shadow 0.2s ease",
   };
 
-  /* ─── Google / GitHub / Apple SVGs ─── */
+  /* ─── Google ─── */
   const GoogleIcon = (
     <svg viewBox="0 0 24 24" style={{ width: 16, height: 16, flexShrink: 0 }} aria-hidden="true">
       <path
@@ -366,18 +354,6 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
         fill="#EA4335"
         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
       />
-    </svg>
-  );
-
-  const GitHubIcon = (
-    <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 16, height: 16, flexShrink: 0 }} aria-hidden="true">
-      <path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.699-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.577.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
-    </svg>
-  );
-
-  const AppleIcon = (
-    <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 16, height: 16, flexShrink: 0 }} aria-hidden="true">
-      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.04 2.26-.79 3.59-.76 1.56.04 2.88.75 3.65 1.89-3.08 1.75-2.58 5.61.35 6.75-1.01 2.37-2.39 4.39-4.29 4.29zM12.03 7.25c-.15-2.23 1.66-4.07 3.72-4.25.36 2.38-1.92 4.34-3.72 4.25z" />
     </svg>
   );
 
@@ -485,6 +461,37 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
           border: "1px solid rgba(255,255,255,0.1)",
         }}
       >
+        <Link
+          href="/"
+          style={{
+            alignSelf: "flex-start",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.375rem",
+            fontSize: "0.8rem",
+            color: "#a1a1aa",
+            textDecoration: "none",
+            marginBottom: "1rem",
+            padding: "0.4rem 0.75rem",
+            borderRadius: 8,
+            border: "1px solid rgba(255,255,255,0.12)",
+            background: "rgba(255,255,255,0.03)",
+            transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(124, 58, 237, 0.15)";
+            e.currentTarget.style.color = "#c084fc";
+            e.currentTarget.style.borderColor = "rgba(124, 58, 237, 0.4)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+            e.currentTarget.style.color = "#a1a1aa";
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+          }}
+        >
+          <span style={{ transform: isAr ? "scaleX(-1)" : undefined }}>←</span>
+          {isAr ? "العودة إلى الصفحة الرئيسية" : "Back to Home Page"}
+        </Link>
         {isLogin ? (
           /* ── SIGN IN FORM ── */
           <div
@@ -506,108 +513,12 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
                 : "Access your admissions roadmap and saved universities."}
             </p>
 
-            <form
-              onSubmit={handleAuthSubmit}
-              style={{ width: "100%", display: "flex", flexDirection: "column", gap: "0.75rem" }}
-            >
-              <input
-                style={inputStyle}
-                type="email"
-                placeholder={isAr ? "البريد الإلكتروني (student@example.com)" : "student@example.com"}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <input
-                style={inputStyle}
-                type="password"
-                placeholder={isAr ? "كلمة المرور" : "••••••••"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  borderRadius: 8,
-                  border: "none",
-                  background: "linear-gradient(135deg, #7C3AED, #EC4899)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading ? 0.7 : 1,
-                  boxShadow: "0 4px 15px rgba(124, 58, 237, 0.3)",
-                  transition: "opacity 0.2s ease, transform 0.1s ease",
-                }}
-              >
-                {loading
-                  ? isAr
-                    ? "جاري تسجيل الدخول..."
-                    : "Signing in..."
-                  : isAr
-                  ? "المتابعة بالبريد الإلكتروني"
-                  : "Continue with Email"}
-              </button>
-            </form>
-
             <div style={{ height: 1, background: "rgba(255,255,255,0.08)", width: "100%", margin: "1.1rem 0" }} />
 
             <button style={socialBtn} onClick={() => handleSocialAuth("Google")}>
               {GoogleIcon}
               <span>{isAr ? "المتابعة باستخدام Google" : "Continue with Google"}</span>
             </button>
-            <button style={socialBtn} onClick={() => handleSocialAuth("GitHub")}>
-              {GitHubIcon}
-              <span>{isAr ? "المتابعة باستخدام GitHub" : "Continue with GitHub"}</span>
-            </button>
-            <button style={{ ...socialBtn, marginBottom: 0 }} onClick={() => handleSocialAuth("Apple")}>
-              {AppleIcon}
-              <span>{isAr ? "المتابعة باستخدام Apple" : "Continue with Apple"}</span>
-            </button>
-
-            {/* Quick Demo Pre-fill */}
-            <div style={{ display: "flex", gap: "8px", width: "100%", marginTop: "1rem" }}>
-              <button
-                type="button"
-                onClick={() => handleDemoFill("student")}
-                style={{
-                  flex: 1,
-                  padding: "6px 8px",
-                  borderRadius: 6,
-                  border: "1px solid rgba(124, 58, 237, 0.3)",
-                  background: "rgba(124, 58, 237, 0.1)",
-                  color: "#c084fc",
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                {isAr ? "طالب تجريبي" : "Student Demo"}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoFill("admin")}
-                style={{
-                  flex: 1,
-                  padding: "6px 8px",
-                  borderRadius: 6,
-                  border: "1px solid rgba(236, 72, 153, 0.3)",
-                  background: "rgba(236, 72, 153, 0.1)",
-                  color: "#f472b6",
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                {isAr ? "مشرف تجريبي" : "Admin Demo"}
-              </button>
-            </div>
 
             <div style={{ marginTop: "1.25rem", fontSize: "0.875rem", color: "#888" }}>
               {isAr ? "ليس لديك حساب بعد؟ " : "Don't have an account? "}
@@ -649,78 +560,11 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
                 : "Create a free account to track university applications."}
             </p>
 
-            <form
-              onSubmit={handleAuthSubmit}
-              style={{ width: "100%", display: "flex", flexDirection: "column", gap: "0.75rem" }}
-            >
-              <input
-                style={inputStyle}
-                type="text"
-                placeholder={isAr ? "الاسم الكامل (مثال: أحمد محمود)" : "Full Name"}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <input
-                style={inputStyle}
-                type="email"
-                placeholder={isAr ? "البريد الإلكتروني (student@example.com)" : "student@example.com"}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <input
-                style={inputStyle}
-                type="password"
-                placeholder={isAr ? "كلمة المرور (8 أحرف على الأقل)" : "Password (min 8 characters)"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "0.75rem",
-                  borderRadius: 8,
-                  border: "none",
-                  background: "linear-gradient(135deg, #7C3AED, #EC4899)",
-                  color: "#fff",
-                  fontWeight: 600,
-                  fontSize: "0.875rem",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading ? 0.7 : 1,
-                  boxShadow: "0 4px 15px rgba(124, 58, 237, 0.3)",
-                  transition: "opacity 0.2s ease, transform 0.1s ease",
-                }}
-              >
-                {loading
-                  ? isAr
-                    ? "جاري إنشاء الحساب..."
-                    : "Creating account..."
-                  : isAr
-                  ? "إنشاء حساب بالبريد الإلكتروني"
-                  : "Sign Up with Email"}
-              </button>
-            </form>
-
             <div style={{ height: 1, background: "rgba(255,255,255,0.08)", width: "100%", margin: "1.1rem 0" }} />
 
             <button style={socialBtn} onClick={() => handleSocialAuth("Google")}>
               {GoogleIcon}
               <span>{isAr ? "التسجيل باستخدام Google" : "Sign up with Google"}</span>
-            </button>
-            <button style={socialBtn} onClick={() => handleSocialAuth("GitHub")}>
-              {GitHubIcon}
-              <span>{isAr ? "التسجيل باستخدام GitHub" : "Sign up with GitHub"}</span>
-            </button>
-            <button style={{ ...socialBtn, marginBottom: 0 }} onClick={() => handleSocialAuth("Apple")}>
-              {AppleIcon}
-              <span>{isAr ? "التسجيل باستخدام Apple" : "Sign up with Apple"}</span>
             </button>
 
             <div style={{ marginTop: "1.25rem", fontSize: "0.875rem", color: "#888" }}>

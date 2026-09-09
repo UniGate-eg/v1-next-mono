@@ -27,8 +27,8 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Do not render public Navbar inside the Admin Portal
-  if (pathname?.startsWith("/admin")) {
+  // Do not render public Navbar inside the Admin Portal or auth pages
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/auth")) {
     return null;
   }
 
