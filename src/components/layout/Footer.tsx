@@ -4,10 +4,17 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Globe, ArrowUp } from "lucide-react";
 
 export function Footer() {
-  const { language } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   const pathname = usePathname();
+
+  const scrollToTop = () => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   // Do not render public Footer inside the Admin Portal
   if (pathname?.startsWith("/admin")) {
@@ -15,7 +22,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="footer">
+    <footer className="footer" role="contentinfo">
       <div className="container footer-inner">
         <div className="footer-brand">
           <div className="footer-logo">
@@ -45,6 +52,7 @@ export function Footer() {
           <Link href="/majors">{language === "ar" ? "التخصصات" : "Majors"}</Link>
           <Link href="/compare">{language === "ar" ? "مقارنة" : "Compare"}</Link>
           <Link href="/about">{language === "ar" ? "عن المنصة" : "About"}</Link>
+          <Link href="/faq">{language === "ar" ? "الأسئلة الشائعة" : "FAQ & Guide"}</Link>
         </div>
 
         <div className="footer-links-group">
@@ -65,14 +73,82 @@ export function Footer() {
       </div>
 
       <div className="container footer-bottom">
-        <p>
-          © {new Date().getFullYear()} UniGate (بوابة الجامعة).{" "}
-          {language === "ar" ? "جميع الحقوق محفوظة." : "All rights reserved."}
-        </p>
-        <div className="footer-bottom-links">
-          <Link href="/about">{language === "ar" ? "عن المنصة" : "About"}</Link>
-          <Link href="/privacy">{language === "ar" ? "الخصوصية" : "Privacy"}</Link>
-          <Link href="/terms">{language === "ar" ? "الشروط" : "Terms"}</Link>
+        <div className="footer-bottom-shimmer" aria-hidden="true" />
+        <div className="footer-legal-bar">
+          <div className="footer-legal-primary">
+            <p className="footer-copyright">
+              {language === "ar"
+                ? "حقوق النشر © 2026 بوابة الجامعة (UniGate). جميع الحقوق محفوظة."
+                : "Copyright © 2026 UniGate (بوابة الجامعة). All rights reserved."}
+            </p>
+
+            <nav
+              className="footer-legal-nav"
+              aria-label={language === "ar" ? "روابط قانونية ومعلوماتية" : "Legal and platform links"}
+            >
+              <ul className="footer-legal-list">
+                <li className="footer-legal-item">
+                  <Link href="/about" className="footer-legal-link">
+                    {language === "ar" ? "عن المنصة" : "About"}
+                  </Link>
+                </li>
+                <li className="footer-legal-separator" aria-hidden="true">
+                  |
+                </li>
+                <li className="footer-legal-item">
+                  <Link href="/privacy" className="footer-legal-link">
+                    {language === "ar" ? "الخصوصية" : "Privacy"}
+                  </Link>
+                </li>
+                <li className="footer-legal-separator" aria-hidden="true">
+                  |
+                </li>
+                <li className="footer-legal-item">
+                  <Link href="/terms" className="footer-legal-link">
+                    {language === "ar" ? "الشروط" : "Terms"}
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+          </div>
+
+          <div className="footer-legal-secondary">
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="footer-locale-btn"
+              title={language === "ar" ? "التبديل إلى English" : "Switch to العربية"}
+              aria-label={language === "ar" ? "اختيار اللغة: العربية" : "Select language: English"}
+            >
+              <Globe className="footer-locale-icon" aria-hidden="true" />
+              <span>{language === "ar" ? "مصر (العربية)" : "Egypt (English)"}</span>
+            </button>
+
+            <div
+              className="footer-status-pill"
+              title={
+                language === "ar"
+                  ? "جميع خدمات القبول والجامعات متاحة"
+                  : "All admissions & portal directories operational"
+              }
+            >
+              <span className="footer-status-dot" aria-hidden="true">
+                <span className="footer-status-dot-ping" />
+                <span className="footer-status-dot-solid" />
+              </span>
+              <span>{language === "ar" ? "القبول ٢٠٢٦ متاح" : "Admissions 2026 Live"}</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={scrollToTop}
+              className="footer-back-to-top"
+              title={language === "ar" ? "العودة إلى أعلى الصفحة" : "Scroll to top"}
+              aria-label={language === "ar" ? "العودة إلى أعلى الصفحة" : "Scroll to top"}
+            >
+              <ArrowUp size={13} aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
     </footer>
