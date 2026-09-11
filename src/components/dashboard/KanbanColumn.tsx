@@ -41,7 +41,7 @@ export function KanbanColumn({
       <div className="mt-3 flex flex-col gap-3 flex-1 overflow-y-auto max-h-[calc(100vh-18rem)] min-h-36">
         {bookmarks.length === 0 ? (
           <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-slate-200 p-6 text-center text-xs text-slate-400 dark:border-slate-800/80">
-            No applications in this stage
+            No applications in this stage (لا توجد طلبات في هذه المرحلة)
           </div>
         ) : (
           bookmarks.map((bookmark) => (
