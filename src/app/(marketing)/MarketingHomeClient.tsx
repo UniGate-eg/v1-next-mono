@@ -7,6 +7,7 @@ import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
+import { EgyptFlag } from "@/components/ui/EgyptFlag";
 import type { SlimSearchToken } from "@/types/university.types";
 
 const homeMajors = [
@@ -309,7 +310,9 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
 
         <div className="hero-content">
           <div className="hero-badge animate-in">
-            <span className="badge-flag">🇪🇬</span>
+            <span className="badge-flag" aria-hidden="true">
+              <EgyptFlag className="w-5 h-3.5 rounded-[2px] shadow-sm inline-block shrink-0" />
+            </span>
             <span>
               {language === "ar"
                 ? "دليلك الشامل لاختيار جامعتك في مصر"

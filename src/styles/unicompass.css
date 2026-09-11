@@ -530,7 +530,12 @@ header,
     backdrop-filter: blur(10px);
 }
 
-.badge-flag { font-size: 18px; }
+.badge-flag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
 
 .hero-title {
     font-family: var(--font-display);
