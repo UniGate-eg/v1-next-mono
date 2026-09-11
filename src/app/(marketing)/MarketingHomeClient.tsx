@@ -653,7 +653,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
             </Link>
 
             {/* Sheikh Zayed & 6th October */}
-            <Link href="/universities?city=Zayed" className="city-card animate-in">
+            <Link href="/universities?city=Zayed,October" className="city-card animate-in">
               <div
                 className="city-card-bg"
                 style={{
