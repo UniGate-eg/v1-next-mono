@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { formatCity, formatUniversityType } from "@/lib/utils";
 import { SuggestionDialog } from "@/components/university/SuggestionDialog";
 import { useCompareStore } from "@/stores/compareStore";
 import { useBookmarks } from "@/hooks/useBookmarks";
@@ -91,6 +92,15 @@ export interface UniversityData {
   structured_faculties?: any[];
   website?: string | null;
 }
+
+const EDUCATION_MODEL_LABELS: Record<string, { en: string; ar: string }> = {
+  AMERICAN: { en: "American", ar: "أمريكي" },
+  GERMAN: { en: "German", ar: "ألماني" },
+  BRITISH: { en: "British", ar: "بريطاني" },
+  EGYPTIAN: { en: "Egyptian", ar: "مصري" },
+  FRENCH: { en: "French", ar: "فرنسي" },
+  CANADIAN: { en: "Canadian", ar: "كندي" },
+};
 
 const universityDetailsMemoryCache = new Map<string, any>();
 
@@ -205,8 +215,10 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
         return uniAny.overviewAr || uniAny.overview_ar || uniAny.description_ar || uniAny.description || uniAny.overviewEn;
       }
       if (fieldName === "location" || fieldName === "city") {
-        return uniAny.city_ar || uniAny.city || uniAny.governorate || "مصر";
+        return formatCity(uniAny.city_ar || uniAny.city || uniAny.governorate || "مصر", "ar");
       }
+      if (fieldName === "type") return formatUniversityType(uniAny.type || "", "ar");
+      if (fieldName === "model") return EDUCATION_MODEL_LABELS[String(uniAny.educationModel || uniAny.model || "").toUpperCase()]?.ar || uniAny.educationModel || uniAny.model;
       if (fieldName === "name") return uniAny.nameAr || uniAny.name_ar || uniAny.nameEn || uniAny.name;
     }
     if (uniAny[fieldName + "En"]) return uniAny[fieldName + "En"];
@@ -214,8 +226,10 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
       return uniAny.overviewEn || uniAny.overview_en || uniAny.description || uniAny.overviewAr;
     }
     if (fieldName === "location" || fieldName === "city") {
-      return uniAny.city || uniAny.governorate || "Egypt";
+      return formatCity(uniAny.city || uniAny.governorate || "Egypt", "en");
     }
+    if (fieldName === "type") return formatUniversityType(uniAny.type || "", "en");
+    if (fieldName === "model") return EDUCATION_MODEL_LABELS[String(uniAny.educationModel || uniAny.model || "").toUpperCase()]?.en || uniAny.educationModel || uniAny.model;
     if (fieldName === "name") return uniAny.nameEn || uniAny.name || uniAny.nameAr;
     return uniAny[fieldName] || "";
   };
@@ -437,13 +451,13 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
             {/* Meta Tags */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
               <span className="modal-meta-item">
-                {displayUni.modelEmoji || "🎓"} {displayUni.educationModel || getLangField("model") || "University"} {isArabic ? "نموذج" : "Model"}
+                {displayUni.modelEmoji || "🎓"} {getLangField("model") || "University"} {isArabic ? "نموذج" : "Model"}
               </span>
               <span className="modal-meta-item">
                 📍 {getLangField("location")}
               </span>
               <span className="modal-meta-item">
-                🏛️ {displayUni.type || "University"}
+                🏛️ {getLangField("type") || "University"}
               </span>
               {establishedYear && (
                 <span className="modal-meta-item">
@@ -485,7 +499,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
             </div>
             <div className="modal-info-item">
               <div className="modal-info-value" style={{ color: "var(--primary-light)" }}>
-                {displayUni.type || "University"}
+                {getLangField("type") || "University"}
               </div>
               <div className="modal-info-label">{isArabic ? "نوع المؤسسة" : "Type"}</div>
             </div>
