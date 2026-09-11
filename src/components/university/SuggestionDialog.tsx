@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MessageSquarePlus } from "lucide-react";
 import { SuggestionForm } from "@/components/forms/SuggestionForm";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SuggestionDialogProps {
   universityId: string;
@@ -20,23 +21,26 @@ interface SuggestionDialogProps {
 
 export function SuggestionDialog({ universityId, universityName }: SuggestionDialogProps) {
   const [open, setOpen] = useState(false);
+  const { language } = useLanguage();
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1.5 text-xs">
           <MessageSquarePlus className="h-3.5 w-3.5 text-slate-500" />
-          <span>Suggest Correction</span>
+          <span>{language === "ar" ? "اقتراح تصحيح" : "Suggest Correction"}</span>
         </Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-base font-bold">
-            Suggest Data Correction
+            {language === "ar" ? "اقترح تصحيحاً للبيانات" : "Suggest Data Correction"}
           </DialogTitle>
           <DialogDescription className="text-xs">
-            Help keep Egypt&apos;s university directory accurate by submitting missing majors or updated contact links.
+            {language === "ar"
+              ? "ساعدنا في الحفاظ على دقة دليل الجامعات المصرية من خلال إرسال تخصصات مفقودة أو روابط تواصل محدّثة."
+              : "Help keep Egypt's university directory accurate by submitting missing majors or updated contact links."}
           </DialogDescription>
         </DialogHeader>
 
