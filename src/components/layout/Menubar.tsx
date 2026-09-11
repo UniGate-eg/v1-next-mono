@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSession } from "@/lib/auth-client";
+import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "../ui/button";
 
 interface MenubarProps {
@@ -35,6 +35,15 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
 
   const user = session?.user;
   const initials = getInitials(user?.name) || user?.email?.[0]?.toUpperCase();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      window.location.href = "/";
+    } catch {
+      window.location.href = "/";
+    }
+  };
 
   return (
     <div className="relative lg:hidden">
@@ -87,13 +96,20 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
               {user ? (
                 <div className="flex items-center gap-2 px-1 justify-between">
                   {initials && (
-                    <div
+                    <Button
+                      type="button"
+                      variant="outline"
+                      aria-label={
+                        isUserMenuOpen ? "Close user menu" : "Open user menu"
+                      }
+                      aria-expanded={isUserMenuOpen}
+                      aria-controls="user-menu"
+                      aria-haspopup="true"
                       onClick={() => setIsUserMenuOpen((open) => !open)}
-                      aria-hidden="true"
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-primary/20 text-xs font-bold text-primary"
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-primary/20 p-0 text-xs font-bold text-primary"
                     >
                       {initials}
-                    </div>
+                    </Button>
                   )}
 
                   {isUserMenuOpen && (
@@ -105,7 +121,10 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
                         type="button"
                         variant="destructive"
                         size="sm"
-                        onClick={() => setIsUserMenuOpen(false)}
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          handleLogout();
+                        }}
                       >
                         {t("navLogout")}
                       </Button>
