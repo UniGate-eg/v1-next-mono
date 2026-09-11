@@ -11,7 +11,7 @@ import {
   Trash2,
   MoveRight,
 } from "lucide-react";
-import { formatGovernorate } from "@/lib/utils";
+import { formatGovernorate, formatUniversityType } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const STAGES: { value: AppStatus; label: string }[] = [
@@ -72,11 +72,11 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
       {/* Meta tags */}
       <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
         <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-          {uni.type}
+          {formatUniversityType(uni.type, language)}
         </Badge>
         <div className="flex items-center gap-1">
           <MapPin className="h-3 w-3 text-slate-400" />
-          <span>{formatGovernorate(uni.governorate)}</span>
+          <span>{formatGovernorate(uni.governorate, language)}</span>
         </div>
       </div>
 
