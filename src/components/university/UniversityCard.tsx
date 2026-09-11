@@ -4,6 +4,7 @@ import React from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCompareStore } from "@/stores/compareStore";
 import { useBookmarks } from "@/hooks/useBookmarks";
+import { formatCity, formatUniversityType } from "@/lib/utils";
 import type { UniversityData } from "./UniversityModal";
 
 interface UniversityCardProps {
@@ -41,14 +42,19 @@ export function UniversityCard({
       if (fieldName === "description" || fieldName === "overview") {
         return uniAny.overviewAr || uniAny.overview_ar || uniAny.description_ar || uniAny.description || uniAny.overviewEn;
       }
-      if (fieldName === "location") return uniAny.city_ar || uniAny.city || uniAny.governorate || "مصر";
+      if (fieldName === "location") {
+        const raw = uniAny.city || uniAny.governorate || "مصر";
+        return formatCity(raw, "ar");
+      }
+      if (fieldName === "type") return formatUniversityType(uniAny.type || "", "ar");
       if (fieldName === "name") return uniAny.nameAr || uniAny.name_ar || uniAny.nameEn || uniAny.name;
     }
     if (uniAny[fieldName + "En"]) return uniAny[fieldName + "En"];
     if (fieldName === "description" || fieldName === "overview") {
       return uniAny.overviewEn || uniAny.overview_en || uniAny.description || uniAny.overviewAr;
     }
-    if (fieldName === "location") return uniAny.city || uniAny.governorate || "Egypt";
+    if (fieldName === "location") return formatCity(uniAny.city || uniAny.governorate || "Egypt", "en");
+    if (fieldName === "type") return formatUniversityType(uniAny.type || "", "en");
     if (fieldName === "name") return uniAny.nameEn || uniAny.name || uniAny.nameAr;
     return uniAny[fieldName] || "";
   };
