@@ -1323,6 +1323,65 @@ body.rtl .search-result-info {
     color: var(--text-primary);
 }
 
+/* In-DOM filter dropdown (replaces native <select> so replays capture picks) */
+.filter-dropdown {
+    position: relative;
+}
+
+.filter-dropdown-trigger {
+    text-align: left;
+    width: 100%;
+}
+
+.filter-dropdown-placeholder {
+    color: var(--text-muted);
+}
+
+.filter-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 50;
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 4px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+}
+
+.filter-dropdown-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.filter-dropdown-option:hover:not(:disabled) {
+    background: rgba(124, 58, 237, 0.08);
+    color: var(--primary-light);
+}
+
+.filter-dropdown-option.selected {
+    color: var(--primary-light);
+    font-weight: 600;
+}
+
+.filter-dropdown-option:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
 /* Filter Groups */
 .filter-groups {
     display: flex;
