@@ -1,17 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useCompareStore } from "@/stores/compareStore";
 import Link from "next/link";
 import posthog from "posthog-js";
 
-export default function ComparePage() {
+function ComparePageContent() {
   const { language } = useLanguage();
   const { index: universitiesDatabase } = useUniversitySearch();
-  const { selectedIds, toggle, clear } = useCompareStore();
+  const { selectedIds, toggle, toggleUniversity, clear } = useCompareStore();
   const [selectorSearch, setSelectorSearch] = useState("");
+  const searchParams = useSearchParams();
+  const appliedParamRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const universitiesParam = searchParams.get("universities");
+    if (!universitiesParam) return;
+    if (universitiesDatabase.length === 0) return;
+    if (appliedParamRef.current === universitiesParam) return;
+    appliedParamRef.current = universitiesParam;
+
+    const slugs = universitiesParam
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    for (const slug of slugs) {
+      const match = universitiesDatabase.find(
+        (u: any) => u.slug === slug || String(u.id) === slug
+      );
+      if (!match) continue;
+      if (selectedIds.some((id) => String(id) === String(match.id))) continue;
+
+      toggleUniversity({
+        id: String(match.id),
+        slug: match.slug,
+        nameAr: match.nameAr,
+        nameEn: match.nameEn,
+        type: match.type,
+        governorate: match.governorate || match.city || "",
+        emoji: match.emoji || undefined,
+        shortName: match.shortName || undefined,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, universitiesDatabase]);
 
   const getLangField = (obj: any, fieldName: string) => {
     if (!obj) return "";
@@ -265,5 +301,13 @@ export default function ComparePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ComparePage() {
+  return (
+    <Suspense fallback={null}>
+      <ComparePageContent />
+    </Suspense>
   );
 }
