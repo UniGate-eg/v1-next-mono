@@ -13,18 +13,19 @@ interface LanguageContextType {
 
 const translations: Record<string, { en: string; ar: string }> = {
   navHome: { en: "Home", ar: "الرئيسية" },
+  navAbout: { en: "About", ar: "عن المنصة" },
   navUniversities: { en: "Universities", ar: "الجامعات" },
   navCompare: { en: "Compare", ar: "مقارنة" },
   navMajors: { en: "Majors", ar: "التخصصات" },
-  navDashboard: { en: "Dashboard", ar: "مساحتي" },
-  navAbout: { en: "About", ar: "عن المنصة" },
+  navDashboard: { en: "Dashboard", ar: "لوحة التحكم" },
   navLogin: { en: "Log In", ar: "تسجيل الدخول" },
   navLogout: { en: "Log Out", ar: "تسجيل الخروج" },
   "All Universities": { en: "All Universities", ar: "جميع الجامعات" },
-  "Browse and discover Egyptian universities. Filter by model, type, city — or search by name.": {
-    en: "Browse and discover Egyptian universities. Filter by model, type, city — or search by name.",
-    ar: "تصفح واكتشف الجامعات المصرية. فلتر حسب النموذج، النوع، المدينة — أو ابحث بالاسم.",
-  },
+  "Browse and discover Egyptian universities. Filter by model, type, city — or search by name.":
+    {
+      en: "Browse and discover Egyptian universities. Filter by model, type, city — or search by name.",
+      ar: "تصفح واكتشف الجامعات المصرية. فلتر حسب النموذج، النوع، المدينة — أو ابحث بالاسم.",
+    },
   "Education Model": { en: "Education Model", ar: "نموذج التعليم" },
   Type: { en: "Type", ar: "النوع" },
   City: { en: "City", ar: "المدينة" },
@@ -34,13 +35,31 @@ const translations: Record<string, { en: string; ar: string }> = {
   "Name Z → A": { en: "Name Z → A", ar: "الاسم ي → أ" },
   "Oldest first": { en: "Oldest first", ar: "الأقدم أولاً" },
   "Newest first": { en: "Newest first", ar: "الأحدث أولاً" },
-  "Tuition: Low → High": { en: "Tuition: Low → High", ar: "المصروفات: منخفض → مرتفع" },
-  "Tuition: High → Low": { en: "Tuition: High → Low", ar: "المصروفات: مرتفع → منخفض" },
-  "Tuition Budget (EGP/year)": { en: "Tuition Budget (EGP/year)", ar: "ميزانية المصروفات (ج.م/سنة)" },
+  "Tuition: Low → High": {
+    en: "Tuition: Low → High",
+    ar: "المصروفات: منخفض → مرتفع",
+  },
+  "Tuition: High → Low": {
+    en: "Tuition: High → Low",
+    ar: "المصروفات: مرتفع → منخفض",
+  },
+  "Tuition Budget (EGP/year)": {
+    en: "Tuition Budget (EGP/year)",
+    ar: "ميزانية المصروفات (ج.م/سنة)",
+  },
   "Clear all filters": { en: "Clear all filters", ar: "مسح كل الفلاتر" },
-  "No universities found": { en: "No universities found", ar: "لم يتم العثور على جامعات" },
-  "Try adjusting your search or filters.": { en: "Try adjusting your search or filters.", ar: "حاول تعديل البحث أو الفلاتر." },
-  "Reset all filters": { en: "Reset all filters", ar: "إعادة تعيين كل الفلاتر" },
+  "No universities found": {
+    en: "No universities found",
+    ar: "لم يتم العثور على جامعات",
+  },
+  "Try adjusting your search or filters.": {
+    en: "Try adjusting your search or filters.",
+    ar: "حاول تعديل البحث أو الفلاتر.",
+  },
+  "Reset all filters": {
+    en: "Reset all filters",
+    ar: "إعادة تعيين كل الفلاتر",
+  },
   "Explore Majors": { en: "Explore Majors", ar: "استكشف التخصصات" },
   "Start from what you want to study — see every university that offers it.": {
     en: "Start from what you want to study — see every university that offers it.",
@@ -106,7 +125,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage, setLanguage, t }}>
+    <LanguageContext.Provider
+      value={{ language, toggleLanguage, setLanguage, t }}
+    >
       {children}
     </LanguageContext.Provider>
   );
