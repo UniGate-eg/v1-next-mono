@@ -2434,16 +2434,38 @@ body.rtl .search-result-info {
     margin-bottom: 16px;
 }
 
-.footer-links-group a {
+.footer a,
+.footer a:visited,
+.footer-links-group a,
+.footer-links-group a:visited {
     display: block;
     font-size: 14px;
-    color: var(--text-muted);
+    color: #94a3b8 !important;
     padding: 6px 0;
-    transition: color var(--transition-fast);
+    transition: all var(--transition-fast);
     cursor: pointer;
+    text-decoration: none;
 }
 
-.footer-links-group a:hover { color: var(--primary-light); }
+.footer a:hover,
+.footer a:focus,
+.footer a:visited:hover,
+.footer-links-group a:hover,
+.footer-links-group a:focus,
+.footer-links-group a:visited:hover {
+    color: #ffffff !important;
+}
+
+.footer-links-group a:hover,
+.footer-links-group a:focus {
+    color: #ffffff !important;
+    transform: translateX(3px);
+}
+
+body.rtl .footer-links-group a:hover,
+body.rtl .footer-links-group a:focus {
+    transform: translateX(-3px);
+}
 
 .footer-bottom {
     position: relative;
@@ -2518,8 +2540,9 @@ body.rtl .search-result-info {
     align-items: center;
 }
 
-.footer-legal-link {
-    color: #94a3b8;
+.footer-legal-link,
+.footer-legal-link:visited {
+    color: #94a3b8 !important;
     font-size: 12px;
     text-decoration: none;
     padding: 3px 6px;
@@ -2529,11 +2552,13 @@ body.rtl .search-result-info {
     cursor: pointer;
 }
 
-.footer-legal-link:hover {
-    color: #ffffff;
-    text-decoration: underline;
+.footer-legal-link:hover,
+.footer-legal-link:focus,
+.footer-legal-link:visited:hover {
+    color: #ffffff !important;
+    text-decoration: underline !important;
     text-underline-offset: 4px;
-    text-decoration-color: #38bdf8;
+    text-decoration-color: #38bdf8 !important;
 }
 
 .footer-legal-link:focus-visible {

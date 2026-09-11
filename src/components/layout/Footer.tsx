@@ -48,25 +48,62 @@ export function Footer() {
 
         <div className="footer-links-group">
           <h4>{language === "ar" ? "استكشف" : "Explore"}</h4>
-          <Link href="/universities">{language === "ar" ? "الجامعات" : "Universities"}</Link>
-          <Link href="/majors">{language === "ar" ? "التخصصات" : "Majors"}</Link>
-          <Link href="/compare">{language === "ar" ? "مقارنة" : "Compare"}</Link>
-          <Link href="/about">{language === "ar" ? "عن المنصة" : "About"}</Link>
-          <Link href="/faq">{language === "ar" ? "الأسئلة الشائعة" : "FAQ & Guide"}</Link>
+          <Link
+            href="/universities"
+            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
+          >
+            {language === "ar" ? "الجامعات" : "Universities"}
+          </Link>
+          <Link
+            href="/majors"
+            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
+          >
+            {language === "ar" ? "التخصصات" : "Majors"}
+          </Link>
+          <Link
+            href="/compare"
+            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
+          >
+            {language === "ar" ? "مقارنة" : "Compare"}
+          </Link>
+          <Link
+            href="/about"
+            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
+          >
+            {language === "ar" ? "عن المنصة" : "About"}
+          </Link>
+          <Link
+            href="/faq"
+            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
+          >
+            {language === "ar" ? "الأسئلة الشائعة" : "FAQ & Guide"}
+          </Link>
         </div>
 
         <div className="footer-links-group">
           <h4>{language === "ar" ? "أنواع الجامعات" : "University Types"}</h4>
-          <Link href="/universities?type=PUBLIC">
+          <Link
+            href="/universities?type=PUBLIC"
+            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
+          >
             {language === "ar" ? "جامعات حكومية" : "Public Universities"}
           </Link>
-          <Link href="/universities?type=PRIVATE">
+          <Link
+            href="/universities?type=PRIVATE"
+            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
+          >
             {language === "ar" ? "جامعات خاصة" : "Private Universities"}
           </Link>
-          <Link href="/universities?type=NATIONAL">
+          <Link
+            href="/universities?type=NATIONAL"
+            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
+          >
             {language === "ar" ? "جامعات أهلية" : "National Universities"}
           </Link>
-          <Link href="/universities?type=INTERNATIONAL">
+          <Link
+            href="/universities?type=INTERNATIONAL"
+            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
+          >
             {language === "ar" ? "جامعات دولية" : "International Universities"}
           </Link>
         </div>
@@ -88,7 +125,10 @@ export function Footer() {
             >
               <ul className="footer-legal-list">
                 <li className="footer-legal-item">
-                  <Link href="/about" className="footer-legal-link">
+                  <Link
+                    href="/about"
+                    className="footer-legal-link !text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors"
+                  >
                     {language === "ar" ? "عن المنصة" : "About"}
                   </Link>
                 </li>
@@ -96,7 +136,10 @@ export function Footer() {
                   |
                 </li>
                 <li className="footer-legal-item">
-                  <Link href="/privacy" className="footer-legal-link">
+                  <Link
+                    href="/privacy"
+                    className="footer-legal-link !text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors"
+                  >
                     {language === "ar" ? "الخصوصية" : "Privacy"}
                   </Link>
                 </li>
@@ -104,7 +147,10 @@ export function Footer() {
                   |
                 </li>
                 <li className="footer-legal-item">
-                  <Link href="/terms" className="footer-legal-link">
+                  <Link
+                    href="/terms"
+                    className="footer-legal-link !text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors"
+                  >
                     {language === "ar" ? "الشروط" : "Terms"}
                   </Link>
                 </li>
