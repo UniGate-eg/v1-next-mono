@@ -12,6 +12,7 @@ import {
   MoveRight,
 } from "lucide-react";
 import { formatGovernorate } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const STAGES: { value: AppStatus; label: string }[] = [
   { value: "INTERESTED", label: "Interested (مهتم)" },
@@ -40,6 +41,7 @@ interface BookmarkCardProps {
 
 export function BookmarkCard({ bookmark }: BookmarkCardProps) {
   const { updateBookmark, deleteBookmark } = useBookmarks();
+  const { language } = useLanguage();
   const uni = bookmark.university;
 
   return (
@@ -61,7 +63,7 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
         <button
           onClick={() => deleteBookmark(bookmark.id)}
           className="text-slate-400 hover:text-red-500 p-1 transition-colors"
-          title="Delete from Tracker"
+          title={language === "ar" ? "حذف من المتابعة" : "Delete from Tracker"}
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
