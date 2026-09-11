@@ -1,13 +1,14 @@
 "use client";
 
 import React, { Suspense, useState, useMemo, useRef, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 import { TuitionBudgetFilter } from "@/components/university/TuitionBudgetFilter";
+import { FilterDropdown } from "@/components/university/FilterDropdown";
 import { formatCity } from "@/lib/utils";
 import type { SlimSearchToken } from "@/types/university.types";
 
@@ -72,6 +73,8 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     return () => {
@@ -93,37 +96,31 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
 
   const parseCsvParam = (value: string | null) => (value ? value.split(",").map((v) => v.trim()).filter(Boolean) : []);
 
-  const [activeFilters, setActiveFilters] = useState<{
-    model: string[];
-    type: string[];
-    city: string[];
-    major: string[];
-  }>(() => ({
-    model: [],
-    type: parseCsvParam(searchParams.get("type")),
-    city: parseCsvParam(searchParams.get("city")),
-    major: [],
-  }));
+  // City and type are deep-linkable, so the URL is their single source of truth.
+  const cityFilter = useMemo(() => parseCsvParam(searchParams.get("city")), [searchParams]);
+  const typeFilter = useMemo(() => parseCsvParam(searchParams.get("type")), [searchParams]);
 
-  const appliedCityParamRef = useRef<string | null>(searchParams.get("city"));
-  const appliedTypeParamRef = useRef<string | null>(searchParams.get("type"));
+  // Model and major have no deep link, so they stay in local state.
+  const [modelFilter, setModelFilter] = useState<string[]>([]);
+  const [majorFilter, setMajorFilter] = useState<string[]>([]);
 
-  useEffect(() => {
-    const cityParam = searchParams.get("city");
-    if (cityParam && appliedCityParamRef.current !== cityParam) {
-      appliedCityParamRef.current = cityParam;
-      const cities = parseCsvParam(cityParam);
-      setActiveFilters((prev) => ({ ...prev, city: Array.from(new Set([...prev.city, ...cities])) }));
+  const activeFilters = useMemo(
+    () => ({ model: modelFilter, type: typeFilter, city: cityFilter, major: majorFilter }),
+    [modelFilter, majorFilter, typeFilter, cityFilter]
+  );
+
+  const toggle = (list: string[], value: string) =>
+    list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
+
+  const setUrlFilters = (updates: Partial<Record<"city" | "type", string[]>>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, values] of Object.entries(updates)) {
+      if (values && values.length > 0) params.set(key, values.join(","));
+      else params.delete(key);
     }
-
-    const typeParam = searchParams.get("type");
-    if (typeParam && appliedTypeParamRef.current !== typeParam) {
-      appliedTypeParamRef.current = typeParam;
-      const types = parseCsvParam(typeParam);
-      setActiveFilters((prev) => ({ ...prev, type: Array.from(new Set([...prev.type, ...types])) }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
 
   const [rankFilter, setRankFilter] = useState("all");
   const [currentSort, setCurrentSort] = useState("default");
@@ -142,19 +139,27 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   }, [universitiesDatabase]);
 
   const handleFilterToggle = (category: "model" | "type" | "city" | "major", value: string) => {
-    setActiveFilters((prev) => {
-      const isSelected = prev[category].includes(value);
-      if (isSelected) {
-        return { ...prev, [category]: prev[category].filter((v) => v !== value) };
-      } else {
-        return { ...prev, [category]: [...prev[category], value] };
-      }
-    });
+    switch (category) {
+      case "city":
+        setUrlFilters({ city: toggle(cityFilter, value) });
+        break;
+      case "type":
+        setUrlFilters({ type: toggle(typeFilter, value) });
+        break;
+      case "model":
+        setModelFilter((prev) => toggle(prev, value));
+        break;
+      case "major":
+        setMajorFilter((prev) => toggle(prev, value));
+        break;
+    }
   };
 
   const clearAllFilters = () => {
     setSearchQuery("");
-    setActiveFilters({ model: [], type: [], city: [], major: [] });
+    setModelFilter([]);
+    setMajorFilter([]);
+    setUrlFilters({ city: [], type: [] });
     setRankFilter("all");
     setCurrentSort("default");
     setPriceMin(0);
@@ -180,9 +185,11 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     if (activeFilters.city.length > 0) {
+      const cityTargets = new Set(activeFilters.city.map((c) => c.trim().toLowerCase()));
       filtered = filtered.filter((u: any) => {
-        const cityStr = `${u.city || ""} ${u.governorate || ""}`.toLowerCase();
-        return activeFilters.city.some((c) => cityStr.includes(c.toLowerCase()));
+        const city = (u.city || "").trim().toLowerCase();
+        const gov = (u.governorate || "").trim().toLowerCase();
+        return cityTargets.has(city) || cityTargets.has(gov);
       });
     }
 
@@ -270,6 +277,25 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
 
     return filtered;
   }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase]);
+
+  // Report the result count whenever a discrete filter changes, so filtering is observable.
+  const filterAppliedInitRef = useRef(true);
+  useEffect(() => {
+    if (filterAppliedInitRef.current) {
+      filterAppliedInitRef.current = false;
+      return;
+    }
+    posthog.capture("university_filter_applied", {
+      result_count: filteredUnis.length,
+      total_count: universitiesDatabase.length,
+      cities: cityFilter,
+      types: typeFilter,
+      models: modelFilter,
+      majors: majorFilter,
+      rank: rankFilter,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cityFilter, typeFilter, modelFilter, majorFilter, rankFilter]);
 
   const getPriceRangeText = () => {
     if (priceMin === 0 && priceMax >= 400000) return t("Any") || "Any";
@@ -416,23 +442,17 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
             {/* City Dropdown */}
             <div className="filter-group">
               <span className="filter-group-label">🏙️ {t("City")}</span>
-              <select
-                className="sort-select"
+              <FilterDropdown
                 style={{ width: "100%", marginBottom: "8px" }}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    handleFilterToggle("city", e.target.value);
-                    e.target.value = "";
-                  }
-                }}
-              >
-                <option value="">{language === "ar" ? "اختر المدينة..." : "Select a city..."}</option>
-                {allCities.map((city) => (
-                  <option key={city} value={city} disabled={activeFilters.city.includes(city)}>
-                    {formatCity(city, language)}
-                  </option>
-                ))}
-              </select>
+                placeholder={language === "ar" ? "اختر المدينة..." : "Select a city..."}
+                ariaLabel={t("City")}
+                options={allCities.map((city) => ({
+                  value: city,
+                  label: formatCity(city, language),
+                  disabled: activeFilters.city.includes(city),
+                }))}
+                onSelect={(value) => handleFilterToggle("city", value)}
+              />
               <div className="filter-group-chips">
                 {activeFilters.city.map((city) => (
                   <button key={city} className="filter-chip active" onClick={() => handleFilterToggle("city", city)}>
@@ -447,17 +467,19 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
             {/* World Rank Dropdown */}
             <div className="filter-group">
               <span className="filter-group-label">🏆 {language === "ar" ? "التصنيف العالمي" : "World Rank"}</span>
-              <select
-                className="sort-select"
+              <FilterDropdown
                 style={{ width: "100%" }}
                 value={rankFilter}
-                onChange={(e) => setRankFilter(e.target.value)}
-              >
-                <option value="all">{language === "ar" ? "جميع التصنيفات" : "All Ranks"}</option>
-                <option value="top500">🏆 {language === "ar" ? "أفضل 500 عالمياً" : "Top 500 Global"}</option>
-                <option value="top1000">🏅 {language === "ar" ? "أفضل 1000 عالمياً" : "Top 1000 Global"}</option>
-                <option value="ranked-egypt">🇪🇬 {language === "ar" ? "مصنفة في مصر" : "Ranked in Egypt"}</option>
-              </select>
+                placeholder={language === "ar" ? "جميع التصنيفات" : "All Ranks"}
+                ariaLabel={language === "ar" ? "التصنيف العالمي" : "World Rank"}
+                options={[
+                  { value: "all", label: language === "ar" ? "جميع التصنيفات" : "All Ranks" },
+                  { value: "top500", label: `🏆 ${language === "ar" ? "أفضل 500 عالمياً" : "Top 500 Global"}` },
+                  { value: "top1000", label: `🏅 ${language === "ar" ? "أفضل 1000 عالمياً" : "Top 1000 Global"}` },
+                  { value: "ranked-egypt", label: `🇪🇬 ${language === "ar" ? "مصنفة في مصر" : "Ranked in Egypt"}` },
+                ]}
+                onSelect={(value) => setRankFilter(value)}
+              />
             </div>
 
             <div className="filter-group-divider"></div>
@@ -465,23 +487,17 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
             {/* Major Dropdown */}
             <div className="filter-group">
               <span className="filter-group-label">📚 {language === "ar" ? "التخصص" : "Major"}</span>
-              <select
-                className="sort-select"
+              <FilterDropdown
                 style={{ width: "100%", marginBottom: "10px" }}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    handleFilterToggle("major", e.target.value);
-                    e.target.value = "";
-                  }
-                }}
-              >
-                <option value="">{language === "ar" ? "اختر تخصصاً..." : "Select a major..."}</option>
-                {predefinedMajors.map((major) => (
-                  <option key={major.name} value={major.name} disabled={activeFilters.major.includes(major.name)}>
-                    {language === "ar" ? major.name_ar : major.name}
-                  </option>
-                ))}
-              </select>
+                placeholder={language === "ar" ? "اختر تخصصاً..." : "Select a major..."}
+                ariaLabel={language === "ar" ? "التخصص" : "Major"}
+                options={predefinedMajors.map((major) => ({
+                  value: major.name,
+                  label: language === "ar" ? major.name_ar : major.name,
+                  disabled: activeFilters.major.includes(major.name),
+                }))}
+                onSelect={(value) => handleFilterToggle("major", value)}
+              />
               <div className="filter-group-chips">
                 {activeFilters.major.map((major) => (
                   <button key={major} className="filter-chip active" onClick={() => handleFilterToggle("major", major)}>
