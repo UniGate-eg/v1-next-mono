@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo, useRef, useEffect } from "react";
+import React, { Suspense, useState, useMemo, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
@@ -64,11 +65,12 @@ interface UniversitiesDirectoryClientProps {
   initialUniversities?: SlimSearchToken[];
 }
 
-export function UniversitiesDirectoryClient({ initialUniversities = [] }: UniversitiesDirectoryClientProps) {
+function UniversitiesDirectoryContent({ initialUniversities = [] }: UniversitiesDirectoryClientProps) {
   const { language, t } = useLanguage();
   const { index: universitiesDatabase } = useUniversitySearch(initialUniversities);
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     return () => {
@@ -78,7 +80,15 @@ export function UniversitiesDirectoryClient({ initialUniversities = [] }: Univer
     };
   }, []);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(() => searchParams.get("search") || "");
+
+  useEffect(() => {
+    const searchParam = searchParams.get("search");
+    if (searchParam !== null) {
+      setSearchQuery(searchParam);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
   const [activeFilters, setActiveFilters] = useState<{
     model: string[];
     type: string[];
@@ -540,5 +550,13 @@ export function UniversitiesDirectoryClient({ initialUniversities = [] }: Univer
         />
       )}
     </div>
+  );
+}
+
+export function UniversitiesDirectoryClient(props: UniversitiesDirectoryClientProps) {
+  return (
+    <Suspense fallback={null}>
+      <UniversitiesDirectoryContent {...props} />
+    </Suspense>
   );
 }
