@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useCompareStore } from "@/stores/compareStore";
+import { formatCity, formatUniversityType } from "@/lib/utils";
 import Link from "next/link";
 import posthog from "posthog-js";
 
@@ -49,23 +50,42 @@ function ComparePageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, universitiesDatabase]);
 
+  const EDUCATION_MODEL_LABELS: Record<string, { en: string; ar: string }> = {
+    AMERICAN: { en: "American", ar: "أمريكي" },
+    GERMAN: { en: "German", ar: "ألماني" },
+    BRITISH: { en: "British", ar: "بريطاني" },
+    EGYPTIAN: { en: "Egyptian", ar: "مصري" },
+    FRENCH: { en: "French", ar: "فرنسي" },
+    CANADIAN: { en: "Canadian", ar: "كندي" },
+  };
+
   const getLangField = (obj: any, fieldName: string) => {
     if (!obj) return "";
     if (language === "ar") {
       if (fieldName === "name") return obj.nameAr || obj.name_ar || obj.nameEn || obj.name;
-      if (fieldName === "model") return obj.educationModel || obj.model || "Egyptian";
-      if (fieldName === "location" || fieldName === "city") return obj.city_ar || obj.city || obj.governorate || "مصر";
+      if (fieldName === "model") {
+        const key = String(obj.educationModel || obj.model || "").toUpperCase();
+        return EDUCATION_MODEL_LABELS[key]?.ar || obj.educationModel || obj.model || "مصري";
+      }
+      if (fieldName === "location" || fieldName === "city") {
+        return formatCity(obj.city_ar || obj.city || obj.governorate || "مصر", "ar");
+      }
       if (fieldName === "qs_ranking") return obj.qsRanking || obj.qs_ranking || "مصنفة في مصر";
-      if (fieldName === "type") return obj.type || "خاصة";
+      if (fieldName === "type") return formatUniversityType(obj.type || "", "ar");
       if (fieldName === "founded") return obj.established || obj.founded || "N/A";
       if (fieldName === "tuition") return obj.tuition_ar || obj.tuition || "حسب الكلية";
       if (obj[fieldName + "_ar"]) return obj[fieldName + "_ar"];
     }
     if (fieldName === "name") return obj.nameEn || obj.name || obj.nameAr;
-    if (fieldName === "model") return obj.educationModel || obj.model || "Egyptian";
-    if (fieldName === "location" || fieldName === "city") return obj.city || obj.governorate || "Egypt";
+    if (fieldName === "model") {
+      const key = String(obj.educationModel || obj.model || "").toUpperCase();
+      return EDUCATION_MODEL_LABELS[key]?.en || obj.educationModel || obj.model || "Egyptian";
+    }
+    if (fieldName === "location" || fieldName === "city") {
+      return formatCity(obj.city || obj.governorate || "Egypt", "en");
+    }
     if (fieldName === "qs_ranking") return obj.qsRanking || obj.qs_ranking || "Ranked in Egypt";
-    if (fieldName === "type") return obj.type || "Private";
+    if (fieldName === "type") return formatUniversityType(obj.type || "", "en");
     if (fieldName === "founded") return obj.established || obj.founded || "N/A";
     if (fieldName === "tuition") return obj.tuition || "Per Faculty";
     if (obj[fieldName + "En"]) return obj[fieldName + "En"];
@@ -154,9 +174,9 @@ function ComparePageContent() {
               if (!selectorSearch.trim()) return true;
               const s = selectorSearch.toLowerCase();
               return (
-                (u.name || "").toLowerCase().includes(s) ||
+                (u.nameEn || "").toLowerCase().includes(s) ||
                 (u.shortName || "").toLowerCase().includes(s) ||
-                (u.name_ar || "").includes(s)
+                (u.nameAr || "").includes(selectorSearch)
               );
             })
             .map((uni: any) => {
@@ -177,7 +197,7 @@ function ComparePageContent() {
                 >
                   <span className="check-indicator"></span>
                   <span>{uni.emoji || "🏛️"}</span>
-                  <span>{uni.shortName || uni.name}</span>
+                  <span>{getLangField(uni, "name")}</span>
                 </button>
               );
             })}
@@ -194,7 +214,7 @@ function ComparePageContent() {
                     <th key={u.id}>
                       <div className="compare-uni-header">
                         <span className="emoji">{u.emoji || "🏛️"}</span>
-                        <span>{u.shortName || u.name}</span>
+                        <span>{getLangField(u, "name")}</span>
                         <button
                           onClick={() => toggle(String(u.id))}
                           style={{
