@@ -90,6 +90,8 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  const parseCsvParam = (value: string | null) => (value ? value.split(",").map((v) => v.trim()).filter(Boolean) : []);
+
   const [activeFilters, setActiveFilters] = useState<{
     model: string[];
     type: string[];
@@ -97,8 +99,8 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     major: string[];
   }>(() => ({
     model: [],
-    type: searchParams.get("type") ? [searchParams.get("type") as string] : [],
-    city: searchParams.get("city") ? [searchParams.get("city") as string] : [],
+    type: parseCsvParam(searchParams.get("type")),
+    city: parseCsvParam(searchParams.get("city")),
     major: [],
   }));
 
@@ -109,13 +111,15 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     const cityParam = searchParams.get("city");
     if (cityParam && appliedCityParamRef.current !== cityParam) {
       appliedCityParamRef.current = cityParam;
-      setActiveFilters((prev) => (prev.city.includes(cityParam) ? prev : { ...prev, city: [...prev.city, cityParam] }));
+      const cities = parseCsvParam(cityParam);
+      setActiveFilters((prev) => ({ ...prev, city: Array.from(new Set([...prev.city, ...cities])) }));
     }
 
     const typeParam = searchParams.get("type");
     if (typeParam && appliedTypeParamRef.current !== typeParam) {
       appliedTypeParamRef.current = typeParam;
-      setActiveFilters((prev) => (prev.type.includes(typeParam) ? prev : { ...prev, type: [...prev.type, typeParam] }));
+      const types = parseCsvParam(typeParam);
+      setActiveFilters((prev) => ({ ...prev, type: Array.from(new Set([...prev.type, ...types])) }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
