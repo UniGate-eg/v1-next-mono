@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSession, signOut } from "@/lib/auth-client";
-import Image from "next/image";
+import { Globe, User, LogOut } from "lucide-react";
 import { Button } from "../ui/button";
 import Menubar from "./Menubar";
 
@@ -77,8 +77,21 @@ export function Navbar() {
       </nav>
 
       {/* Actions  */}
-
       <div className="hidden items-center justify-center gap-3 sm:gap-4 lg:flex">
+        {/* Language Switcher with Globe Icon (Always Visible) */}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={toggleLanguage}
+          title={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+          aria-label={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+          className="flex items-center gap-1.5 rounded-full border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-white/80 hover:border-sky-400/40 hover:bg-white/10 hover:text-white transition-all"
+        >
+          <Globe className="h-3.5 w-3.5 text-sky-400" aria-hidden="true" />
+          <span>{language === "ar" ? "English" : "عربي"}</span>
+        </Button>
+
         {!isPending && session?.user ? (
           <div className="relative">
             <Button
@@ -90,30 +103,38 @@ export function Navbar() {
               aria-controls="user-menu"
               aria-haspopup="true"
               onClick={() => setIsUserMenuOpen((open) => !open)}
-              className="flex h-10 w-10 items-center justify-center rounded-full"
+              className="flex h-10 w-10 items-center justify-center rounded-full border-white/20 bg-primary/20 hover:bg-primary/30 text-white"
             >
-              {getInitials(session.user.name) ||
-                session.user.email?.[0]?.toUpperCase()}
+              {getInitials(session.user.name) ? (
+                <span className="text-xs font-bold text-sky-300">
+                  {getInitials(session.user.name)}
+                </span>
+              ) : (
+                <User className="h-4 w-4 text-sky-300" aria-hidden="true" />
+              )}
             </Button>
 
             {/* User Menu  */}
-
             {isUserMenuOpen && (
               <div
                 id="user-menu"
-                className="absolute end-0 top-full z-50 mt-2 w-44 rounded-md border border-[var(--border)] bg-[var(--bg-body)] p-2 shadow-[var(--shadow-card)]"
+                className="absolute end-0 top-full z-50 mt-2 w-48 rounded-lg border border-white/15 bg-[#18110b] p-2 shadow-2xl backdrop-blur-md"
               >
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => {
-                    toggleLanguage();
-                    setIsUserMenuOpen(false);
-                  }}
-                  className="block w-full rounded-sm px-3 py-2 text-start text-sm font-medium text-white"
+                <div className="px-3 py-2 border-b border-white/10 mb-1">
+                  <p className="text-xs font-semibold text-white truncate">
+                    {session.user.name || session.user.email}
+                  </p>
+                  <p className="text-[11px] text-white/60 truncate">{session.user.email}</p>
+                </div>
+
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsUserMenuOpen(false)}
+                  className="flex items-center gap-2 w-full rounded-sm px-3 py-2 text-start text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors"
                 >
-                  {language === "ar" ? "English" : "Arabic"}
-                </Button>
+                  <User className="h-3.5 w-3.5 text-sky-400" />
+                  <span>{t("navDashboard")}</span>
+                </Link>
 
                 <Button
                   type="button"
@@ -122,9 +143,10 @@ export function Navbar() {
                     setIsUserMenuOpen(false);
                     handleLogout();
                   }}
-                  className="block w-full rounded-sm px-3 py-2 text-start text-sm font-medium text-white"
+                  className="flex items-center gap-2 w-full rounded-sm px-3 py-2 text-start text-xs font-medium text-red-300 hover:text-white"
                 >
-                  {t("navLogout")}
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span>{t("navLogout")}</span>
                 </Button>
               </div>
             )}
@@ -137,25 +159,17 @@ export function Navbar() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={toggleLanguage}
-                  className="text-sm font-semibold text-white/60 hover:text-white"
-                >
-                  {language === "ar" ? "English" : "Arabic"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
                   onClick={() => router.push("/auth/login")}
-                  className="text-sm font-semibold text-white/60 hover:text-white"
+                  className="flex items-center gap-1.5 rounded-lg border-white/15 bg-white/5 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white"
                 >
-                  {language === "ar" ? "تسجيل الدخول" : "Login"}
+                  <User className="h-3.5 w-3.5 text-sky-400" aria-hidden="true" />
+                  <span>{language === "ar" ? "تسجيل الدخول" : "Login"}</span>
                 </Button>
                 <Button
                   type="button"
                   size="sm"
                   onClick={() => router.push("/auth/register")}
-                  className="text-sm font-semibold text-white hover:text-white"
+                  className="rounded-lg text-xs font-semibold text-white hover:opacity-90 bg-gradient-to-r from-sky-500 to-indigo-600"
                 >
                   {language === "ar" ? "إنشاء حساب" : "Sign Up"}
                 </Button>

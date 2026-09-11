@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Globe, User, LogOut } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Button } from "../ui/button";
@@ -95,28 +95,37 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
             <div className="mt-1 flex flex-col gap-2 border-t border-white/10 px-1 pt-3">
               {user ? (
                 <div className="flex items-center gap-2 px-1 justify-between">
-                  {initials && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      aria-label={
-                        isUserMenuOpen ? "Close user menu" : "Open user menu"
-                      }
-                      aria-expanded={isUserMenuOpen}
-                      aria-controls="user-menu"
-                      aria-haspopup="true"
-                      onClick={() => setIsUserMenuOpen((open) => !open)}
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-primary/20 p-0 text-xs font-bold text-primary"
-                    >
-                      {initials}
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    aria-label={
+                      isUserMenuOpen ? "Close user menu" : "Open user menu"
+                    }
+                    aria-expanded={isUserMenuOpen}
+                    aria-controls="user-menu"
+                    aria-haspopup="true"
+                    onClick={() => setIsUserMenuOpen((open) => !open)}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-primary/20 p-0 text-xs font-bold text-sky-300"
+                  >
+                    {initials ? initials : <User className="h-4 w-4 text-sky-300" aria-hidden="true" />}
+                  </Button>
 
                   {isUserMenuOpen && (
                     <div
                       id="user-menu"
-                      className="absolute start-0 top-full z-50 w-fit rounded-md border border-[var(--border)] bg-[var(--bg-body)] p-2 shadow-[var(--shadow-card)]"
+                      className="absolute start-0 top-full z-50 mt-1 w-44 rounded-md border border-[var(--border)] bg-[var(--bg-body)] p-2 shadow-[var(--shadow-card)]"
                     >
+                      <Link
+                        href="/dashboard"
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          setIsOpen(false);
+                        }}
+                        className="flex items-center gap-2 w-full rounded-sm px-3 py-2 text-start text-xs font-medium text-white/80 hover:text-white hover:bg-white/10 transition-colors mb-1"
+                      >
+                        <User className="h-3.5 w-3.5 text-sky-400" />
+                        <span>{t("navDashboard")}</span>
+                      </Link>
                       <Button
                         type="button"
                         variant="destructive"
@@ -125,8 +134,10 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
                           setIsUserMenuOpen(false);
                           handleLogout();
                         }}
+                        className="flex items-center gap-2 w-full"
                       >
-                        {t("navLogout")}
+                        <LogOut className="h-3.5 w-3.5" />
+                        <span>{t("navLogout")}</span>
                       </Button>
                     </div>
                   )}
@@ -136,10 +147,12 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
                     variant="outline"
                     size="sm"
                     onClick={toggleLanguage}
-                    aria-label="Toggle language"
-                    className="text-sm font-semibold text-white/60 hover:text-white"
+                    title={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+                    aria-label={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white"
                   >
-                    {language === "ar" ? "English" : "Arabic"}
+                    <Globe className="h-3.5 w-3.5 text-sky-400" aria-hidden="true" />
+                    <span>{language === "ar" ? "English" : "عربي"}</span>
                   </Button>
                 </div>
               ) : (
@@ -149,10 +162,12 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
                     variant="outline"
                     size="sm"
                     onClick={toggleLanguage}
-                    aria-label="Toggle language"
-                    className="text-sm font-semibold text-white/60 hover:text-white"
+                    title={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+                    aria-label={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
+                    className="flex items-center justify-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white"
                   >
-                    {language === "ar" ? "English" : "Arabic"}
+                    <Globe className="h-3.5 w-3.5 text-sky-400" aria-hidden="true" />
+                    <span>{language === "ar" ? "English" : "عربي"}</span>
                   </Button>
                   <Button
                     type="button"
@@ -162,9 +177,10 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
                       setIsOpen(false);
                       router.push("/auth/login");
                     }}
-                    className="text-sm font-semibold text-white/60 hover:text-white"
+                    className="flex items-center justify-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white"
                   >
-                    {language === "ar" ? "تسجيل الدخول" : "Login"}
+                    <User className="h-3.5 w-3.5 text-sky-400" aria-hidden="true" />
+                    <span>{language === "ar" ? "تسجيل الدخول" : "Login"}</span>
                   </Button>
                   <Button
                     type="button"
@@ -173,7 +189,7 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
                       setIsOpen(false);
                       router.push("/auth/register");
                     }}
-                    className="bg-gradient-to-r from-primary to-primary-dark text-sm font-semibold text-white hover:text-white"
+                    className="bg-gradient-to-r from-sky-500 to-indigo-600 text-xs font-semibold text-white hover:opacity-90"
                   >
                     {language === "ar" ? "إنشاء حساب" : "Sign Up"}
                   </Button>
