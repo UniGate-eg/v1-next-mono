@@ -9,6 +9,7 @@ import { UniversityModal, type UniversityData } from "@/components/university/Un
 import Link from "next/link";
 import type { AppStatus } from "@/schemas/bookmark.schema";
 import posthog from "posthog-js";
+import { formatCity } from "@/lib/utils";
 
 const statusToColMap: Record<string, string> = {
   INTERESTED: "shortlisted",
@@ -32,6 +33,7 @@ export default function DashboardPage() {
 
   const getLangField = (obj: any, fieldName: string) => {
     if (!obj) return "";
+    if (fieldName === "city") return formatCity(obj.city_ar || obj.city || "", language);
     if (language === "ar" && obj[fieldName + "_ar"]) return obj[fieldName + "_ar"];
     return obj[fieldName] || "";
   };
@@ -197,7 +199,7 @@ export default function DashboardPage() {
                             <button
                               onClick={() => deleteBookmark(bookmark.id)}
                               style={{ color: "var(--text-muted)", cursor: "pointer", fontSize: "14px" }}
-                              title="Delete"
+                              title={language === "ar" ? "حذف" : "Delete"}
                             >
                               ✕
                             </button>
@@ -243,7 +245,7 @@ export default function DashboardPage() {
                                     cursor: "pointer",
                                   }}
                                 >
-                                  ⭐ Shortlist
+                                  ⭐ {language === "ar" ? "قائمة الاهتمام" : "Shortlist"}
                                 </button>
                               )}
                               {statusKey !== "applied" && (
@@ -259,7 +261,7 @@ export default function DashboardPage() {
                                     cursor: "pointer",
                                   }}
                                 >
-                                  📝 Applied
+                                  📝 {language === "ar" ? "تم التقديم" : "Applied"}
                                 </button>
                               )}
                               {statusKey !== "accepted" && (
@@ -275,7 +277,7 @@ export default function DashboardPage() {
                                     cursor: "pointer",
                                   }}
                                 >
-                                  🎉 Accepted
+                                  🎉 {language === "ar" ? "تم القبول" : "Accepted"}
                                 </button>
                               )}
                             </div>
