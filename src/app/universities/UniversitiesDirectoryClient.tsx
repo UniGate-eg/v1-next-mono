@@ -8,6 +8,7 @@ import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 import { TuitionBudgetFilter } from "@/components/university/TuitionBudgetFilter";
+import { formatCity } from "@/lib/utils";
 import type { SlimSearchToken } from "@/types/university.types";
 
 const parseTuition = (tuitionStr?: string | number) => {
@@ -428,14 +429,14 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
                 <option value="">{language === "ar" ? "اختر المدينة..." : "Select a city..."}</option>
                 {allCities.map((city) => (
                   <option key={city} value={city} disabled={activeFilters.city.includes(city)}>
-                    {city}
+                    {formatCity(city, language)}
                   </option>
                 ))}
               </select>
               <div className="filter-group-chips">
                 {activeFilters.city.map((city) => (
                   <button key={city} className="filter-chip active" onClick={() => handleFilterToggle("city", city)}>
-                    <span className="fc-emoji">🏙️</span> {city} ✕
+                    <span className="fc-emoji">🏙️</span> {formatCity(city, language)} ✕
                   </button>
                 ))}
               </div>
