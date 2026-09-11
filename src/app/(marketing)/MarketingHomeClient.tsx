@@ -287,7 +287,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
     <div className="home-tab-container">
       {/* Hero Section */}
       <section className="hero">
-        <div className="hero-bg">
+        <div className="hero-bg pointer-events-none select-none" aria-hidden="true">
           <div className="gradient-orb orb-1"></div>
           <div className="gradient-orb orb-2"></div>
           <div className="gradient-orb orb-3"></div>

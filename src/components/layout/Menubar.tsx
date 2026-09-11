@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Menu, X, Globe, User, LogOut } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSession, signOut } from "@/lib/auth-client";
-import { Button } from "../ui/button";
 
 interface MenubarProps {
   navbarLinks: { href: string; label: string; key: string }[];
@@ -39,31 +38,29 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
   const handleLogout = async () => {
     try {
       await signOut();
-      window.location.href = "/";
-    } catch {
-      window.location.href = "/";
+      router.push("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
     }
   };
 
   return (
     <div className="relative lg:hidden">
-      <Button
+      <button
         type="button"
-        variant="outline"
-        size="sm"
         aria-label={isOpen ? "Close menu" : "Open menu"}
         aria-expanded={isOpen}
         aria-controls="mobile-nav"
         aria-haspopup="true"
         onClick={() => setIsOpen((open) => !open)}
-        className="flex h-10 w-10 items-center justify-center rounded-full border-white/10 bg-white/[0.03] p-2 text-white/60 hover:bg-white/5 hover:text-white"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] p-2 text-white/70 hover:bg-white/10 hover:text-white transition-all cursor-pointer select-none"
       >
         {isOpen ? (
           <X className="h-5 w-5" aria-hidden="true" />
         ) : (
           <Menu className="h-5 w-5" aria-hidden="true" />
         )}
-      </Button>
+      </button>
 
       {isOpen && (
         <nav
@@ -95,9 +92,8 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
             <div className="mt-1 flex flex-col gap-2 border-t border-white/10 px-1 pt-3">
               {user ? (
                 <div className="flex items-center gap-2 px-1 justify-between">
-                  <Button
+                  <button
                     type="button"
-                    variant="outline"
                     aria-label={
                       isUserMenuOpen ? "Close user menu" : "Open user menu"
                     }
@@ -105,10 +101,10 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
                     aria-controls="user-menu"
                     aria-haspopup="true"
                     onClick={() => setIsUserMenuOpen((open) => !open)}
-                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-primary/20 p-0 text-xs font-bold text-sky-300"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-primary/20 p-0 text-xs font-bold text-sky-300 cursor-pointer"
                   >
                     {initials ? initials : <User className="h-4 w-4 text-sky-300" aria-hidden="true" />}
-                  </Button>
+                  </button>
 
                   {isUserMenuOpen && (
                     <div
@@ -126,73 +122,72 @@ const Menubar = ({ navbarLinks, isActive }: MenubarProps) => {
                         <User className="h-3.5 w-3.5 text-sky-400" />
                         <span>{t("navDashboard")}</span>
                       </Link>
-                      <Button
+                      <button
                         type="button"
-                        variant="destructive"
-                        size="sm"
                         onClick={() => {
                           setIsUserMenuOpen(false);
                           handleLogout();
                         }}
-                        className="flex items-center gap-2 w-full"
+                        className="flex items-center gap-2 w-full rounded-sm px-3 py-2 text-start text-xs font-medium text-red-300 hover:text-white hover:bg-red-500/20 transition-colors cursor-pointer"
                       >
                         <LogOut className="h-3.5 w-3.5" />
                         <span>{t("navLogout")}</span>
-                      </Button>
+                      </button>
                     </div>
                   )}
 
-                  <Button
+                  <button
                     type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={toggleLanguage}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleLanguage();
+                    }}
                     title={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
                     aria-label={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white"
+                    className="flex items-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-white/90 hover:bg-white/10 hover:text-white transition-all cursor-pointer select-none"
                   >
                     <Globe className="h-3.5 w-3.5 text-sky-400" aria-hidden="true" />
                     <span>{language === "ar" ? "English" : "عربي"}</span>
-                  </Button>
+                  </button>
                 </div>
               ) : (
                 <>
-                  <Button
+                  <button
                     type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={toggleLanguage}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toggleLanguage();
+                    }}
                     title={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
                     aria-label={language === "ar" ? "Switch to English" : "التبديل إلى العربية"}
-                    className="flex items-center justify-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white"
+                    className="flex items-center justify-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white/90 hover:bg-white/10 hover:text-white transition-all cursor-pointer select-none"
                   >
                     <Globe className="h-3.5 w-3.5 text-sky-400" aria-hidden="true" />
                     <span>{language === "ar" ? "English" : "عربي"}</span>
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     type="button"
-                    variant="outline"
-                    size="sm"
                     onClick={() => {
                       setIsOpen(false);
                       router.push("/auth/login");
                     }}
-                    className="flex items-center justify-center gap-1.5 text-xs font-semibold text-white/80 hover:text-white"
+                    className="flex items-center justify-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-white/80 hover:bg-white/10 hover:text-white transition-all cursor-pointer select-none"
                   >
                     <User className="h-3.5 w-3.5 text-sky-400" aria-hidden="true" />
                     <span>{language === "ar" ? "تسجيل الدخول" : "Login"}</span>
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     type="button"
-                    size="sm"
                     onClick={() => {
                       setIsOpen(false);
                       router.push("/auth/register");
                     }}
-                    className="bg-gradient-to-r from-sky-500 to-indigo-600 text-xs font-semibold text-white hover:opacity-90"
+                    className="rounded-md bg-gradient-to-r from-sky-500 to-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:opacity-90 transition-all cursor-pointer select-none"
                   >
                     {language === "ar" ? "إنشاء حساب" : "Sign Up"}
-                  </Button>
+                  </button>
                 </>
               )}
             </div>

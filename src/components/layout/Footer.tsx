@@ -161,8 +161,12 @@ export function Footer() {
           <div className="footer-legal-secondary">
             <button
               type="button"
-              onClick={toggleLanguage}
-              className="footer-locale-btn"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toggleLanguage();
+              }}
+              className="footer-locale-btn !text-slate-300 hover:!text-white cursor-pointer"
               title={language === "ar" ? "التبديل إلى English" : "Switch to العربية"}
               aria-label={language === "ar" ? "اختيار اللغة: العربية" : "Select language: English"}
             >

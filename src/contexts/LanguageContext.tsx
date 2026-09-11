@@ -88,28 +88,40 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLangState] = useState<Language>("en");
 
   useEffect(() => {
-    const saved = localStorage.getItem("preferredLanguage") as Language | null;
-    if (saved === "ar" || saved === "en") {
-      setLangState(saved);
-      document.documentElement.lang = saved;
-      document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
-      if (saved === "ar") {
-        document.body.classList.add("rtl");
-      } else {
-        document.body.classList.remove("rtl");
+    try {
+      const saved = localStorage.getItem("preferredLanguage") as Language | null;
+      if (saved === "ar" || saved === "en") {
+        setLangState(saved);
+        if (typeof document !== "undefined") {
+          document.documentElement.lang = saved;
+          document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
+          if (saved === "ar") {
+            document.body.classList.add("rtl");
+          } else {
+            document.body.classList.remove("rtl");
+          }
+        }
       }
+    } catch {
+      // Storage access may be restricted
     }
   }, []);
 
   const setLanguage = (lang: Language) => {
     setLangState(lang);
-    localStorage.setItem("preferredLanguage", lang);
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    if (lang === "ar") {
-      document.body.classList.add("rtl");
-    } else {
-      document.body.classList.remove("rtl");
+    try {
+      localStorage.setItem("preferredLanguage", lang);
+    } catch {
+      // Storage access may be restricted
+    }
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = lang;
+      document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+      if (lang === "ar") {
+        document.body.classList.add("rtl");
+      } else {
+        document.body.classList.remove("rtl");
+      }
     }
   };
 
