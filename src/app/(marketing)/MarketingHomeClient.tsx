@@ -626,7 +626,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
 
           <div className="city-explorer-grid">
             {/* New Cairo */}
-            <Link href="/universities?search=New Cairo" className="city-card animate-in">
+            <Link href="/universities?city=New Cairo" className="city-card animate-in">
               <div
                 className="city-card-bg"
                 style={{
@@ -653,7 +653,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
             </Link>
 
             {/* Sheikh Zayed & 6th October */}
-            <Link href="/universities?search=Zayed" className="city-card animate-in">
+            <Link href="/universities?city=Zayed" className="city-card animate-in">
               <div
                 className="city-card-bg"
                 style={{
@@ -680,7 +680,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
             </Link>
 
             {/* Alexandria & Coastal */}
-            <Link href="/universities?search=Alexandria" className="city-card animate-in">
+            <Link href="/universities?city=Alexandria" className="city-card animate-in">
               <div
                 className="city-card-bg"
                 style={{
@@ -707,7 +707,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
             </Link>
 
             {/* National & New Smart Hubs */}
-            <Link href="/universities?search=National" className="city-card animate-in">
+            <Link href="/universities?type=National" className="city-card animate-in">
               <div
                 className="city-card-bg"
                 style={{

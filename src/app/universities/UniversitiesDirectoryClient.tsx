@@ -89,12 +89,36 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
   const [activeFilters, setActiveFilters] = useState<{
     model: string[];
     type: string[];
     city: string[];
     major: string[];
-  }>({ model: [], type: [], city: [], major: [] });
+  }>(() => ({
+    model: [],
+    type: searchParams.get("type") ? [searchParams.get("type") as string] : [],
+    city: searchParams.get("city") ? [searchParams.get("city") as string] : [],
+    major: [],
+  }));
+
+  const appliedCityParamRef = useRef<string | null>(searchParams.get("city"));
+  const appliedTypeParamRef = useRef<string | null>(searchParams.get("type"));
+
+  useEffect(() => {
+    const cityParam = searchParams.get("city");
+    if (cityParam && appliedCityParamRef.current !== cityParam) {
+      appliedCityParamRef.current = cityParam;
+      setActiveFilters((prev) => (prev.city.includes(cityParam) ? prev : { ...prev, city: [...prev.city, cityParam] }));
+    }
+
+    const typeParam = searchParams.get("type");
+    if (typeParam && appliedTypeParamRef.current !== typeParam) {
+      appliedTypeParamRef.current = typeParam;
+      setActiveFilters((prev) => (prev.type.includes(typeParam) ? prev : { ...prev, type: [...prev.type, typeParam] }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const [rankFilter, setRankFilter] = useState("all");
   const [currentSort, setCurrentSort] = useState("default");
