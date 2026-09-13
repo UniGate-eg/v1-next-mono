@@ -28,7 +28,7 @@ const BADGE_VARIANTS: Record<UniversityType, "public" | "private" | "national" |
 export function UniversityTypeBadge({
   type,
   variant = "pill",
-  showIcon = false,
+  showIcon = true,
   className,
 }: UniversityTypeBadgeProps) {
   const { language } = useLanguage();
@@ -46,8 +46,8 @@ export function UniversityTypeBadge({
 
   if (variant === "inline") {
     return (
-      <span className={cn("inline-flex items-center", className)}>
-        {showIcon && <span className="mr-1 rtl:ml-1 rtl:mr-0">{icon}</span>}
+      <span className={cn("inline-flex items-center gap-1.5", className)}>
+        {showIcon && <span aria-hidden="true">{icon}</span>}
         <span>{label}</span>
       </span>
     );
@@ -56,9 +56,9 @@ export function UniversityTypeBadge({
   return (
     <Badge
       variant={BADGE_VARIANTS[type] || "secondary"}
-      className={cn("font-medium", className)}
+      className={cn("font-medium inline-flex items-center gap-1.5", className)}
     >
-      {showIcon && <span className="mr-1 rtl:ml-1 rtl:mr-0">{icon}</span>}
+      {showIcon && <span aria-hidden="true">{icon}</span>}
       <span>{label}</span>
     </Badge>
   );
