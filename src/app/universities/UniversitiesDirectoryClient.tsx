@@ -9,6 +9,7 @@ import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 import { TuitionBudgetFilter } from "@/components/university/TuitionBudgetFilter";
 import { EducationModelIcon } from "@/components/university/EducationModelIcon";
+import AnimatedSelect from "@/components/ui/animated-select";
 import { formatCity } from "@/lib/utils";
 import {
   UNIVERSITY_TYPES,
@@ -511,17 +512,16 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
             {/* World Rank Dropdown */}
             <div className="filter-group">
               <span className="filter-group-label">🏆 {language === "ar" ? "التصنيف العالمي" : "World Rank"}</span>
-              <select
-                className="sort-select"
-                style={{ width: "100%" }}
-                value={rankFilter}
-                onChange={(e) => setRankFilter(e.target.value)}
-              >
-                <option value="all">{language === "ar" ? "جميع التصنيفات" : "All Ranks"}</option>
-                <option value="top500">🏆 {language === "ar" ? "أفضل 500 عالمياً" : "Top 500 Global"}</option>
-                <option value="top1000">🏅 {language === "ar" ? "أفضل 1000 عالمياً" : "Top 1000 Global"}</option>
-                <option value="ranked-egypt">🇪🇬 {language === "ar" ? "مصنفة في مصر" : "Ranked in Egypt"}</option>
-              </select>
+              <AnimatedSelect
+                data={[
+                  { id: "all", value: "all", label: language === "ar" ? "جميع التصنيفات" : "All Ranks" },
+                  { id: "top500", value: "top500", icon: "🏆", label: language === "ar" ? "أفضل 500 عالمياً" : "Top 500 Global" },
+                  { id: "top1000", value: "top1000", icon: "🏅", label: language === "ar" ? "أفضل 1000 عالمياً" : "Top 1000 Global" },
+                  { id: "ranked-egypt", value: "ranked-egypt", icon: "🇪🇬", label: language === "ar" ? "مصنفة في مصر" : "Ranked in Egypt" },
+                ]}
+                defaultValue={rankFilter}
+                onChange={(value) => setRankFilter(value)}
+              />
             </div>
 
             <div className="filter-group-divider"></div>
