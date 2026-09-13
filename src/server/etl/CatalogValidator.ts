@@ -130,6 +130,13 @@ export interface ValidationReport {
   warnings: string[];
   typeCounts: Record<UniversityType, number>;
   typeReview: TypeReviewEntry[];
+  /**
+   * False when the enrichment provider's typeSource references have not been
+   * confirmed by a human against the official MoHE/SCU registry. Does not block
+   * validation on its own (see reset-verified-catalog.ts, which refuses
+   * --confirm-production on this unless explicitly acknowledged).
+   */
+  auditHumanVerified: boolean;
   stats: {
     universitiesCount: number;
     facultiesCount: number;
@@ -161,8 +168,17 @@ export class CatalogValidator {
     workbooksData: ParsedWorkbookData[],
     enrichmentProvider: IEnrichmentProvider | { getEnrichment: (short: string, nameEn: string) => UniversityEnrichmentRecord | null }
   ): ValidationReport {
+    const auditHumanVerified =
+      typeof (enrichmentProvider as IEnrichmentProvider).isAuditHumanVerified === "function"
+        ? (enrichmentProvider as IEnrichmentProvider).isAuditHumanVerified!()
+        : false;
     const errors: string[] = [];
     const warnings: string[] = [];
+    if (!auditHumanVerified) {
+      warnings.push(
+        "Type classification audit has not been confirmed by a human against the official MoHE/SCU registry (typeSource references are drafted, unverified). --confirm-production will refuse to run without --acknowledge-unverified-audit."
+      );
+    }
     const typeReview: TypeReviewEntry[] = [];
     const typeCounts: Record<UniversityType, number> = {
       PUBLIC: 0,
@@ -371,6 +387,7 @@ export class CatalogValidator {
       warnings,
       typeCounts,
       typeReview,
+      auditHumanVerified,
       stats: {
         universitiesCount: validatedUnis.length,
         facultiesCount: validatedFaculties.length,
