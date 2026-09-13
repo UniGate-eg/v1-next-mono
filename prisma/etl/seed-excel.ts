@@ -38,6 +38,15 @@ async function main() {
 
   let successCount = 0;
   let notFoundCount = 0;
+  let reviewCount = 0;
+  let blockingReviewCount = 0;
+
+  const typeCounts: Record<UniversityType, number> = {
+    PUBLIC: 0,
+    PRIVATE: 0,
+    NATIONAL: 0,
+    INTERNATIONAL: 0,
+  };
 
   for (const rawUni of rawUnis) {
     const uniId = rawUni["University ID"];
@@ -56,23 +65,29 @@ async function main() {
     });
 
     if (!dbUni) {
-      console.log(`⚠️ University not found in DB, creating basic entry: ${uniName} (${shortName})`);
-      // Create a basic entry if not exists
-      dbUni = await prisma.university.create({
-        data: {
-          slug: slugify(shortName || uniName),
-          nameEn: uniName,
-          nameAr: uniName, // Fallback
-          shortName: shortName,
-          governorate: "Cairo", // Fallback
-          type: UniversityType.PRIVATE, // Fallback
-          educationModel: EducationModel.EGYPTIAN,
-          publishStatus: PublishStatus.PUBLISHED,
-        }
-      });
+      console.log(`⚠️ University not found in DB, skipping fallback creation: ${uniName} (${shortName})`);
+      reviewCount++;
+      blockingReviewCount++;
+      const errorLogPath = path.join(process.cwd(), "prisma", "etl", "etl-errors.jsonl");
+      const reviewEntry = {
+        timestamp: new Date().toISOString(),
+        fileName: "seed-excel",
+        kind: "TYPE_REVIEW",
+        institutionId: uniId || shortName || slugify(uniName),
+        nameEn: uniName,
+        originalValue: null,
+        reason: "NO_VERIFIED_RECORD",
+        candidates: [],
+        blocking: true,
+        rawData: uniName,
+      };
+      fs.appendFileSync(errorLogPath, JSON.stringify(reviewEntry) + "\n", "utf8");
+      notFoundCount++;
+      continue;
     }
 
     console.log(`\n⚙️  Processing: ${dbUni.nameEn} (ID: ${dbUni.id})`);
+    typeCounts[dbUni.type]++;
 
     // Get faculties for this uni
     const uniFaculties = rawFaculties.filter(f => f["University ID"] === uniId);
@@ -136,6 +151,15 @@ async function main() {
 
   console.log("\n✅ ETL Ingestion Complete!");
   console.log(`🎓 Successfully Updated: ${successCount} Universities`);
+  console.log(`⏩ Skipped / Not Found: ${notFoundCount}`);
+  console.log(JSON.stringify({
+    level: "INFO",
+    step: "seed-excel",
+    message: "Type classification summary",
+    typeCounts,
+    reviewCount,
+    blockingReviewCount,
+  }));
 }
 
 main()
