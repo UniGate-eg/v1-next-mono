@@ -179,7 +179,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
       const uCity = (uni.city || "").toLowerCase();
       const uGov = (uni.governorate || "").toLowerCase();
       const uModel = (uni.educationModel || "").toLowerCase();
-      const uType = uni.type || "PUBLIC";
+      const uType = uni.type;
 
       // 1. Discipline / Field Score (Max 38 pts)
       if (selMajor.includes("computer") || selMajor.includes("cs")) {
@@ -707,7 +707,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
             </Link>
 
             {/* National & New Smart Hubs */}
-            <Link href="/universities?type=National" className="city-card animate-in">
+            <Link href="/universities?type=NATIONAL" className="city-card animate-in">
               <div
                 className="city-card-bg"
                 style={{
