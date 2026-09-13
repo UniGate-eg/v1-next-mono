@@ -150,24 +150,7 @@ export function UniversityCard({
             <UniversityTypeBadge type={university.type} variant="inline" showIcon={true} />
           )}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {university.qs_ranking && university.qs_ranking !== "N/A" && (
-            <span
-              style={{
-                fontSize: "11px",
-                fontWeight: "700",
-                background: "rgba(251, 191, 36, 0.15)",
-                border: "1px solid rgba(251, 191, 36, 0.3)",
-                color: "#F59E0B",
-                padding: "3px 8px",
-                borderRadius: "12px",
-              }}
-            >
-              🏆 {String(university.qs_ranking).includes("#1") ? "#1 Egypt" : "Top 500"}
-            </span>
-          )}
-          <div className="uni-card-emoji">{university.emoji || "🏛️"}</div>
-        </div>
+        <div className="uni-card-emoji">{university.emoji || "🏛️"}</div>
       </div>
 
       <h3 className="uni-card-name">{uniName}</h3>
