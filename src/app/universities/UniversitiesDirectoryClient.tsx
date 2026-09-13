@@ -8,6 +8,7 @@ import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 import { TuitionBudgetFilter } from "@/components/university/TuitionBudgetFilter";
+import { EducationModelIcon } from "@/components/university/EducationModelIcon";
 import { formatCity } from "@/lib/utils";
 import {
   UNIVERSITY_TYPES,
@@ -324,10 +325,10 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   };
 
   const activeFilterTags = useMemo(() => {
-    const tags: Array<{ category: string; value: string; emoji: string; displayValue: string }> = [];
+    const tags: Array<{ category: string; value: string; emoji: React.ReactNode; displayValue: string }> = [];
     activeFilters.model.forEach((val) => {
       const meta = EDUCATION_MODEL_META[val];
-      tags.push({ category: "model", value: val, emoji: meta.icon, displayValue: meta[language] });
+      tags.push({ category: "model", value: val, emoji: <EducationModelIcon model={val} />, displayValue: meta[language] });
     });
     activeFilters.type.forEach((val) => {
       const meta = UNIVERSITY_TYPE_META[val];
@@ -443,7 +444,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
                       className={`filter-chip ${isSelected ? "active" : ""}`}
                       onClick={() => handleModelToggle(model)}
                     >
-                      <span className="fc-emoji">{meta.icon}</span> {meta[language]} ({count})
+                      <span className="fc-emoji"><EducationModelIcon model={model} /></span> {meta[language]} ({count})
                     </button>
                   );
                 })}
