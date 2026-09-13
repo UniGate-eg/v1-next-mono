@@ -71,6 +71,7 @@ export function transformUniversity(raw: RawUniversity) {
     addressEn: raw.addressEn || raw.address || null,
     addressAr: raw.addressAr || raw.address_ar || null,
     overviewEn: raw.overviewEn || raw.overview || raw.description || null,
+    overviewAr: raw.overviewAr || raw.overview_ar || raw.description_ar || null,
     website: raw.website || null,
     logoUrl: raw.logoUrl || null,
     established: typeof raw.established === "number" ? raw.established : typeof raw.founded === "number" ? raw.founded : null,
