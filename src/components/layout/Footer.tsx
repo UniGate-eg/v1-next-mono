@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { UNIVERSITY_TYPES, UNIVERSITY_TYPE_META, toTypeParam } from "@/lib/university-type";
 import { Globe, ArrowUp } from "lucide-react";
 
 export function Footer() {
@@ -82,30 +83,18 @@ export function Footer() {
 
         <div className="footer-links-group">
           <h4>{language === "ar" ? "أنواع الجامعات" : "University Types"}</h4>
-          <Link
-            href="/universities?type=PUBLIC"
-            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
-          >
-            {language === "ar" ? "جامعات حكومية" : "Public Universities"}
-          </Link>
-          <Link
-            href="/universities?type=PRIVATE"
-            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
-          >
-            {language === "ar" ? "جامعات خاصة" : "Private Universities"}
-          </Link>
-          <Link
-            href="/universities?type=NATIONAL"
-            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
-          >
-            {language === "ar" ? "جامعات أهلية" : "National Universities"}
-          </Link>
-          <Link
-            href="/universities?type=INTERNATIONAL"
-            className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
-          >
-            {language === "ar" ? "جامعات دولية" : "International Universities"}
-          </Link>
+          {UNIVERSITY_TYPES.map((type) => {
+            const meta = UNIVERSITY_TYPE_META[type];
+            return (
+              <Link
+                key={type}
+                href={`/universities?type=${toTypeParam(type)}`}
+                className="!text-slate-400 hover:!text-white focus:!text-white visited:!text-slate-400 visited:hover:!text-white transition-colors duration-150"
+              >
+                {language === "ar" ? `جامعات ${meta.ar}` : `${meta.en} Universities`}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
