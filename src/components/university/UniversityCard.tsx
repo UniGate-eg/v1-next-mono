@@ -6,6 +6,8 @@ import { useCompareStore } from "@/stores/compareStore";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { formatCity } from "@/lib/utils";
 import { UniversityTypeBadge } from "@/components/university/UniversityTypeBadge";
+import { EducationModelBadge } from "@/components/university/EducationModelBadge";
+import { getEducationModelLabel } from "@/lib/education-model";
 import type { UniversityData } from "./UniversityModal";
 
 interface UniversityCardProps {
@@ -13,15 +15,6 @@ interface UniversityCardProps {
   onViewDetails?: (uni: UniversityData) => void;
   className?: string;
 }
-
-const EDUCATION_MODEL_LABELS: Record<string, { en: string; ar: string; emoji: string }> = {
-  AMERICAN: { en: "American Model", ar: "نموذج أمريكي", emoji: "🎓" },
-  GERMAN: { en: "German Model", ar: "نموذج ألماني", emoji: "🏛️" },
-  BRITISH: { en: "British Model", ar: "نموذج بريطاني", emoji: "🏫" },
-  EGYPTIAN: { en: "Egyptian Model", ar: "نموذج مصري", emoji: "🇪🇬" },
-  FRENCH: { en: "French Model", ar: "نموذج فرنسي", emoji: "🗼" },
-  CANADIAN: { en: "Canadian Model", ar: "نموذج كندي", emoji: "🍁" },
-};
 
 export function UniversityCard({
   university,
@@ -45,12 +38,7 @@ export function UniversityCard({
   const getLangField = (fieldName: string): string => {
     const uniAny = university as any;
     if (fieldName === "model" || fieldName === "educationModel") {
-      const rawModel = String(uniAny.educationModel || uniAny.model || "").toUpperCase();
-      const meta = EDUCATION_MODEL_LABELS[rawModel];
-      if (meta) {
-        return language === "ar" ? meta.ar : meta.en;
-      }
-      return "";
+      return getEducationModelLabel(uniAny.educationModel ?? uniAny.model, language) || "";
     }
     if (language === "ar") {
       if (uniAny[fieldName + "_ar"]) return uniAny[fieldName + "_ar"];
@@ -142,10 +130,7 @@ export function UniversityCard({
   const strengthsList = getLangArray("strengths");
 
   const uniName = getLangField("name") || university.nameEn || university.name || "";
-  const rawModelKey = String((university as any).educationModel || (university as any).model || "").toUpperCase();
-  const modelMeta = EDUCATION_MODEL_LABELS[rawModelKey];
-  const modelName = getLangField("model");
-  const modelEmoji = university.modelEmoji || modelMeta?.emoji || "🎓";
+  const educationModel = (university as any).educationModel || (university as any).model;
   const locationName = getLangField("location") || (university as any).governorate || "Egypt";
 
   return (
@@ -159,16 +144,12 @@ export function UniversityCard({
       onClick={() => onViewDetails && onViewDetails(university)}
     >
       <div className="uni-card-header">
-        {modelName ? (
-          <div className="uni-card-model">
-            <span>{modelEmoji}</span>
-            <span>{modelName}</span>
-          </div>
-        ) : (
-          <div className="uni-card-model">
+        <div className="uni-card-model">
+          <EducationModelBadge model={educationModel} showIcon={true} />
+          {!getEducationModelLabel(educationModel, language) && (
             <UniversityTypeBadge type={university.type} variant="inline" showIcon={true} />
-          </div>
-        )}
+          )}
+        </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {university.qs_ranking && university.qs_ranking !== "N/A" && (
             <span
