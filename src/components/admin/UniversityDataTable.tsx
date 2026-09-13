@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { UniversityDTO } from "../../types/university.types";
 import { getUniversityTypeLabel } from "@/lib/university-type";
-import { getEducationModelLabel, getEducationModelIcon } from "@/lib/education-model";
+import { getEducationModelLabel } from "@/lib/education-model";
+import { EducationModelIcon } from "@/components/university/EducationModelIcon";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Input } from "../ui/input";
 import { Edit, Eye, Filter, Plus, Building2, CheckSquare, Square, Search, Sparkles } from "lucide-react";
@@ -150,10 +151,10 @@ export function UniversityDataTable({ universities, total, currentPage }: Univer
                       <td className="px-8 py-5 text-slate-300">
                         <span className="font-bold text-white text-xs">{getUniversityTypeLabel(uni.type, "en") || uni.type}</span>
                         <span className="text-[11px] text-slate-400 block mt-0.5">
-                          {getEducationModelIcon(uni.educationModel) && (
-                            <span aria-hidden="true">{getEducationModelIcon(uni.educationModel)} </span>
-                          )}
-                          ({getEducationModelLabel(uni.educationModel, "en") || uni.educationModel})
+                          <span className="inline-flex items-center gap-1">
+                            <EducationModelIcon model={uni.educationModel} />
+                            ({getEducationModelLabel(uni.educationModel, "en") || uni.educationModel})
+                          </span>
                         </span>
                       </td>
                       <td className="px-8 py-5">
