@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
+import { useViewportPagination } from "@/hooks/useViewportPagination";
 import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 import { TuitionBudgetFilter } from "@/components/university/TuitionBudgetFilter";
@@ -316,6 +317,14 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
 
     return filtered;
   }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase]);
+
+  const {
+    visibleItems: visibleUnis,
+    hasMore,
+    isLoadingMore,
+    newlyRevealedCount,
+    sentinelRef,
+  } = useViewportPagination(filteredUnis, 24);
 
   const getPriceRangeText = () => {
     if (priceMin === 0 && priceMax >= 400000) return t("Any") || "Any";
@@ -643,22 +652,45 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
             </button>
           </div>
         ) : (
-          <div className="uni-grid uni-grid-full" id="unisGrid">
-            {filteredUnis.map((uni: any) => (
-              <UniversityCard
-                key={uni.id}
-                university={uni}
-                onViewDetails={() => {
-                  posthog.capture("university_card_viewed", {
-                    university_id: String(uni.id),
-                    university_type: uni.type,
-                    university_city: uni.city || uni.governorate,
-                  });
-                  setSelectedUniModal(uni);
-                }}
-              />
-            ))}
-          </div>
+          <>
+            <div className="uni-grid uni-grid-full" id="unisGrid">
+              {visibleUnis.map((uni: any, idx: number) => {
+                const firstNewIndex = visibleUnis.length - newlyRevealedCount;
+                const isNewlyRevealed = idx >= firstNewIndex;
+                const staggerIndex = idx - firstNewIndex;
+                return (
+                  <UniversityCard
+                    key={uni.id}
+                    university={uni}
+                    className={isNewlyRevealed ? "uni-card-page-enter" : ""}
+                    style={isNewlyRevealed ? { animationDelay: `${Math.min(staggerIndex, 12) * 40}ms` } : undefined}
+                    onViewDetails={() => {
+                      posthog.capture("university_card_viewed", {
+                        university_id: String(uni.id),
+                        university_type: uni.type,
+                        university_city: uni.city || uni.governorate,
+                      });
+                      setSelectedUniModal(uni);
+                    }}
+                  />
+                );
+              })}
+            </div>
+            {hasMore && (
+              <div ref={sentinelRef} className="pagination-sentinel" aria-hidden="true">
+                {isLoadingMore && (
+                  <div className="pagination-loading-more">
+                    <span className="pagination-dot" />
+                    <span className="pagination-dot" />
+                    <span className="pagination-dot" />
+                    <span className="pagination-loading-text">
+                      {language === "ar" ? "جارٍ تحميل المزيد من الجامعات..." : "Loading more universities…"}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
       </div>
 
