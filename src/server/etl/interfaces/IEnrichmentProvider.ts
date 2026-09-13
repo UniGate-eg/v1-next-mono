@@ -10,6 +10,8 @@ export interface TypeSource {
 
 export interface UniversityEnrichmentRecord {
   shortName: string;
+  /** Per-institution display icon. Falls back to the schema default ("🏛️") when absent. */
+  emoji?: string;
   nameEn: string;
   nameAr: string;
   governorate: string;
