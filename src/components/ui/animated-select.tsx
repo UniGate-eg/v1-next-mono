@@ -46,7 +46,7 @@ const AnimatedSelect = ({ data, defaultValue }: SelectProps) => {
         type: "spring",
         stiffness: 300,
         damping: 25,
-        ease: "0.65, 0, 0.35, 1",
+        ease: [0.65, 0, 0.35, 1],
       }}
     >
       <motion.div className="flex items-center justify-center">
@@ -139,21 +139,21 @@ const animation = {
     opacity: 0,
     y: 10,
   },
-  visible: {
+  visible: (custom: number) => ({
     opacity: 1,
     y: 0,
-    transition: (custom: number) => ({
+    transition: {
       delay: custom * 0.1,
       duration: 0.5,
-    }),
-  },
-  exit: {
+    },
+  }),
+  exit: (custom: number) => ({
     opacity: 0,
     y: 10,
-    transition: (custom: number) => ({
+    transition: {
       delay: custom * 0.1,
-    }),
-  },
+    },
+  }),
 }
 
 const SelectItem = ({
