@@ -37,6 +37,14 @@ export function getUniversityTypeLabel(type: unknown, lang: Lang): string | null
   return UNIVERSITY_TYPE_META[type][lang] ?? null;
 }
 
+/** Icon for the type; null for anything that is not a valid enum value. */
+export function getUniversityTypeIcon(type: unknown): string | null {
+  if (!isUniversityType(type)) {
+    return null;
+  }
+  return UNIVERSITY_TYPE_META[type].icon;
+}
+
 export type ParseResult =
   | { ok: true; type: UniversityType }
   | { ok: false; reason: "EMPTY" | "UNRECOGNISED" | "AMBIGUOUS"; candidates: UniversityType[] };
