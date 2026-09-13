@@ -7,7 +7,8 @@ import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useCompareStore } from "@/stores/compareStore";
 import { formatCity } from "@/lib/utils";
 import { getUniversityTypeLabel, getUniversityTypeIcon } from "@/lib/university-type";
-import { getEducationModelLabel, getEducationModelIcon } from "@/lib/education-model";
+import { getEducationModelLabel } from "@/lib/education-model";
+import { EducationModelIcon } from "@/components/university/EducationModelIcon";
 import Link from "next/link";
 import posthog from "posthog-js";
 
@@ -79,10 +80,13 @@ function ComparePageContent() {
     return obj[fieldName] || "";
   };
 
-  const getFieldIcon = (obj: any, fieldName: string): string | null => {
+  const getFieldIcon = (obj: any, fieldName: string): React.ReactNode => {
     if (!obj) return null;
-    if (fieldName === "model") return getEducationModelIcon(obj.educationModel ?? obj.model);
-    if (fieldName === "type") return getUniversityTypeIcon(obj.type);
+    if (fieldName === "model") return <EducationModelIcon model={obj.educationModel ?? obj.model} />;
+    if (fieldName === "type") {
+      const icon = getUniversityTypeIcon(obj.type);
+      return icon ? <span aria-hidden="true">{icon}</span> : null;
+    }
     return null;
   };
 
@@ -265,8 +269,8 @@ function ComparePageContent() {
                       const icon = getFieldIcon(u, row.key);
                       return (
                         <td key={u.id}>
-                          <span>
-                            {icon && <span aria-hidden="true">{icon} </span>}
+                          <span className="inline-flex items-center gap-1.5">
+                            {icon}
                             {getLangField(u, row.key) || "—"}
                           </span>
                         </td>
