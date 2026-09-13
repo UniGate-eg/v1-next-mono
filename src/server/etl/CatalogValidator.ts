@@ -90,6 +90,7 @@ export interface ValidatedUniversity {
   slug: string;
   sourceUniId: string;
   shortName: string;
+  emoji?: string;
   nameEn: string;
   nameAr: string;
   governorate: string;
@@ -300,6 +301,7 @@ export class CatalogValidator {
         slug,
         sourceUniId: id,
         shortName: short,
+        emoji: enrichment.emoji,
         nameEn,
         nameAr: enrichment.nameAr,
         governorate: enrichment.governorate,
