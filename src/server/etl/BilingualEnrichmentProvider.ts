@@ -1,9 +1,21 @@
 import { UniversityType, EducationModel } from "@prisma/client";
 import { IEnrichmentProvider, UniversityEnrichmentRecord } from "./interfaces/IEnrichmentProvider";
 
+/**
+ * Whether every `typeSource.reference` below has been checked by a human content
+ * owner against the official MoHE / Supreme Council of Universities registry.
+ *
+ * The references currently on file (decree numbers, dates) were drafted during the
+ * type-consistency audit (see specs/005-university-type-consistency/audit/type-audit.md)
+ * and have NOT been confirmed against a live, authoritative source. Flip this to `true`
+ * only after that confirmation is done, and record who did it and when in the audit doc.
+ */
+export const AUDIT_HUMAN_VERIFIED = false;
+
 export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichmentRecord> = {
   // ----------------------------------------------------
-  // FILE 1: PRIVATE & INTERNATIONAL & PUBLIC (24)
+  // FILE 1: PRIVATE, NATIONAL & PUBLIC (24) — see type per record; this file groups
+  // institutions historically sourced together, not by a single shared type.
   // ----------------------------------------------------
   AUC: {
     shortName: "AUC",
@@ -802,6 +814,10 @@ export class BilingualEnrichmentProvider implements IEnrichmentProvider {
 
     // No verified record found
     return null;
+  }
+
+  isAuditHumanVerified(): boolean {
+    return AUDIT_HUMAN_VERIFIED;
   }
 
   getAllEnrichments(): Map<string, UniversityEnrichmentRecord> {
