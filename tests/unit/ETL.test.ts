@@ -97,5 +97,21 @@ describe("ETL Pipeline Utilities", () => {
       expect(transformed.degreePrograms).toHaveLength(1);
       expect(transformed.degreePrograms[0].data.tuitionEgpPerYear).toBe(140000);
     });
+
+    it("should preserve the Arabic overview alongside the English one", () => {
+      const raw = {
+        nameEn: "Future University in Egypt",
+        nameAr: "جامعة المستقبل",
+        type: "PRIVATE",
+        governorate: "Cairo",
+        overview: "A private university in Cairo.",
+        overviewAr: "جامعة خاصة في القاهرة.",
+      };
+
+      const transformed = transformUniversity(raw as any);
+
+      expect(transformed.universityData.overviewEn).toBe("A private university in Cairo.");
+      expect(transformed.universityData.overviewAr).toBe("جامعة خاصة في القاهرة.");
+    });
   });
 });
