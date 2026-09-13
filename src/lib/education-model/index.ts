@@ -22,8 +22,8 @@ export const EDUCATION_MODELS = [
 /** Single source of truth for education-model labels and icons. Compile-time exhaustive over the Prisma enum. */
 export const EDUCATION_MODEL_META: Readonly<Record<EducationModel, EducationModelMeta>> = {
   AMERICAN: { en: "American", ar: "أمريكي", icon: "🎓" },
-  GERMAN: { en: "German", ar: "ألماني", icon: "🏛️" },
-  BRITISH: { en: "British", ar: "بريطاني", icon: "🏫" },
+  GERMAN: { en: "German", ar: "ألماني", icon: "🦅" },
+  BRITISH: { en: "British", ar: "بريطاني", icon: "🎩" },
   EGYPTIAN: { en: "Egyptian", ar: "مصري", icon: "🇪🇬" },
   FRENCH: { en: "French", ar: "فرنسي", icon: "🗼" },
   CANADIAN: { en: "Canadian", ar: "كندي", icon: "🍁" },
