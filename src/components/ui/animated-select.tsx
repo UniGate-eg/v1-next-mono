@@ -18,7 +18,7 @@ type SelectProps = {
   defaultValue?: string
 }
 
-const AnimatedSelect = ({ data, defaultValue }: SelectProps) => {
+const AnimatedSelect = ({ data, defaultValue, onChange }: SelectProps) => {
   const [open, setOpen] = React.useState(false)
   const ref = React.useRef<HTMLDivElement>(null)
   const [selected, setSelected] = useState<TSelectData | undefined>(undefined)
@@ -32,12 +32,13 @@ const AnimatedSelect = ({ data, defaultValue }: SelectProps) => {
     } else {
       setSelected(data?.[0])
     }
-  }, [defaultValue])
+  }, [defaultValue, data])
 
   const onSelect = (value: string) => {
     const item = data?.find((i) => i.value === value)
     setSelected(item as TSelectData)
     setOpen(false)
+    onChange?.(value)
   }
 
   return (
@@ -60,7 +61,7 @@ const AnimatedSelect = ({ data, defaultValue }: SelectProps) => {
               layout
               layoutId="dropdown"
               onClick={() => setOpen(true)}
-              className="overflow-hidden rounded-[30px] border border-input bg-background shadow-sm"
+              className="overflow-hidden rounded-[30px] border border-slate-200 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-950"
             >
               <SelectItem item={selected} />
             </motion.div>
@@ -71,7 +72,7 @@ const AnimatedSelect = ({ data, defaultValue }: SelectProps) => {
                 borderRadius: 20,
               }}
               layoutId="dropdown"
-              className="overflow-hidden rounded-[20px] w-[400px] border border-input bg-background py-2 shadow-md"
+              className="overflow-hidden rounded-[20px] w-[400px] border border-slate-200 bg-white py-2 shadow-md dark:border-slate-800 dark:bg-slate-950"
               ref={ref}
             >
               <Head setOpen={setOpen} />
@@ -114,14 +115,14 @@ const Head = ({ setOpen }: { setOpen: (open: boolean) => void }) => {
       layout
       className="flex items-center justify-between p-4"
     >
-      <motion.strong layout className="text-foreground">
-        Choose Model
+      <motion.strong layout className="text-slate-900 dark:text-white">
+        Choose an option
       </motion.strong>
       <button
         onClick={() => setOpen(false)}
-        className="flex h-6 w-6 items-center justify-center rounded-full bg-secondary"
+        className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800"
       >
-        <X className="text-secondary-foreground" size={12} />
+        <X className="text-slate-700 dark:text-slate-300" size={12} />
       </button>
     </motion.div>
   )
@@ -164,7 +165,7 @@ const SelectItem = ({
 }: SelectItemProps) => {
   return (
     <motion.div
-      className={`group flex cursor-pointer items-center justify-between gap-2 p-4 py-2 hover:bg-accent hover:text-accent-foreground ${
+      className={`group flex cursor-pointer items-center justify-between gap-2 p-4 py-2 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50 ${
         noDescription && "!p-2"
       }`}
       variants={animation}
@@ -179,19 +180,19 @@ const SelectItem = ({
         <motion.div
           layout
           layoutId={`icon-${item?.id}`}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-input"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 dark:border-slate-800"
         >
           {item?.icon}
         </motion.div>
         <motion.div layout className="flex w-56 flex-col">
           <motion.strong
             layoutId={`label-${item?.id}`}
-            className="text-sm font-semibold text-foreground"
+            className="text-sm font-semibold text-slate-900 dark:text-white"
           >
             {item?.label}
           </motion.strong>
           {noDescription ? null : (
-            <span className="truncate text-xs text-muted-foreground">
+            <span className="truncate text-xs text-slate-500 dark:text-slate-400">
               {item?.description}
             </span>
           )}
@@ -202,7 +203,7 @@ const SelectItem = ({
           layout
           className="flex items-center justify-center gap-2 pr-3"
         >
-          <ChevronDownIcon className="text-foreground" size={20} />
+          <ChevronDownIcon className="text-slate-900 dark:text-white" size={20} />
         </motion.div>
       ) : null}
     </motion.div>
