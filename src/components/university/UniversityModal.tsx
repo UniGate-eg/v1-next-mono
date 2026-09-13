@@ -449,9 +449,11 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
 
             {/* Meta Tags */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
-              <span className="modal-meta-item">
-                {displayUni.modelEmoji || "🎓"} {getLangField("model") || "University"} {isArabic ? "نموذج" : "Model"}
-              </span>
+              {getLangField("model") && (
+                <span className="modal-meta-item">
+                  {displayUni.modelEmoji || "🎓"} {isArabic ? `نموذج ${getLangField("model")}` : `${getLangField("model")} Model`}
+                </span>
+              )}
               <span className="modal-meta-item">
                 📍 {getLangField("location")}
               </span>
@@ -500,7 +502,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
             </div>
             <div className="modal-info-item">
               <div className="modal-info-value" style={{ color: "var(--primary-light)" }}>
-                <UniversityTypeBadge type={displayUni.type} variant="inline" />
+                <UniversityTypeBadge type={displayUni.type} variant="inline" showIcon={true} />
               </div>
               <div className="modal-info-label">{isArabic ? "نوع المؤسسة" : "Type"}</div>
             </div>
