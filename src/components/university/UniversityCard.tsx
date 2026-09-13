@@ -14,12 +14,14 @@ interface UniversityCardProps {
   university: UniversityData;
   onViewDetails?: (uni: UniversityData) => void;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 export function UniversityCard({
   university,
   onViewDetails,
   className = "",
+  style,
 }: UniversityCardProps) {
   const { language } = useLanguage();
   const { bookmarks, createBookmark, deleteBookmark } = useBookmarks();
@@ -139,6 +141,7 @@ export function UniversityCard({
       style={
         {
           "--card-accent": university.accentGradient || "linear-gradient(135deg, #7C3AED, #EC4899)",
+          ...style,
         } as React.CSSProperties
       }
       onClick={() => onViewDetails && onViewDetails(university)}
