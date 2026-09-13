@@ -54,4 +54,22 @@ describe("University Type Consistency Static Guard", () => {
       `Found phantom university types in source files: ${JSON.stringify(violations, null, 2)}`
     ).toEqual([]);
   });
+
+  it("disallows a local EDUCATION_MODEL_LABELS map re-appearing outside education-model module", () => {
+    const violations: string[] = [];
+
+    for (const filePath of sourceFiles) {
+      if (filePath.includes(`${path.sep}education-model${path.sep}`)) continue;
+      const content = fs.readFileSync(filePath, "utf-8");
+      if (/\bEDUCATION_MODEL_LABELS\b/.test(content)) {
+        violations.push(path.relative(srcDir, filePath));
+      }
+    }
+
+    expect(
+      violations,
+      `Found a duplicate EDUCATION_MODEL_LABELS map outside src/lib/education-model: ${JSON.stringify(violations)}. ` +
+        `Import from @/lib/education-model instead.`
+    ).toEqual([]);
+  });
 });
