@@ -78,15 +78,3 @@ export function formatCity(city: string, lang: "en" | "ar" = "en"): string {
   const entry = CITY_MAP[normalized];
   return (entry ? entry[lang] : null) || city;
 }
-
-const UNIVERSITY_TYPE_MAP: Record<string, { en: string; ar: string }> = {
-  PUBLIC: { en: "Public", ar: "حكومية" },
-  PRIVATE: { en: "Private", ar: "خاصة" },
-  NATIONAL: { en: "National", ar: "أهلية" },
-  INTERNATIONAL: { en: "International", ar: "دولية" },
-};
-
-export function formatUniversityType(type: string, lang: "en" | "ar" = "en"): string {
-  const entry = UNIVERSITY_TYPE_MAP[String(type || "").toUpperCase()];
-  return (entry ? entry[lang] : null) || type;
-}
