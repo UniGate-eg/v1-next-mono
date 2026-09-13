@@ -2,6 +2,30 @@
 @import "../styles/unicompass.css";
 @import "../styles/roadmap.css";
 
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted-foreground: #64748b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+}
+
 /* Reset & Root Setup */
 html, body {
   min-height: 100vh;
