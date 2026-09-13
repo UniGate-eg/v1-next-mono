@@ -2,6 +2,7 @@ import { University } from "@prisma/client";
 import { UniversityDTO, SlimSearchToken } from "../../types/university.types";
 import { FacultyMapper } from "./FacultyMapper";
 import { DegreeProgramMapper } from "./DegreeProgramMapper";
+import { getEducationModelIcon } from "../../lib/education-model";
 
 export class UniversityMapper {
   static toDTO(university: any): UniversityDTO {
@@ -14,6 +15,7 @@ export class UniversityMapper {
       nameAr: university.nameAr,
       educationModel: university.educationModel,
       type: university.type,
+      typeSourceRef: university.typeSourceRef || null,
       governorate: university.governorate,
       city: university.city,
       addressEn: university.addressEn,
@@ -50,15 +52,6 @@ export class UniversityMapper {
   }
 
   static toSlimSearchToken(university: any): SlimSearchToken {
-    const modelEmojiMap: Record<string, string> = {
-      AMERICAN: "🎓",
-      GERMAN: "🏛️",
-      BRITISH: "🏫",
-      EGYPTIAN: "🇪🇬",
-      FRENCH: "🗼",
-      CANADIAN: "🍁",
-    };
-
     const gradientMap: Record<string, string> = {
       AMERICAN: "linear-gradient(135deg, #2563EB, #7C3AED)",
       GERMAN: "linear-gradient(135deg, #059669, #0D9488)",
@@ -107,7 +100,7 @@ export class UniversityMapper {
       shortName: university.shortName,
       type: university.type,
       emoji: university.emoji || "🏛️",
-      modelEmoji: modelEmojiMap[modelKey] || "🎓",
+      modelEmoji: getEducationModelIcon(university.educationModel) || "🎓",
       city: university.city || university.governorate,
       governorate: university.governorate,
       educationModel: university.educationModel,

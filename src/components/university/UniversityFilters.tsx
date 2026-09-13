@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Filter, RotateCcw } from "lucide-react";
+import { UNIVERSITY_TYPES, UNIVERSITY_TYPE_META } from "@/lib/university-type";
 import type { UniversityType } from "@prisma/client";
 
 const EGYPTIAN_GOVERNORATES = [
@@ -37,10 +38,11 @@ const EGYPTIAN_GOVERNORATES = [
 
 const TYPES: { value: UniversityType | "ALL"; labelEn: string; labelAr: string }[] = [
   { value: "ALL", labelEn: "All Types", labelAr: "الكل" },
-  { value: "PUBLIC", labelEn: "Public", labelAr: "حكومية" },
-  { value: "PRIVATE", labelEn: "Private", labelAr: "خاصة" },
-  { value: "NATIONAL", labelEn: "National", labelAr: "أهلية" },
-  { value: "INTERNATIONAL", labelEn: "International", labelAr: "دولية" },
+  ...UNIVERSITY_TYPES.map((t) => ({
+    value: t,
+    labelEn: UNIVERSITY_TYPE_META[t].en,
+    labelAr: UNIVERSITY_TYPE_META[t].ar,
+  })),
 ];
 
 export function UniversityFilters() {

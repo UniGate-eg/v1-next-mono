@@ -8,7 +8,8 @@ export interface UniversityDTO {
   nameEn: string;
   nameAr: string;
   educationModel: EducationModel | string;
-  type: UniversityType | string;
+  type: UniversityType;
+  typeSourceRef?: string | null;
   governorate: string;
   city: string | null;
   addressEn: string | null;
@@ -84,7 +85,7 @@ export interface SlimSearchToken {
   nameEn: string;
   nameAr: string;
   shortName?: string | null;
-  type: string;
+  type: UniversityType;
   emoji?: string | null;
   modelEmoji?: string | null;
   city?: string | null;
@@ -116,6 +117,6 @@ export interface SlimSearchToken {
 export interface UniversityFilters {
   governorate?: string;
   educationModel?: string;
-  type?: string;
+  type?: UniversityType;
   degreeType?: string;
 }

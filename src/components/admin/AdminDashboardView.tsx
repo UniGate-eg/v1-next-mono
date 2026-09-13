@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { getUniversityTypeLabel } from "@/lib/university-type";
 import {
   Building2,
   GraduationCap,
@@ -339,7 +340,7 @@ export function AdminDashboardView({ data }: { data: DashboardKPIs }) {
                         {inst.name}
                       </p>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                        {inst.programsCount} Programs • {inst.type}
+                        {inst.programsCount} Programs • {getUniversityTypeLabel(inst.type, "en") || inst.type}
                       </p>
                     </div>
                   </div>

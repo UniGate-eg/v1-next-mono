@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import * as path from "path";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, UniversityType } from "@prisma/client";
 import { transformUniversity } from "./transform";
 import { validateUniversityData, streamError } from "./validate";
 import { CheckpointManager } from "./checkpoint";
@@ -31,6 +31,15 @@ async function main() {
   let successCount = 0;
   let skipCount = 0;
   let errorCount = 0;
+  let reviewCount = 0;
+  let blockingReviewCount = 0;
+
+  const typeCounts: Record<UniversityType, number> = {
+    PUBLIC: 0,
+    PRIVATE: 0,
+    NATIONAL: 0,
+    INTERNATIONAL: 0,
+  };
 
   for (const rawUni of rawData) {
     try {
@@ -44,6 +53,18 @@ async function main() {
 
       // 2. Transformation
       const normalized = transformUniversity(rawUni);
+
+      if (!normalized.success || normalized.typeReview) {
+        const review = normalized.typeReview!;
+        reviewCount++;
+        if (review.blocking) {
+          blockingReviewCount++;
+          streamError("source_data", { kind: "TYPE_REVIEW", ...review }, rawUni);
+          console.warn(`⚠️ Skipped ${rawUni.name || rawUni.nameEn}: Type review required (${review.reason})`);
+          skipCount++;
+          continue;
+        }
+      }
 
       console.log(`🔄 Ingesting ${normalized.slug} (${normalized.universityData.nameEn})...`);
 
@@ -97,6 +118,7 @@ async function main() {
       });
 
       checkpoint.markProcessed(normalized.slug);
+      typeCounts[normalized.universityData.type as UniversityType]++;
       successCount++;
     } catch (error) {
       console.error(`❌ Failed to ingest university: ${rawUni.name || rawUni.nameEn}`, error);
@@ -109,6 +131,14 @@ async function main() {
   console.log(`📈 Successfully Ingested: ${successCount}`);
   console.log(`⏩ Skipped: ${skipCount}`);
   console.log(`⚠️ Errors: ${errorCount} (Check prisma/etl/etl-errors.jsonl)`);
+  console.log(JSON.stringify({
+    level: "INFO",
+    step: "seed-deep",
+    message: "Type classification summary",
+    typeCounts,
+    reviewCount,
+    blockingReviewCount,
+  }));
 }
 
 main()

@@ -9,6 +9,11 @@
  *   npx tsx prisma/etl/reset-verified-catalog.ts --backup-only
  *   npx tsx prisma/etl/reset-verified-catalog.ts --list-backups
  *   npx tsx prisma/etl/reset-verified-catalog.ts --rollback <snapshotId>
+ *
+ * --confirm-production refuses to run while the type classification audit
+ * (specs/005-university-type-consistency/audit/type-audit.md) is unverified —
+ * see BilingualEnrichmentProvider.AUDIT_HUMAN_VERIFIED. Add
+ * --acknowledge-unverified-audit only if you intend to proceed anyway.
  */
 
 import * as path from "path";
@@ -31,6 +36,7 @@ async function main() {
   const isConfirmProd   = args.includes("--confirm-production");
   const isBackupOnly    = args.includes("--backup-only");
   const isListBackups   = args.includes("--list-backups");
+  const acknowledgeUnverifiedAudit = args.includes("--acknowledge-unverified-audit");
 
   const rollbackIndex     = args.indexOf("--rollback");
   const rollbackSnapshotId = rollbackIndex !== -1 ? args[rollbackIndex + 1] : undefined;
@@ -117,9 +123,49 @@ async function main() {
   const validator = new CatalogValidator();
   const report = validator.validate([wb1, wb2], enrichmentProvider);
 
+  // Type classification summary logging (contracts/import-review-report.contract.md)
+  const validatorLogger = new StructuredLogger("CatalogValidator");
+  const blockingReviewCount = report.typeReview.filter((r) => r.blocking).length;
+  validatorLogger.info("Type classification summary", {
+    typeCounts: report.typeCounts,
+    reviewCount: report.typeReview.length,
+    blockingReviewCount,
+  });
+
+  for (const review of report.typeReview) {
+    validatorLogger.warn("Type review required", {
+      institutionId: review.institutionId,
+      nameEn: review.nameEn,
+      originalValue: review.originalValue,
+      reason: review.reason,
+      candidates: review.candidates,
+      blocking: review.blocking,
+    });
+  }
+
   if (!report.success) {
     logger.error("Validation failed — pipeline aborted", { errors: report.errors });
     process.exit(1);
+  }
+
+  // ── 6b. Audit Sign-Off Guard ──────────────────────────────────────────────
+  // The type classification audit (specs/005-university-type-consistency/audit/type-audit.md)
+  // records decree references drafted during research. They must be checked by a human
+  // against the official MoHE/SCU registry before they are used to reset production data.
+  if (isConfirmProd && !report.auditHumanVerified && !acknowledgeUnverifiedAudit) {
+    logger.error(
+      "SAFETY GUARD: Type classification audit has not been human-verified against the official MoHE/SCU registry. " +
+        "Refusing --confirm-production. Verify specs/005-university-type-consistency/audit/type-audit.md, " +
+        "flip BilingualEnrichmentProvider.AUDIT_HUMAN_VERIFIED to true once confirmed, or re-run with " +
+        "--acknowledge-unverified-audit to proceed anyway at your own risk.",
+      { warnings: report.warnings }
+    );
+    process.exit(3);
+  }
+  if (isConfirmProd && !report.auditHumanVerified && acknowledgeUnverifiedAudit) {
+    logger.warn("Proceeding with an UNVERIFIED type classification audit — --acknowledge-unverified-audit was passed.", {
+      warnings: report.warnings,
+    });
   }
 
   logger.info("Validation passed with zero errors", {

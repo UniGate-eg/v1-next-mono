@@ -1,6 +1,7 @@
-import { z } from "zod";
+import { UniversityType } from "@prisma/client";
+import { parseUniversityType } from "@/lib/university-type";
 import { ParsedWorkbookData, RawUniversityRow, RawAcademicUnitRow, RawAcademicOfferingRow } from "./interfaces/IWorkbookParser";
-import { UniversityEnrichmentRecord } from "./interfaces/IEnrichmentProvider";
+import { UniversityEnrichmentRecord, IEnrichmentProvider } from "./interfaces/IEnrichmentProvider";
 
 export function slugify(text: string): string {
   return text
@@ -67,15 +68,35 @@ export function getArabicFacultyName(nameEn: string): string {
   return nameEn;
 }
 
+export type TypeReviewReason =
+  | "UNRECOGNISED"
+  | "AMBIGUOUS"
+  | "EMPTY"
+  | "NO_VERIFIED_RECORD"
+  | "MISSING_SOURCE"
+  | "RULE_VIOLATION"
+  | "DESCRIPTION_CONTRADICTION";
+
+export interface TypeReviewEntry {
+  institutionId: string;
+  nameEn: string;
+  originalValue: string | null;
+  reason: TypeReviewReason;
+  candidates: UniversityType[];
+  blocking: boolean;
+}
+
 export interface ValidatedUniversity {
   slug: string;
   sourceUniId: string;
   shortName: string;
+  emoji?: string;
   nameEn: string;
   nameAr: string;
   governorate: string;
   city?: string;
-  type: any;
+  type: UniversityType;
+  typeSourceRef?: string;
   educationModel: any;
   website?: string;
   established?: number;
@@ -108,6 +129,15 @@ export interface ValidationReport {
   success: boolean;
   errors: string[];
   warnings: string[];
+  typeCounts: Record<UniversityType, number>;
+  typeReview: TypeReviewEntry[];
+  /**
+   * False when the enrichment provider's typeSource references have not been
+   * confirmed by a human against the official MoHE/SCU registry. Does not block
+   * validation on its own (see reset-verified-catalog.ts, which refuses
+   * --confirm-production on this unless explicitly acknowledged).
+   */
+  auditHumanVerified: boolean;
   stats: {
     universitiesCount: number;
     facultiesCount: number;
@@ -120,13 +150,43 @@ export interface ValidationReport {
   };
 }
 
+export interface CatalogValidatorOptions {
+  isV4Blocking?: boolean;
+}
+
 export class CatalogValidator {
+  private isV4Blocking: boolean;
+
+  constructor(options?: CatalogValidatorOptions) {
+    this.isV4Blocking = options?.isV4Blocking ?? true;
+  }
+
+  setV4Blocking(blocking: boolean): void {
+    this.isV4Blocking = blocking;
+  }
+
   validate(
     workbooksData: ParsedWorkbookData[],
-    enrichmentProvider: { getEnrichment: (short: string, nameEn: string) => UniversityEnrichmentRecord }
+    enrichmentProvider: IEnrichmentProvider | { getEnrichment: (short: string, nameEn: string) => UniversityEnrichmentRecord | null }
   ): ValidationReport {
+    const auditHumanVerified =
+      typeof (enrichmentProvider as IEnrichmentProvider).isAuditHumanVerified === "function"
+        ? (enrichmentProvider as IEnrichmentProvider).isAuditHumanVerified!()
+        : false;
     const errors: string[] = [];
     const warnings: string[] = [];
+    if (!auditHumanVerified) {
+      warnings.push(
+        "Type classification audit has not been confirmed by a human against the official MoHE/SCU registry (typeSource references are drafted, unverified). --confirm-production will refuse to run without --acknowledge-unverified-audit."
+      );
+    }
+    const typeReview: TypeReviewEntry[] = [];
+    const typeCounts: Record<UniversityType, number> = {
+      PUBLIC: 0,
+      PRIVATE: 0,
+      NATIONAL: 0,
+      INTERNATIONAL: 0,
+    };
 
     const rawUnis: RawUniversityRow[] = [];
     const rawUnits: RawAcademicUnitRow[] = [];
@@ -156,32 +216,109 @@ export class CatalogValidator {
       const nameEn = u.universityName.trim();
       const enrichment = enrichmentProvider.getEnrichment(short, nameEn);
 
+      // V1: Check enrichment existence
+      if (!enrichment) {
+        errors.push(`Missing verified enrichment record for university '${short}' (${nameEn})`);
+        typeReview.push({
+          institutionId: id,
+          nameEn,
+          originalValue: null,
+          reason: "NO_VERIFIED_RECORD",
+          candidates: [],
+          blocking: true,
+        });
+        continue;
+      }
+
+      // V2: Check typeSource evidence
+      if (!enrichment.typeSource || !enrichment.typeSource.reference || !enrichment.typeSource.reference.trim()) {
+        typeReview.push({
+          institutionId: id,
+          nameEn,
+          originalValue: null,
+          reason: "MISSING_SOURCE",
+          candidates: [],
+          blocking: true,
+        });
+        errors.push(`Missing typeSource evidence reference for university '${short}' (${nameEn})`);
+      }
+
+      // V3: Check authority and type match
+      if (enrichment.typeSource) {
+        const { authority } = enrichment.typeSource;
+        if (
+          (authority === "FOREIGN_PARENT" && enrichment.type !== "INTERNATIONAL") ||
+          (enrichment.type === "INTERNATIONAL" && authority !== "FOREIGN_PARENT")
+        ) {
+          typeReview.push({
+            institutionId: id,
+            nameEn,
+            originalValue: null,
+            reason: "RULE_VIOLATION",
+            candidates: [],
+            blocking: true,
+          });
+          errors.push(
+            `Classification rule violation for university '${short}' (${nameEn}): authority=${authority} with type=${enrichment.type}`
+          );
+        }
+      }
+
+      // V4: Description contradiction check (FR-018)
+      if (enrichment.overviewAr) {
+        const parsed = parseUniversityType(enrichment.overviewAr);
+        if (parsed.ok && parsed.type !== enrichment.type) {
+          typeReview.push({
+            institutionId: id,
+            nameEn,
+            originalValue: null,
+            reason: "DESCRIPTION_CONTRADICTION",
+            candidates: [parsed.type],
+            blocking: this.isV4Blocking,
+          });
+          const message = `Description contradiction for university '${short}': overviewAr indicates ${parsed.type} but record is ${enrichment.type}`;
+          if (this.isV4Blocking) {
+            errors.push(message);
+          } else {
+            warnings.push(message);
+          }
+        }
+      }
+
       const slug = slugify(short || nameEn);
       if (uniSlugSet.has(slug)) {
         errors.push(`Duplicate university slug detected: ${slug} for ${short}`);
       }
       uniSlugSet.add(slug);
 
+      const typeSourceRef = enrichment.typeSource
+        ? `${enrichment.typeSource.authority}: ${enrichment.typeSource.reference}`
+        : undefined;
+
+      typeCounts[enrichment.type]++;
+
       validatedUnis.push({
         slug,
         sourceUniId: id,
         shortName: short,
+        emoji: enrichment.emoji,
         nameEn,
         nameAr: enrichment.nameAr,
         governorate: enrichment.governorate,
         city: enrichment.city,
         type: enrichment.type,
+        typeSourceRef,
         educationModel: enrichment.educationModel,
         website: enrichment.website || u.website,
         established: enrichment.established,
         overviewEn: enrichment.overviewEn,
         overviewAr: enrichment.overviewAr,
-        completenessScore: 85
+        completenessScore: 85,
       });
     }
 
     // 2. Validate Academic Units (Faculties)
-    const validUniIds = new Set(validatedUnis.map(u => u.sourceUniId));
+    const validUniIds = new Set(validatedUnis.map((u) => u.sourceUniId));
     const validatedFaculties: ValidatedFaculty[] = [];
     const unitMap = new Map<string, ValidatedFaculty>();
 
@@ -201,7 +338,7 @@ export class CatalogValidator {
         sourceUniId: parentUniId,
         nameEn,
         nameAr,
-        unitType: unit.unitType
+        unitType: unit.unitType,
       };
 
       unitMap.set(unitId, validUnit);
@@ -223,7 +360,7 @@ export class CatalogValidator {
       const parentUniId = parentUnit.sourceUniId;
       const progName = off.officialName.trim();
       const rawSlug = slugify(`${parentUniId.toLowerCase()}-${progName}`);
-      
+
       // Ensure deterministic collision-free slug per university
       let finalSlug = rawSlug;
       let counter = 1;
@@ -242,7 +379,7 @@ export class CatalogValidator {
         nameAr: progName, // standard fallback
         degreeType: off.offeringType || "Bachelor",
         durationYears: 4,
-        studyLanguage: "English"
+        studyLanguage: "English",
       });
     }
 
@@ -250,16 +387,19 @@ export class CatalogValidator {
       success: errors.length === 0,
       errors,
       warnings,
+      typeCounts,
+      typeReview,
+      auditHumanVerified,
       stats: {
         universitiesCount: validatedUnis.length,
         facultiesCount: validatedFaculties.length,
-        programsCount: validatedPrograms.length
+        programsCount: validatedPrograms.length,
       },
       validatedData: {
         universities: validatedUnis,
         faculties: validatedFaculties,
-        programs: validatedPrograms
-      }
+        programs: validatedPrograms,
+      },
     };
   }
 }

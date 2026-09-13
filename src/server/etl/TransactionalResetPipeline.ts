@@ -238,11 +238,13 @@ class CatalogResetAndIngestionStep implements IPipelineStep {
           data: {
             slug: u.slug,
             shortName: u.shortName,
+            emoji: u.emoji || undefined,
             nameEn: u.nameEn,
             nameAr: u.nameAr,
             governorate: u.governorate,
             city: u.city || null,
             type: u.type,
+            typeSourceRef: u.typeSourceRef || null,
             educationModel: u.educationModel,
             website: u.website || null,
             established: u.established || null,

@@ -102,7 +102,7 @@ describe("UniversityMapper", () => {
       shortName: "GUC",
       type: "PRIVATE",
       emoji: "🇩🇪",
-      modelEmoji: "🏛️",
+      modelEmoji: "🦅",
       city: "New Cairo",
       governorate: "Cairo",
       educationModel: "GERMAN",

@@ -6,7 +6,8 @@ import { CompareToggleButton } from "@/components/university/CompareToggleButton
 import { SuggestionDialog } from "@/components/university/SuggestionDialog";
 import { MapPin, Calendar, ExternalLink, ArrowLeft, Building2 } from "lucide-react";
 import Link from "next/link";
-import { formatGovernorate, formatUniversityType } from "@/lib/utils";
+import { formatGovernorate } from "@/lib/utils";
+import { UniversityTypeBadge } from "@/components/university/UniversityTypeBadge";
 import type { Metadata } from "next";
 
 export const revalidate = 3600; // ISR: 1 hour revalidation
@@ -91,9 +92,7 @@ export default async function UniversityDetailPage({ params }: UniversityPagePro
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="font-semibold text-xs">
-                {formatUniversityType(university.type)}
-              </Badge>
+              <UniversityTypeBadge type={university.type} className="font-semibold text-xs" />
               <span className="text-xs text-slate-400">•</span>
               <div className="flex items-center gap-1 text-xs text-slate-500 font-medium">
                 <MapPin className="h-3.5 w-3.5 text-slate-400" />

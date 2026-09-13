@@ -29,18 +29,7 @@ function getUniCity(u: SlimSearchToken, language: "en" | "ar"): string {
   return u.city || u.governorate || "Egypt";
 }
 
-function getUniTypeLabel(u: SlimSearchToken, language: "en" | "ar"): string {
-  const typeMap: Record<string, { en: string; ar: string }> = {
-    PUBLIC: { en: "Public", ar: "حكومية" },
-    PRIVATE: { en: "Private", ar: "خاصة" },
-    NATIONAL: { en: "National", ar: "أهلية" },
-    INTERNATIONAL: { en: "International", ar: "دولية" },
-    TECHNOLOGICAL: { en: "Technological", ar: "تكنولوجية" },
-  };
-  const entry = typeMap[u.type || "PUBLIC"];
-  if (!entry) return u.type || "";
-  return language === "ar" ? entry.ar : entry.en;
-}
+import { UniversityTypeBadge } from "@/components/university/UniversityTypeBadge";
 
 /**
  * MajorUniList — Progressive Disclosure University List (Dark Glassmorphism)
@@ -61,7 +50,7 @@ export function MajorUniList({
   const typeFiltered = useMemo(() => {
     if (activeFilter === "ALL") return scoredUniversities;
     return scoredUniversities.filter(
-      (r) => (r.university.type || "PUBLIC") === activeFilter,
+      (r) => r.university.type === activeFilter,
     );
   }, [scoredUniversities, activeFilter]);
 
@@ -285,8 +274,12 @@ export function MajorUniList({
                       }}
                     >
                       <span>📍 {getUniCity(u, language)}</span>
-                      <span>·</span>
-                      <span>🏛️ {getUniTypeLabel(u, language)}</span>
+                      {u.type && (
+                        <>
+                          <span>·</span>
+                          <UniversityTypeBadge type={u.type} variant="inline" showIcon={true} />
+                        </>
+                      )}
                       {hasRanking && (
                         <span
                           style={{

@@ -4,38 +4,42 @@ import React from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useCompareStore } from "@/stores/compareStore";
 import { useBookmarks } from "@/hooks/useBookmarks";
-import { formatCity, formatUniversityType } from "@/lib/utils";
+import { formatCity } from "@/lib/utils";
+import { UniversityTypeBadge } from "@/components/university/UniversityTypeBadge";
+import { EducationModelBadge } from "@/components/university/EducationModelBadge";
+import { getEducationModelLabel } from "@/lib/education-model";
 import type { UniversityData } from "./UniversityModal";
 
 interface UniversityCardProps {
   university: UniversityData;
   onViewDetails?: (uni: UniversityData) => void;
   className?: string;
-  style?: React.CSSProperties;
 }
 
 export function UniversityCard({
   university,
   onViewDetails,
   className = "",
-  style = {},
 }: UniversityCardProps) {
   const { language } = useLanguage();
-  const { selectedUniversities, toggleUniversity } = useCompareStore();
   const { bookmarks, createBookmark, deleteBookmark } = useBookmarks();
+  const { selectedUniversities, toggleUniversity } = useCompareStore();
 
   if (!university) return null;
 
-  const uniIdStr = String(university.id);
+  const uniIdStr = String(university.id || (university as any).slug || "");
   const isCompared = selectedUniversities.some((u) => String(u.id) === uniIdStr);
 
   const existingBookmark = bookmarks.find(
-    (b) => String(b.universityId) === uniIdStr || String(b.university?.id) === uniIdStr
+    (b) => String(b.universityId) === uniIdStr
   );
   const isBookmarked = !!existingBookmark;
 
-  const getLangField = (fieldName: string) => {
+  const getLangField = (fieldName: string): string => {
     const uniAny = university as any;
+    if (fieldName === "model" || fieldName === "educationModel") {
+      return getEducationModelLabel(uniAny.educationModel ?? uniAny.model, language) || "";
+    }
     if (language === "ar") {
       if (uniAny[fieldName + "_ar"]) return uniAny[fieldName + "_ar"];
       if (uniAny[fieldName + "Ar"]) return uniAny[fieldName + "Ar"];
@@ -46,7 +50,6 @@ export function UniversityCard({
         const raw = uniAny.city || uniAny.governorate || "مصر";
         return formatCity(raw, "ar");
       }
-      if (fieldName === "type") return formatUniversityType(uniAny.type || "", "ar");
       if (fieldName === "name") return uniAny.nameAr || uniAny.name_ar || uniAny.nameEn || uniAny.name;
     }
     if (uniAny[fieldName + "En"]) return uniAny[fieldName + "En"];
@@ -54,7 +57,6 @@ export function UniversityCard({
       return uniAny.overviewEn || uniAny.overview_en || uniAny.description || uniAny.overviewAr;
     }
     if (fieldName === "location") return formatCity(uniAny.city || uniAny.governorate || "Egypt", "en");
-    if (fieldName === "type") return formatUniversityType(uniAny.type || "", "en");
     if (fieldName === "name") return uniAny.nameEn || uniAny.name || uniAny.nameAr;
     return uniAny[fieldName] || "";
   };
@@ -103,7 +105,7 @@ export function UniversityCard({
       slug: (university as any).slug || String(university.id),
       nameAr: (university as any).name_ar || (university as any).nameAr || university.name || "",
       nameEn: (university as any).name || (university as any).nameEn || "",
-      type: (university as any).type || "PUBLIC",
+      type: (university as any).type,
       governorate: (university as any).city || (university as any).governorate || "Cairo",
       majorsCount: university.majors?.length || university.faculties?.length || 0,
     });
@@ -128,9 +130,8 @@ export function UniversityCard({
   const strengthsList = getLangArray("strengths");
 
   const uniName = getLangField("name") || university.nameEn || university.name || "";
-  const modelName = getLangField("model") || university.type || "University";
+  const educationModel = (university as any).educationModel || (university as any).model;
   const locationName = getLangField("location") || (university as any).governorate || "Egypt";
-  const typeName = getLangField("type") || university.type || "University";
 
   return (
     <div
@@ -138,15 +139,16 @@ export function UniversityCard({
       style={
         {
           "--card-accent": university.accentGradient || "linear-gradient(135deg, #7C3AED, #EC4899)",
-          ...style,
         } as React.CSSProperties
       }
       onClick={() => onViewDetails && onViewDetails(university)}
     >
       <div className="uni-card-header">
         <div className="uni-card-model">
-          <span>{university.modelEmoji || "🎓"}</span>
-          <span>{modelName}</span>
+          <EducationModelBadge model={educationModel} showIcon={true} />
+          {!getEducationModelLabel(educationModel, language) && (
+            <UniversityTypeBadge type={university.type} variant="inline" showIcon={true} />
+          )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           {university.qs_ranking && university.qs_ranking !== "N/A" && (
@@ -170,7 +172,13 @@ export function UniversityCard({
 
       <h3 className="uni-card-name">{uniName}</h3>
       <div className="uni-card-location">
-        {locationName} · {typeName}
+        {locationName}
+        {university.type ? (
+          <>
+            {" · "}
+            <UniversityTypeBadge type={university.type} variant="inline" showIcon={true} />
+          </>
+        ) : null}
       </div>
       <p className="uni-card-desc">{getLangField("description") || university.description}</p>
 
@@ -215,7 +223,7 @@ export function UniversityCard({
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span className="uni-card-type">{typeName}</span>
+          <UniversityTypeBadge type={university.type} variant="inline" className="uni-card-type" />
           <button
             className={`card-compare-btn ${isCompared ? "selected" : ""}`}
             onClick={handleCompareClick}

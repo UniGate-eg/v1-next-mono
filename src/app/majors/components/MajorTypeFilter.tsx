@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
+import { UNIVERSITY_TYPES, UNIVERSITY_TYPE_META, countByType } from "@/lib/university-type";
 import type { UniversityType } from "@prisma/client";
 
-export type TypeFilter = "ALL" | "PUBLIC" | "PRIVATE" | "NATIONAL" | "INTERNATIONAL" | "TECHNOLOGICAL";
+export type TypeFilter = "ALL" | UniversityType;
 
 interface TypeCount {
   type: TypeFilter;
@@ -13,24 +14,16 @@ interface TypeCount {
 }
 
 interface MajorTypeFilterProps {
-  universities: Array<{ type?: string | null }>;
+  universities: Array<{ type?: UniversityType | string | null }>;
   activeFilter: TypeFilter;
   language: "en" | "ar";
   onChange: (filter: TypeFilter) => void;
 }
 
-const TYPE_META: Record<Exclude<TypeFilter, "ALL">, { label: string; labelAr: string }> = {
-  PUBLIC:        { label: "Public",       labelAr: "حكومية"   },
-  PRIVATE:       { label: "Private",      labelAr: "خاصة"     },
-  NATIONAL:      { label: "National",     labelAr: "أهلية"    },
-  INTERNATIONAL: { label: "International",labelAr: "دولية"    },
-  TECHNOLOGICAL: { label: "Technological",labelAr: "تكنولوجية"},
-};
-
 /**
  * MajorTypeFilter
  *
- * Glassmorphic dark-theme filter chips for university types (Public, Private, National, etc.).
+ * Glassmorphic dark-theme filter chips for university types (Public, Private, National, International).
  * Designed to seamlessly blend with UniCompass's purple-neon dark aesthetic.
  */
 export function MajorTypeFilter({
@@ -40,11 +33,7 @@ export function MajorTypeFilter({
   onChange,
 }: MajorTypeFilterProps) {
   const typeCounts = React.useMemo<TypeCount[]>(() => {
-    const counts: Partial<Record<TypeFilter, number>> = {};
-    for (const u of universities) {
-      const t = (u.type || "PUBLIC") as TypeFilter;
-      counts[t] = (counts[t] ?? 0) + 1;
-    }
+    const counts = countByType(universities);
 
     const result: TypeCount[] = [
       {
@@ -55,14 +44,13 @@ export function MajorTypeFilter({
       },
     ];
 
-    for (const [type, meta] of Object.entries(TYPE_META) as [
-      Exclude<TypeFilter, "ALL">,
-      { label: string; labelAr: string },
-    ][]) {
-      const count = counts[type] ?? 0;
-      if (count > 0) {
-        result.push({ type, count, ...meta });
-      }
+    for (const item of counts) {
+      result.push({
+        type: item.type,
+        count: item.count,
+        label: UNIVERSITY_TYPE_META[item.type].en,
+        labelAr: UNIVERSITY_TYPE_META[item.type].ar,
+      });
     }
 
     return result;

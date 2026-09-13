@@ -10,7 +10,7 @@ export class PostgresUniversityRepository implements IUniversityReader, IUnivers
   async findMany(filters?: UniversityFilters, page = 1, limit = 10): Promise<{ data: UniversityDTO[], total: number }> {
     const where: Prisma.UniversityWhereInput = {
       ...(filters?.governorate && { governorate: filters.governorate }),
-      ...(filters?.type && { type: filters.type as any }),
+      ...(filters?.type && { type: filters.type }),
       ...(filters?.educationModel && { educationModel: filters.educationModel as any }),
       ...(filters?.degreeType && {
         degreePrograms: {
@@ -135,7 +135,8 @@ export class PostgresUniversityRepository implements IUniversityReader, IUnivers
         nameEn: data.nameEn,
         nameAr: data.nameAr,
         educationModel: data.educationModel as any,
-        type: data.type as any,
+        type: data.type,
+        typeSourceRef: data.typeSourceRef || null,
         governorate: data.governorate,
         city: data.city,
         addressEn: data.addressEn,
@@ -170,6 +171,8 @@ export class PostgresUniversityRepository implements IUniversityReader, IUnivers
       where: { id },
       data: {
         ...updateData,
+        type: updateData.type !== undefined ? updateData.type : undefined,
+        typeSourceRef: updateData.typeSourceRef !== undefined ? updateData.typeSourceRef : undefined,
         socialLinks: updateData.socialLinks !== undefined ? (updateData.socialLinks || Prisma.JsonNull) : undefined
       } as any,
       include: {

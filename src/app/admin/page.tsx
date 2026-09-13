@@ -5,6 +5,7 @@ import { prisma } from "../../lib/prisma";
 import { getUserPermissionsCached } from "../../server/services/RbacService";
 import { format } from "date-fns";
 import { AdminDashboardView, DashboardKPIs } from "../../components/admin/AdminDashboardView";
+import { getUniversityTypeLabel } from "../../lib/university-type";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export default async function AdminDashboardPage() {
     code: u.slug.slice(0, 4).toUpperCase(),
     programsCount: (u as any)._count?.degreePrograms || 24,
     status: u.publishStatus,
-    type: u.type || "Public Institution",
+    type: getUniversityTypeLabel(u.type, "en") || u.type,
   }));
 
   const dashboardData: DashboardKPIs = {

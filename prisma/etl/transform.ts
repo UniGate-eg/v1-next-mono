@@ -1,5 +1,17 @@
+import { parseUniversityType } from "../../src/lib/university-type";
+import { UniversityType } from "@prisma/client";
+
 export interface RawUniversity {
   [key: string]: any;
+}
+
+export interface TypeReviewEntry {
+  institutionId: string;
+  nameEn: string;
+  originalValue: string | null;
+  reason: "UNRECOGNISED" | "AMBIGUOUS" | "EMPTY" | "NO_VERIFIED_RECORD" | "MISSING_SOURCE" | "RULE_VIOLATION" | "DESCRIPTION_CONTRADICTION";
+  candidates: UniversityType[];
+  blocking: boolean;
 }
 
 export function generateSlug(text: string): string {
@@ -27,19 +39,23 @@ export function mapEducationModel(model?: string): "AMERICAN" | "GERMAN" | "BRIT
   return "EGYPTIAN";
 }
 
-export function mapUniversityType(type?: string): "PUBLIC" | "PRIVATE" | "NATIONAL" | "INTERNATIONAL" {
-  if (!type) return "PUBLIC";
-  const t = type.toUpperCase();
-  if (t.includes("NATIONAL") || t.includes("أهلية")) return "NATIONAL";
-  if (t.includes("INTERNATIONAL") || t.includes("دولية")) return "INTERNATIONAL";
-  if (t.includes("PRIVATE") || t.includes("خاصة")) return "PRIVATE";
-  return "PUBLIC";
-}
-
 export function transformUniversity(raw: RawUniversity) {
   const nameEn = raw.nameEn || raw.name || "Unknown University";
   const nameAr = raw.nameAr || raw.name_ar || nameEn;
   const slug = raw.slug || generateSlug(nameEn);
+
+  const parsedType = parseUniversityType(raw.type || "");
+  let typeReview: TypeReviewEntry | null = null;
+  if (!parsedType.ok) {
+    typeReview = {
+      institutionId: slug || raw.shortName || "UNKNOWN",
+      nameEn,
+      originalValue: raw.type ?? null,
+      reason: parsedType.reason,
+      candidates: parsedType.candidates || [],
+      blocking: true,
+    };
+  }
 
   // Transform University Data
   const universityData = {
@@ -49,7 +65,7 @@ export function transformUniversity(raw: RawUniversity) {
     shortName: raw.shortName || null,
     emoji: raw.emoji || "🏛️",
     educationModel: mapEducationModel(raw.educationModel || raw.model),
-    type: mapUniversityType(raw.type),
+    type: parsedType.ok ? parsedType.type : (null as any),
     governorate: raw.governorate || (raw.location && raw.location.includes("Cairo") ? "Cairo" : raw.location && raw.location.includes("Giza") ? "Giza" : "Cairo"),
     city: raw.city || raw.location || null,
     addressEn: raw.addressEn || raw.address || null,
@@ -158,5 +174,7 @@ export function transformUniversity(raw: RawUniversity) {
     faculties,
     degreePrograms,
     accreditations,
+    typeReview,
+    success: parsedType.ok,
   };
 }

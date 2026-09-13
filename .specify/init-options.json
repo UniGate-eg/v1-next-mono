@@ -1,10 +1,10 @@
 {
-  "ai": "agy",
+  "ai": "claude",
   "ai_skills": true,
   "branch_numbering": "sequential",
-  "context_file": "AGENTS.md",
+  "context_file": "CLAUDE.md",
   "here": true,
-  "integration": "agy",
+  "integration": "claude",
   "preset": null,
   "script": "ps",
   "speckit_version": "0.7.3"

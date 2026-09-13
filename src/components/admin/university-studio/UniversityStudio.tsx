@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { UniversityDTO } from "@/types/university.types";
+import { getUniversityTypeLabel } from "@/lib/university-type";
 import { GeneralInfoTab } from "./tabs/GeneralInfoTab";
 import { FacultiesTab } from "./tabs/FacultiesTab";
 import { ProgramsTab } from "./tabs/ProgramsTab";
@@ -67,7 +68,7 @@ export function UniversityStudio({ university }: UniversityStudioProps) {
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 font-arabic">
-                {university.nameAr} • <span className="font-sans font-medium">{university.type}</span>
+                {university.nameAr} • <span className="font-sans font-medium">{getUniversityTypeLabel(university.type, "en") || university.type}</span>
               </p>
             </div>
           </div>
