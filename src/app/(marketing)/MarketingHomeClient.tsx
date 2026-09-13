@@ -7,6 +7,7 @@ import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
+import { UniversityTypeBadge } from "@/components/university/UniversityTypeBadge";
 import { EgyptFlag } from "@/components/ui/EgyptFlag";
 import type { SlimSearchToken } from "@/types/university.types";
 
@@ -582,10 +583,15 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
                           <span className="match-result-emoji">{match.uni.emoji || "🏛️"}</span>
                           <div className="match-result-details">
                             <h4>{getLangField(match.uni, "name")}</h4>
-                            <p>
-                              📍 {getLangField(match.uni, "location")} · 🏛️ {getLangField(match.uni, "model")}{" "}
-                              {language === "ar" ? "نموذج" : "Model"}
-                            </p>
+                            <div className="flex items-center gap-1.5 text-xs text-slate-400 mt-1 flex-wrap">
+                              <span>📍 {getLangField(match.uni, "location")}</span>
+                              {match.uni.type && (
+                                <>
+                                  <span>·</span>
+                                  <UniversityTypeBadge type={match.uni.type} variant="inline" showIcon={true} />
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                         <div className="match-score-badge">
