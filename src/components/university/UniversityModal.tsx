@@ -489,12 +489,6 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
               <div className="modal-info-label">{isArabic ? "سنة التأسيس" : "Founded"}</div>
             </div>
             <div className="modal-info-item">
-              <div className="modal-info-value" style={{ color: "#F59E0B" }}>
-                {rank ? (String(rank).includes("#1") ? "#1 in Egypt" : String(rank).split("/")[0]) : "Ranked"}
-              </div>
-              <div className="modal-info-label">{isArabic ? "التصنيف الدولي" : "QS Ranking"}</div>
-            </div>
-            <div className="modal-info-item">
               <div className="modal-info-value" style={{ color: "var(--primary-light)" }}>
                 <UniversityTypeBadge type={displayUni.type} variant="inline" showIcon={true} />
               </div>
