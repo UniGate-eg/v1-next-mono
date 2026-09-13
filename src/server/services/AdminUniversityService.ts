@@ -33,6 +33,12 @@ export class AdminUniversityService {
     const original = await repo.findById(id);
     if (!original) throw new Error("University not found");
 
+    if (data.type && data.type !== original.type) {
+      if (!data.typeSourceRef || !data.typeSourceRef.trim()) {
+        throw new Error("A typeSourceRef evidence reference is required when changing university type.");
+      }
+    }
+
     const university = await repo.update(id, data);
 
     await audit.create({
