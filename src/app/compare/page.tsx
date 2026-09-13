@@ -5,7 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useCompareStore } from "@/stores/compareStore";
-import { formatCity, formatUniversityType } from "@/lib/utils";
+import { formatCity } from "@/lib/utils";
+import { getUniversityTypeLabel } from "@/lib/university-type";
 import Link from "next/link";
 import posthog from "posthog-js";
 
@@ -71,7 +72,7 @@ function ComparePageContent() {
         return formatCity(obj.city_ar || obj.city || obj.governorate || "مصر", "ar");
       }
       if (fieldName === "qs_ranking") return obj.qsRanking || obj.qs_ranking || "مصنفة في مصر";
-      if (fieldName === "type") return formatUniversityType(obj.type || "", "ar");
+      if (fieldName === "type") return getUniversityTypeLabel(obj.type, "ar") || "";
       if (fieldName === "founded") return obj.established || obj.founded || "N/A";
       if (fieldName === "tuition") return obj.tuition_ar || obj.tuition || "حسب الكلية";
       if (obj[fieldName + "_ar"]) return obj[fieldName + "_ar"];
@@ -85,7 +86,7 @@ function ComparePageContent() {
       return formatCity(obj.city || obj.governorate || "Egypt", "en");
     }
     if (fieldName === "qs_ranking") return obj.qsRanking || obj.qs_ranking || "Ranked in Egypt";
-    if (fieldName === "type") return formatUniversityType(obj.type || "", "en");
+    if (fieldName === "type") return getUniversityTypeLabel(obj.type, "en") || "";
     if (fieldName === "founded") return obj.established || obj.founded || "N/A";
     if (fieldName === "tuition") return obj.tuition || "Per Faculty";
     if (obj[fieldName + "En"]) return obj[fieldName + "En"];
