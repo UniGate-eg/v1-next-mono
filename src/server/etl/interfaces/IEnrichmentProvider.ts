@@ -28,4 +28,10 @@ export interface UniversityEnrichmentRecord {
 export interface IEnrichmentProvider {
   getEnrichment(shortName: string, nameEn: string): UniversityEnrichmentRecord | null;
   getAllEnrichments(): Map<string, UniversityEnrichmentRecord>;
+  /**
+   * Whether a human content owner has checked every `typeSource.reference` in this
+   * provider against the official MoHE/SCU registry and confirmed it. Providers that
+   * don't implement this are treated as unverified (the safer default) by CatalogValidator.
+   */
+  isAuditHumanVerified?(): boolean;
 }
