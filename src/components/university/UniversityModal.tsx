@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCity } from "@/lib/utils";
 import { UniversityTypeBadge } from "@/components/university/UniversityTypeBadge";
+import { getEducationModelLabel, getEducationModelIcon } from "@/lib/education-model";
 import { SuggestionDialog } from "@/components/university/SuggestionDialog";
 import { useCompareStore } from "@/stores/compareStore";
 import { useBookmarks } from "@/hooks/useBookmarks";
@@ -93,15 +94,6 @@ export interface UniversityData {
   structured_faculties?: any[];
   website?: string | null;
 }
-
-const EDUCATION_MODEL_LABELS: Record<string, { en: string; ar: string }> = {
-  AMERICAN: { en: "American", ar: "أمريكي" },
-  GERMAN: { en: "German", ar: "ألماني" },
-  BRITISH: { en: "British", ar: "بريطاني" },
-  EGYPTIAN: { en: "Egyptian", ar: "مصري" },
-  FRENCH: { en: "French", ar: "فرنسي" },
-  CANADIAN: { en: "Canadian", ar: "كندي" },
-};
 
 const universityDetailsMemoryCache = new Map<string, any>();
 
@@ -218,7 +210,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
       if (fieldName === "location" || fieldName === "city") {
         return formatCity(uniAny.city_ar || uniAny.city || uniAny.governorate || "مصر", "ar");
       }
-      if (fieldName === "model") return EDUCATION_MODEL_LABELS[String(uniAny.educationModel || uniAny.model || "").toUpperCase()]?.ar || uniAny.educationModel || uniAny.model;
+      if (fieldName === "model") return getEducationModelLabel(uniAny.educationModel ?? uniAny.model, "ar") || "";
       if (fieldName === "name") return uniAny.nameAr || uniAny.name_ar || uniAny.nameEn || uniAny.name;
     }
     if (uniAny[fieldName + "En"]) return uniAny[fieldName + "En"];
@@ -228,7 +220,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
     if (fieldName === "location" || fieldName === "city") {
       return formatCity(uniAny.city || uniAny.governorate || "Egypt", "en");
     }
-    if (fieldName === "model") return EDUCATION_MODEL_LABELS[String(uniAny.educationModel || uniAny.model || "").toUpperCase()]?.en || uniAny.educationModel || uniAny.model;
+    if (fieldName === "model") return getEducationModelLabel(uniAny.educationModel ?? uniAny.model, "en") || "";
     if (fieldName === "name") return uniAny.nameEn || uniAny.name || uniAny.nameAr;
     return uniAny[fieldName] || "";
   };
@@ -451,7 +443,8 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
               {getLangField("model") && (
                 <span className="modal-meta-item">
-                  {displayUni.modelEmoji || "🎓"} {isArabic ? `نموذج ${getLangField("model")}` : `${getLangField("model")} Model`}
+                  {getEducationModelIcon((displayUni as any).educationModel ?? (displayUni as any).model) || displayUni.modelEmoji || "🎓"}{" "}
+                  {isArabic ? `نموذج ${getLangField("model")}` : `${getLangField("model")} Model`}
                 </span>
               )}
               <span className="modal-meta-item">
