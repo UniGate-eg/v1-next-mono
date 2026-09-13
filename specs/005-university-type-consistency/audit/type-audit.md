@@ -1,7 +1,21 @@
 # University Type Classification Audit (43 Institutions)
 
-**Feature**: `005-university-type-consistency` | **Date**: 2026-09-20  
-**Authority**: Ministry of Higher Education and Scientific Research (MoHE) & Supreme Council of Universities (SCU)  
+**Feature**: `005-university-type-consistency` | **Drafted**: 2026-09-20  
+**Authority**: Ministry of Higher Education and Scientific Research (MoHE) & Supreme Council of Universities (SCU)
+
+> **⚠️ Verification status: DRAFT — NOT yet confirmed by a human against the official MoHE/SCU registry.**
+> The decree numbers and "MoHE Official Category" column below were compiled from institutional
+> descriptions and general research during this feature's implementation. They have **not** been
+> checked against a live, authoritative government source. Before running
+> `reset-verified-catalog.ts --confirm-production` against production data:
+> 1. A content owner with access to the official registry must verify each `Source Reference` below.
+> 2. Correct any row found wrong, and record who verified it and when in the **Sign-Off Log** at the
+>    end of this document.
+> 3. Only then flip `AUDIT_HUMAN_VERIFIED` from `false` to `true` in
+>    `src/server/etl/BilingualEnrichmentProvider.ts`.
+> Until that happens, `--confirm-production` refuses to run unless you pass
+> `--acknowledge-unverified-audit`, which proceeds on unverified data at your own risk.
+
 **Classification Rule**:
 - `PUBLIC` (حكومية): State public universities and bilateral governmental treaty universities.
 - `PRIVATE` (خاصة): Private universities chartered under Law 101/1992 and Law 12/2009.
@@ -72,3 +86,14 @@
   - `NU`: Changed from `PRIVATE` to `NATIONAL` (MoHE Decree 270/2011)
   - `EUI`: Changed from `PRIVATE` to `NATIONAL` (MoHE Decree 429/2021)
   - `EJUST`: Changed from `PRIVATE` to `PUBLIC` (Law 149/2009 Intergovernmental Treaty)
+
+---
+
+## Sign-Off Log
+
+Record every verification pass here. Do not flip `AUDIT_HUMAN_VERIFIED` to `true` until at least
+one full pass over all 43 rows is logged below with no open discrepancies.
+
+| Date | Verified by | Rows checked | Discrepancies found & corrected | Result |
+|---|---|---|---|---|
+| _(none yet)_ | | | | **DRAFT — not verified** |
