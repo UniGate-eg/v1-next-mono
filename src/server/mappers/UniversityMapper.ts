@@ -14,6 +14,7 @@ export class UniversityMapper {
       nameAr: university.nameAr,
       educationModel: university.educationModel,
       type: university.type,
+      typeSourceRef: university.typeSourceRef || null,
       governorate: university.governorate,
       city: university.city,
       addressEn: university.addressEn,
