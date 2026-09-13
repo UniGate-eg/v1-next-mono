@@ -19,6 +19,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   // ----------------------------------------------------
   AUC: {
     shortName: "AUC",
+    emoji: "🦉",
     nameEn: "The American University in Cairo",
     nameAr: "الجامعة الأمريكية بالقاهرة",
     governorate: "Cairo",
@@ -37,6 +38,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   GUC: {
     shortName: "GUC",
+    emoji: "⚙️",
     nameEn: "German University in Cairo",
     nameAr: "الجامعة الألمانية بالقاهرة",
     governorate: "Cairo",
@@ -55,6 +57,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   MSA: {
     shortName: "MSA",
+    emoji: "🎨",
     nameEn: "MSA University",
     nameAr: "جامعة أكتوبر للعلوم الحديثة والآداب",
     governorate: "Giza",
@@ -73,6 +76,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   NU: {
     shortName: "NU",
+    emoji: "🌊",
     nameEn: "Nile University",
     nameAr: "جامعة النيل",
     governorate: "Giza",
@@ -91,6 +95,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   GIU: {
     shortName: "GIU",
+    emoji: "🔧",
     nameEn: "German International University",
     nameAr: "الجامعة الألمانية الدولية",
     governorate: "Cairo",
@@ -109,6 +114,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   PUA: {
     shortName: "PUA",
+    emoji: "🏮",
     nameEn: "Pharos University in Alexandria",
     nameAr: "جامعة فاروس بالإسكندرية",
     governorate: "Alexandria",
@@ -127,6 +133,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   MUST: {
     shortName: "MUST",
+    emoji: "🔬",
     nameEn: "Misr University for Science and Technology",
     nameAr: "جامعة مصر للعلوم والتكنولوجيا",
     governorate: "Giza",
@@ -145,6 +152,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   EUI: {
     shortName: "EUI",
+    emoji: "💻",
     nameEn: "Egypt University of Informatics",
     nameAr: "جامعة مصر للمعلوماتية",
     governorate: "Cairo",
@@ -163,6 +171,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   BUC: {
     shortName: "BUC",
+    emoji: "🌙",
     nameEn: "Badr University in Cairo",
     nameAr: "جامعة بدر بالقاهرة",
     governorate: "Cairo",
@@ -181,6 +190,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   NGU: {
     shortName: "NGU",
+    emoji: "🐫",
     nameEn: "Newgiza University",
     nameAr: "جامعة الجيزة الجديدة",
     governorate: "Giza",
@@ -199,6 +209,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   NUB: {
     shortName: "NUB",
+    emoji: "🌅",
     nameEn: "Nahda University in Beni Suef",
     nameAr: "جامعة النهضة ببني سويف",
     governorate: "Beni Suef",
@@ -217,6 +228,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   O6U: {
     shortName: "O6U",
+    emoji: "🎖️",
     nameEn: "October 6 University",
     nameAr: "جامعة 6 أكتوبر",
     governorate: "Giza",
@@ -235,6 +247,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   EJUST: {
     shortName: "EJUST",
+    emoji: "🌸",
     nameEn: "Egypt-Japan University of Science and Technology",
     nameAr: "الجامعة المصرية اليابانية للعلوم والتكنولوجيا",
     governorate: "Alexandria",
@@ -253,6 +266,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   FUE: {
     shortName: "FUE",
+    emoji: "🚀",
     nameEn: "Future University in Egypt",
     nameAr: "جامعة المستقبل بمصر",
     governorate: "Cairo",
@@ -271,6 +285,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   BUE: {
     shortName: "BUE",
+    emoji: "☂️",
     nameEn: "The British University in Egypt",
     nameAr: "الجامعة البريطانية في مصر",
     governorate: "Cairo",
@@ -289,6 +304,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   ERU: {
     shortName: "ERU",
+    emoji: "🪆",
     nameEn: "Egyptian Russian University",
     nameAr: "الجامعة المصرية الروسية",
     governorate: "Cairo",
@@ -307,6 +323,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   HUE: {
     shortName: "HUE",
+    emoji: "🌞",
     nameEn: "Horus University – Egypt",
     nameAr: "جامعة حورس بمصر",
     governorate: "Damietta",
@@ -325,6 +342,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   MIU: {
     shortName: "MIU",
+    emoji: "🌐",
     nameEn: "Misr International University",
     nameAr: "جامعة مصر الدولية",
     governorate: "Cairo",
@@ -343,6 +361,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   ACU: {
     shortName: "ACU",
+    emoji: "🔺",
     nameEn: "Ahram Canadian University",
     nameAr: "جامعة الأهرام الكندية",
     governorate: "Giza",
@@ -361,6 +380,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   SU: {
     shortName: "SU",
+    emoji: "🗿",
     nameEn: "Sphinx University",
     nameAr: "جامعة سفنكس",
     governorate: "Assiut",
@@ -379,6 +399,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   DU: {
     shortName: "DU",
+    emoji: "📖",
     nameEn: "Deraya University",
     nameAr: "جامعة دراية",
     governorate: "Minya",
@@ -397,6 +418,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   ECU: {
     shortName: "ECU",
+    emoji: "🐉",
     nameEn: "Egyptian Chinese University",
     nameAr: "الجامعة المصرية الصينية",
     governorate: "Cairo",
@@ -415,6 +437,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   HU: {
     shortName: "HU",
+    emoji: "🌻",
     nameEn: "Heliopolis University",
     nameAr: "جامعة هليوبوليس للتنمية المستدامة",
     governorate: "Cairo",
@@ -433,6 +456,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   MUE: {
     shortName: "MUE",
+    emoji: "🏅",
     nameEn: "Merit University",
     nameAr: "جامعة ميريت",
     governorate: "Sohag",
@@ -455,6 +479,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   // ----------------------------------------------------
   ASNU: {
     shortName: "ASNU",
+    emoji: "🏺",
     nameEn: "Assiut National University",
     nameAr: "جامعة أسيوط الأهلية",
     governorate: "Assiut",
@@ -473,6 +498,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   NASU: {
     shortName: "NASU",
+    emoji: "👁️",
     nameEn: "Ain Shams National University",
     nameAr: "جامعة عين شمس الأهلية",
     governorate: "Cairo",
@@ -491,6 +517,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   GU: {
     shortName: "GU",
+    emoji: "⛰️",
     nameEn: "Galala University",
     nameAr: "جامعة الجلالة",
     governorate: "Suez",
@@ -509,6 +536,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   ANU: {
     shortName: "ANU",
+    emoji: "⚓",
     nameEn: "Alexandria National University",
     nameAr: "جامعة الإسكندرية الأهلية",
     governorate: "Alexandria",
@@ -527,6 +555,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   NMU: {
     shortName: "NMU",
+    emoji: "🏖️",
     nameEn: "New Mansoura University",
     nameAr: "جامعة المنصورة الجديدة",
     governorate: "Dakahlia",
@@ -545,6 +574,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   BNU: {
     shortName: "BNU",
+    emoji: "🍊",
     nameEn: "Benha National University",
     nameAr: "جامعة بنها الأهلية",
     governorate: "Qalyubia",
@@ -563,6 +593,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   EPNU: {
     shortName: "EPNU",
+    emoji: "🚢",
     nameEn: "East Port Said National University",
     nameAr: "جامعة شرق بورسعيد الأهلية",
     governorate: "Port Said",
@@ -581,6 +612,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   ZNU: {
     shortName: "ZNU",
+    emoji: "🌾",
     nameEn: "Zagazig National University",
     nameAr: "جامعة الزقازيق الأهلية",
     governorate: "Sharqia",
@@ -599,6 +631,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   AIU: {
     shortName: "AIU",
+    emoji: "🎗️",
     nameEn: "Alamein International University",
     nameAr: "جامعة العلمين الدولية",
     governorate: "Matrouh",
@@ -617,6 +650,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   SVNU: {
     shortName: "SVNU",
+    emoji: "🏞️",
     nameEn: "South Valley National University",
     nameAr: "جامعة جنوب الوادي الأهلية",
     governorate: "Qena",
@@ -635,6 +669,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   NINU: {
     shortName: "NINU",
+    emoji: "🚤",
     nameEn: "New Ismailia National University",
     nameAr: "جامعة الإسماعيلية الجديدة الأهلية",
     governorate: "Ismailia",
@@ -653,6 +688,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   KNU: {
     shortName: "KNU",
+    emoji: "🐟",
     nameEn: "Kafr Elsheikh National University",
     nameAr: "جامعة كفر الشيخ الأهلية",
     governorate: "Kafr El Sheikh",
@@ -671,6 +707,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   TNU: {
     shortName: "TNU",
+    emoji: "🕌",
     nameEn: "Tanta National University",
     nameAr: "جامعة طنطا الأهلية",
     governorate: "Gharbia",
@@ -689,6 +726,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   DNU: {
     shortName: "DNU",
+    emoji: "🪑",
     nameEn: "Damietta National University",
     nameAr: "جامعة دمياط الأهلية",
     governorate: "Damietta",
@@ -707,6 +745,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   SONU: {
     shortName: "SONU",
+    emoji: "🌴",
     nameEn: "Sohag National University",
     nameAr: "جامعة سوهاج الأهلية",
     governorate: "Sohag",
@@ -725,6 +764,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   CNU: {
     shortName: "CNU",
+    emoji: "🏙️",
     nameEn: "Cairo National University",
     nameAr: "جامعة القاهرة الأهلية",
     governorate: "Giza",
@@ -743,6 +783,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   SNU: {
     shortName: "SNU",
+    emoji: "🏭",
     nameEn: "Suez National University",
     nameAr: "جامعة السويس الأهلية",
     governorate: "Suez",
@@ -761,6 +802,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   UFE: {
     shortName: "UFE",
+    emoji: "⚜️",
     nameEn: "Université Française d’Égypte",
     nameAr: "الجامعة الفرنسية في مصر",
     governorate: "Cairo",
@@ -779,6 +821,7 @@ export const VERIFIED_INSTITUTIONS_METADATA: Record<string, UniversityEnrichment
   },
   HNU: {
     shortName: "HNU",
+    emoji: "⚒️",
     nameEn: "Helwan National University",
     nameAr: "جامعة حلوان الأهلية",
     governorate: "Cairo",
