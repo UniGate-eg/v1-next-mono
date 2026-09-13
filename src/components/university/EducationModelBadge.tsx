@@ -2,12 +2,8 @@
 
 import React from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  isEducationModel,
-  getEducationModelLabel,
-  EDUCATION_MODEL_META,
-  type EducationModel,
-} from "@/lib/education-model";
+import { isEducationModel, getEducationModelLabel } from "@/lib/education-model";
+import { EducationModelIcon } from "@/components/university/EducationModelIcon";
 import { cn } from "@/lib/utils";
 
 export interface EducationModelBadgeProps {
@@ -34,8 +30,6 @@ export function EducationModelBadge({
     return null;
   }
 
-  const icon = EDUCATION_MODEL_META[model as EducationModel].icon;
-
   if (variant === "pill") {
     return (
       <span
@@ -44,7 +38,7 @@ export function EducationModelBadge({
           className
         )}
       >
-        {showIcon && <span aria-hidden="true">{icon}</span>}
+        {showIcon && <EducationModelIcon model={model} />}
         <span>{label}</span>
       </span>
     );
@@ -52,7 +46,7 @@ export function EducationModelBadge({
 
   return (
     <span className={cn("inline-flex items-center gap-1.5", className)}>
-      {showIcon && <span aria-hidden="true">{icon}</span>}
+      {showIcon && <EducationModelIcon model={model} />}
       <span>{label}</span>
     </span>
   );
