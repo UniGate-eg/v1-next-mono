@@ -80,7 +80,8 @@ model University {
   nameEn            String
   nameAr            String
   educationModel    EducationModel @default(EGYPTIAN)
-  type              UniversityType @default(PUBLIC)
+  type              UniversityType
+  typeSourceRef     String?
   governorate       String
   city              String?
   addressEn         String?
