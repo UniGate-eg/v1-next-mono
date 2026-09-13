@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UNIVERSITY_TYPES } from "@/lib/university-type";
 
 export const CreateUniversitySchema = z.object({
   slug: z.string().min(2).max(50).regex(/^[a-z0-9-]+$/),
@@ -7,7 +8,8 @@ export const CreateUniversitySchema = z.object({
   nameEn: z.string().min(3).max(150),
   nameAr: z.string().min(3).max(150),
   educationModel: z.enum(["AMERICAN", "GERMAN", "BRITISH", "EGYPTIAN", "FRENCH", "CANADIAN"]),
-  type: z.enum(["PUBLIC", "PRIVATE", "NATIONAL", "INTERNATIONAL"]),
+  type: z.enum(UNIVERSITY_TYPES),
+  typeSourceRef: z.string().min(1).optional().nullable(),
   governorate: z.string().min(2).max(50),
   city: z.string().max(100).optional(),
   addressEn: z.string().optional(),
@@ -29,6 +31,7 @@ export const CreateUniversitySchema = z.object({
 
 export const UpdateUniversitySchema = CreateUniversitySchema.partial().extend({
   id: z.string().min(1),
+  typeSourceRef: z.string().min(1).optional().nullable(),
 });
 
 export type CreateUniversityInput = z.infer<typeof CreateUniversitySchema>;
@@ -36,7 +39,7 @@ export type UpdateUniversityInput = z.infer<typeof UpdateUniversitySchema>;
 
 export const UniversityFiltersSchema = z.object({
   search: z.string().optional(),
-  type: z.enum(["PUBLIC", "PRIVATE", "NATIONAL", "INTERNATIONAL"]).optional(),
+  type: z.enum(UNIVERSITY_TYPES).optional(),
   educationModel: z.enum(["AMERICAN", "GERMAN", "BRITISH", "EGYPTIAN", "FRENCH", "CANADIAN"]).optional(),
   city: z.string().optional(),
   hasMedicine: z.boolean().optional(),
