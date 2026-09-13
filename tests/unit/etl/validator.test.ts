@@ -35,6 +35,16 @@ describe("BilingualEnrichmentProvider", () => {
     const unknown = provider.getEnrichment("UNKNOWN_UNI", "Non-existent University");
     expect(unknown).toBeNull();
   });
+
+  it("every institution has an emoji, and no two institutions share one", () => {
+    const all = [...provider.getAllEnrichments().values()];
+    const missing = all.filter((r) => !r.emoji || !r.emoji.trim());
+    expect(missing, `Institutions missing an emoji: ${missing.map((r) => r.shortName).join(", ")}`).toEqual([]);
+
+    const emojis = all.map((r) => r.emoji);
+    const duplicates = emojis.filter((e, i) => emojis.indexOf(e) !== i);
+    expect(duplicates, `Duplicate institution emojis: ${JSON.stringify(duplicates)}`).toEqual([]);
+  });
 });
 
 describe("CatalogValidator", () => {
@@ -175,6 +185,7 @@ describe("CatalogValidator", () => {
     const mockProvider = {
       getEnrichment: () => ({
         shortName: "TEST",
+        emoji: "🔬",
         nameEn: "Test University",
         nameAr: "جامعة تجريبية",
         governorate: "Cairo",
@@ -202,6 +213,7 @@ describe("CatalogValidator", () => {
     expect(report.validatedData.universities[0].typeSourceRef).toBe(
       "MOHE: Ministerial Decree 456"
     );
+    expect(report.validatedData.universities[0].emoji).toBe("🔬");
   });
 
   it("should produce deterministic slugs", () => {
