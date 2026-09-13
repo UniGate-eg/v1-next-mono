@@ -117,6 +117,26 @@ async function main() {
   const validator = new CatalogValidator();
   const report = validator.validate([wb1, wb2], enrichmentProvider);
 
+  // Type classification summary logging (contracts/import-review-report.contract.md)
+  const validatorLogger = new StructuredLogger("CatalogValidator");
+  const blockingReviewCount = report.typeReview.filter((r) => r.blocking).length;
+  validatorLogger.info("Type classification summary", {
+    typeCounts: report.typeCounts,
+    reviewCount: report.typeReview.length,
+    blockingReviewCount,
+  });
+
+  for (const review of report.typeReview) {
+    validatorLogger.warn("Type review required", {
+      institutionId: review.institutionId,
+      nameEn: review.nameEn,
+      originalValue: review.originalValue,
+      reason: review.reason,
+      candidates: review.candidates,
+      blocking: review.blocking,
+    });
+  }
+
   if (!report.success) {
     logger.error("Validation failed — pipeline aborted", { errors: report.errors });
     process.exit(1);
