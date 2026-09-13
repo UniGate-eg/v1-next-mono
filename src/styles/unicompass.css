@@ -875,6 +875,55 @@ body.rtl .search-result-info {
 
 .uni-grid-full { padding-bottom: 60px; }
 
+/* ── Viewport Pagination ───────────────────────────────────── */
+@keyframes cardPageEnter {
+    from { opacity: 0; transform: translateY(24px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.uni-card-page-enter {
+    animation: cardPageEnter 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.pagination-sentinel {
+    display: flex;
+    justify-content: center;
+    min-height: 48px;
+    margin: -24px 0 24px;
+}
+
+.pagination-loading-more {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    animation: fadeInUp 0.3s ease;
+}
+
+.pagination-loading-text {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.pagination-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--primary, #7C3AED);
+    animation: paginationDotBounce 0.9s ease-in-out infinite;
+}
+
+.pagination-dot:nth-child(2) { animation-delay: 0.15s; }
+.pagination-dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes paginationDotBounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40% { transform: translateY(-6px); opacity: 1; }
+}
+
 .uni-card {
     position: relative;
     background: var(--bg-card);
