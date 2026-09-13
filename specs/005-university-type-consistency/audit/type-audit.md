@@ -97,3 +97,4 @@ one full pass over all 43 rows is logged below with no open discrepancies.
 | Date | Verified by | Rows checked | Discrepancies found & corrected | Result |
 |---|---|---|---|---|
 | _(none yet)_ | | | | **DRAFT — not verified** |
+| 2026-09-13 | — (not a verification pass) | 0 | — | Reset run against production with `--acknowledge-unverified-audit` at explicit user request, before any row here was checked against the official registry. `AUDIT_HUMAN_VERIFIED` remains `false`. **A real verification pass covering all 43 rows is still owed** — until it happens and is logged here, treat every `Resolved Type` and `Source Reference` in this document as unconfirmed, including the three that changed (NU, EUI, EJUST). |
