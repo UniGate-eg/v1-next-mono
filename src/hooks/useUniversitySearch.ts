@@ -16,7 +16,7 @@ export function useUniversitySearch(initialData?: SlimSearchToken[]) {
 
     async function fetchIndex() {
       try {
-        const res = await fetch("/search-index.json");
+        const res = await fetch("/api/universities/search-index");
         if (!res.ok) throw new Error("Failed to load search index");
         const data = await res.json();
         setIndex(data);
