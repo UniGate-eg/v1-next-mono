@@ -6,7 +6,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useCompareStore } from "@/stores/compareStore";
 import { formatCity } from "@/lib/utils";
-import { getUniversityTypeLabel } from "@/lib/university-type";
+import { getUniversityTypeLabel, getUniversityTypeIcon } from "@/lib/university-type";
+import { getEducationModelLabel, getEducationModelIcon } from "@/lib/education-model";
 import Link from "next/link";
 import posthog from "posthog-js";
 
@@ -51,23 +52,11 @@ function ComparePageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, universitiesDatabase]);
 
-  const EDUCATION_MODEL_LABELS: Record<string, { en: string; ar: string }> = {
-    AMERICAN: { en: "American", ar: "أمريكي" },
-    GERMAN: { en: "German", ar: "ألماني" },
-    BRITISH: { en: "British", ar: "بريطاني" },
-    EGYPTIAN: { en: "Egyptian", ar: "مصري" },
-    FRENCH: { en: "French", ar: "فرنسي" },
-    CANADIAN: { en: "Canadian", ar: "كندي" },
-  };
-
   const getLangField = (obj: any, fieldName: string) => {
     if (!obj) return "";
     if (language === "ar") {
       if (fieldName === "name") return obj.nameAr || obj.name_ar || obj.nameEn || obj.name;
-      if (fieldName === "model") {
-        const key = String(obj.educationModel || obj.model || "").toUpperCase();
-        return EDUCATION_MODEL_LABELS[key]?.ar || obj.educationModel || obj.model || "مصري";
-      }
+      if (fieldName === "model") return getEducationModelLabel(obj.educationModel ?? obj.model, "ar") || "—";
       if (fieldName === "location" || fieldName === "city") {
         return formatCity(obj.city_ar || obj.city || obj.governorate || "مصر", "ar");
       }
@@ -78,10 +67,7 @@ function ComparePageContent() {
       if (obj[fieldName + "_ar"]) return obj[fieldName + "_ar"];
     }
     if (fieldName === "name") return obj.nameEn || obj.name || obj.nameAr;
-    if (fieldName === "model") {
-      const key = String(obj.educationModel || obj.model || "").toUpperCase();
-      return EDUCATION_MODEL_LABELS[key]?.en || obj.educationModel || obj.model || "Egyptian";
-    }
+    if (fieldName === "model") return getEducationModelLabel(obj.educationModel ?? obj.model, "en") || "—";
     if (fieldName === "location" || fieldName === "city") {
       return formatCity(obj.city || obj.governorate || "Egypt", "en");
     }
@@ -91,6 +77,13 @@ function ComparePageContent() {
     if (fieldName === "tuition") return obj.tuition || "Per Faculty";
     if (obj[fieldName + "En"]) return obj[fieldName + "En"];
     return obj[fieldName] || "";
+  };
+
+  const getFieldIcon = (obj: any, fieldName: string): string | null => {
+    if (!obj) return null;
+    if (fieldName === "model") return getEducationModelIcon(obj.educationModel ?? obj.model);
+    if (fieldName === "type") return getUniversityTypeIcon(obj.type);
+    return null;
   };
 
   const getLangArray = (obj: any, fieldName: string): string[] => {
@@ -269,9 +262,13 @@ function ComparePageContent() {
                         );
                       }
 
+                      const icon = getFieldIcon(u, row.key);
                       return (
                         <td key={u.id}>
-                          <span>{getLangField(u, row.key) || "—"}</span>
+                          <span>
+                            {icon && <span aria-hidden="true">{icon} </span>}
+                            {getLangField(u, row.key) || "—"}
+                          </span>
                         </td>
                       );
                     })}
