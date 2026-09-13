@@ -36,6 +36,7 @@ export function GeneralInfoTab({ university }: GeneralInfoTabProps) {
       slug: university.slug,
       emoji: university.emoji || "🏛️",
       type: university.type as any,
+      typeSourceRef: university.typeSourceRef || "",
       educationModel: university.educationModel as any,
       governorate: university.governorate,
       city: university.city || "",
@@ -145,8 +146,18 @@ export function GeneralInfoTab({ university }: GeneralInfoTabProps) {
               <option value="PRIVATE">Private University (خاصة)</option>
               <option value="NATIONAL">National Ahleya University (أهلية)</option>
               <option value="INTERNATIONAL">International Branch Campus (دولية)</option>
-              <option value="SPECIALIZED">Specialized Institution</option>
             </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+              Type Source Reference (Evidence)
+            </label>
+            <input
+              {...form.register("typeSourceRef")}
+              placeholder="e.g. MOHE: Decree No. 123 / Official Directory (verified 2026-09-20)"
+              className="w-full text-xs p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-blue-500"
+            />
           </div>
 
           <div className="space-y-1.5">
