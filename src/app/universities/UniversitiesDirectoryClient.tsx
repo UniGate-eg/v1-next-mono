@@ -17,6 +17,12 @@ import {
   countByType,
   type UniversityType,
 } from "@/lib/university-type";
+import {
+  EDUCATION_MODELS,
+  EDUCATION_MODEL_META,
+  countByEducationModel,
+  type EducationModel,
+} from "@/lib/education-model";
 import type { SlimSearchToken } from "@/types/university.types";
 
 const parseTuition = (tuitionStr?: string | number) => {
@@ -45,10 +51,6 @@ const parseRankScore = (uni: any) => {
 };
 
 const emojiMap: Record<string, string> = {
-  American: "🎓",
-  German: "🏛️",
-  British: "🏫",
-  Egyptian: "🇪🇬",
   Cairo: "🏙️",
   Giza: "🏜️",
   Alexandria: "🌊",
@@ -99,7 +101,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   const parseCsvParam = (value: string | null) => (value ? value.split(",").map((v) => v.trim()).filter(Boolean) : []);
 
   const [activeFilters, setActiveFilters] = useState<{
-    model: string[];
+    model: EducationModel[];
     type: UniversityType[];
     city: string[];
     major: string[];
@@ -141,6 +143,12 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     [typeCounts]
   );
 
+  const modelCounts = useMemo(() => countByEducationModel(universitiesDatabase), [universitiesDatabase]);
+  const modelCountMap = useMemo(
+    () => Object.fromEntries(modelCounts.map((mc) => [mc.model, mc.count])) as Record<EducationModel, number>,
+    [modelCounts]
+  );
+
   const allCities = useMemo(() => {
     const citiesSet = new Set<string>();
     universitiesDatabase.forEach((u: any) => {
@@ -152,7 +160,17 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     return Array.from(citiesSet).sort();
   }, [universitiesDatabase]);
 
-  const handleFilterToggle = (category: "model" | "city" | "major", value: string) => {
+  const handleModelToggle = (model: EducationModel) => {
+    setActiveFilters((prev) => {
+      const isSelected = prev.model.includes(model);
+      const nextModels = isSelected
+        ? prev.model.filter((m) => m !== model)
+        : [...prev.model, model];
+      return { ...prev, model: nextModels };
+    });
+  };
+
+  const handleFilterToggle = (category: "city" | "major", value: string) => {
     setActiveFilters((prev) => {
       const isSelected = prev[category].includes(value);
       if (isSelected) {
@@ -199,10 +217,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     const search = searchQuery.trim().toLowerCase();
 
     if (activeFilters.model.length > 0) {
-      filtered = filtered.filter((u: any) => {
-        const uModel = (u.educationModel || u.model || "").toUpperCase();
-        return activeFilters.model.some((m) => uModel.includes(m.toUpperCase()));
-      });
+      filtered = filtered.filter((u: any) => activeFilters.model.includes(u.educationModel as EducationModel));
     }
 
     if (activeFilters.type.length > 0) {
@@ -311,7 +326,8 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   const activeFilterTags = useMemo(() => {
     const tags: Array<{ category: string; value: string; emoji: string; displayValue: string }> = [];
     activeFilters.model.forEach((val) => {
-      tags.push({ category: "model", value: val, emoji: emojiMap[val] || "🎓", displayValue: t(val) });
+      const meta = EDUCATION_MODEL_META[val];
+      tags.push({ category: "model", value: val, emoji: meta.icon, displayValue: meta[language] });
     });
     activeFilters.type.forEach((val) => {
       const meta = UNIVERSITY_TYPE_META[val];
@@ -347,8 +363,6 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
     return tags;
   }, [activeFilters, rankFilter, priceMin, priceMax, searchQuery, language]);
-
-  const modelsList = ["American", "German", "British", "Egyptian"];
 
   return (
     <div className="universities-tab-container">
@@ -418,15 +432,21 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
             <div className="filter-group">
               <span className="filter-group-label">{t("Education Model")}</span>
               <div className="filter-group-chips">
-                {modelsList.map((model) => (
-                  <button
-                    key={model}
-                    className={`filter-chip ${activeFilters.model.includes(model) ? "active" : ""}`}
-                    onClick={() => handleFilterToggle("model", model)}
-                  >
-                    <span className="fc-emoji">{emojiMap[model]}</span> {t(model)}
-                  </button>
-                ))}
+                {EDUCATION_MODELS.map((model) => {
+                  const count = modelCountMap[model] ?? 0;
+                  const isSelected = activeFilters.model.includes(model);
+                  if (count === 0 && !isSelected) return null;
+                  const meta = EDUCATION_MODEL_META[model];
+                  return (
+                    <button
+                      key={model}
+                      className={`filter-chip ${isSelected ? "active" : ""}`}
+                      onClick={() => handleModelToggle(model)}
+                    >
+                      <span className="fc-emoji">{meta.icon}</span> {meta[language]} ({count})
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -570,8 +590,10 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
                         setPriceMax(400000);
                       } else if (tag.category === "type") {
                         handleTypeToggle(tag.value as UniversityType);
+                      } else if (tag.category === "model") {
+                        handleModelToggle(tag.value as EducationModel);
                       } else {
-                        handleFilterToggle(tag.category as any, tag.value);
+                        handleFilterToggle(tag.category as "city" | "major", tag.value);
                       }
                     }}
                   >
