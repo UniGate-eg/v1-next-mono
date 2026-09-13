@@ -2,7 +2,8 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { formatCity, formatUniversityType } from "@/lib/utils";
+import { formatCity } from "@/lib/utils";
+import { UniversityTypeBadge } from "@/components/university/UniversityTypeBadge";
 import { SuggestionDialog } from "@/components/university/SuggestionDialog";
 import { useCompareStore } from "@/stores/compareStore";
 import { useBookmarks } from "@/hooks/useBookmarks";
@@ -200,7 +201,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
       slug: (displayUni as any).slug || String(displayUni.id),
       nameAr: (displayUni as any).name_ar || (displayUni as any).nameAr || displayUni.name || "",
       nameEn: (displayUni as any).name || (displayUni as any).nameEn || "",
-      type: (displayUni as any).type || "PUBLIC",
+      type: (displayUni as any).type,
       governorate: (displayUni as any).city || (displayUni as any).governorate || "Cairo",
       majorsCount: displayUni.majors?.length || displayUni.faculties?.length || 0,
     });
@@ -217,7 +218,6 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
       if (fieldName === "location" || fieldName === "city") {
         return formatCity(uniAny.city_ar || uniAny.city || uniAny.governorate || "مصر", "ar");
       }
-      if (fieldName === "type") return formatUniversityType(uniAny.type || "", "ar");
       if (fieldName === "model") return EDUCATION_MODEL_LABELS[String(uniAny.educationModel || uniAny.model || "").toUpperCase()]?.ar || uniAny.educationModel || uniAny.model;
       if (fieldName === "name") return uniAny.nameAr || uniAny.name_ar || uniAny.nameEn || uniAny.name;
     }
@@ -228,7 +228,6 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
     if (fieldName === "location" || fieldName === "city") {
       return formatCity(uniAny.city || uniAny.governorate || "Egypt", "en");
     }
-    if (fieldName === "type") return formatUniversityType(uniAny.type || "", "en");
     if (fieldName === "model") return EDUCATION_MODEL_LABELS[String(uniAny.educationModel || uniAny.model || "").toUpperCase()]?.en || uniAny.educationModel || uniAny.model;
     if (fieldName === "name") return uniAny.nameEn || uniAny.name || uniAny.nameAr;
     return uniAny[fieldName] || "";
@@ -456,9 +455,11 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
               <span className="modal-meta-item">
                 📍 {getLangField("location")}
               </span>
-              <span className="modal-meta-item">
-                🏛️ {getLangField("type") || "University"}
-              </span>
+              {displayUni.type && (
+                <span className="modal-meta-item">
+                  <UniversityTypeBadge type={displayUni.type} variant="inline" showIcon={true} />
+                </span>
+              )}
               {establishedYear && (
                 <span className="modal-meta-item">
                   📅 {isArabic ? `تأسست ${establishedYear}` : `Est. ${establishedYear}`}
@@ -499,7 +500,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
             </div>
             <div className="modal-info-item">
               <div className="modal-info-value" style={{ color: "var(--primary-light)" }}>
-                {getLangField("type") || "University"}
+                <UniversityTypeBadge type={displayUni.type} variant="inline" />
               </div>
               <div className="modal-info-label">{isArabic ? "نوع المؤسسة" : "Type"}</div>
             </div>
