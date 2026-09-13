@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { UniversityDTO } from "../../types/university.types";
+import { getUniversityTypeLabel } from "@/lib/university-type";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Input } from "../ui/input";
 import { Edit, Eye, Filter, Plus, Building2, CheckSquare, Square, Search, Sparkles } from "lucide-react";
 import { CompletenessScore } from "./shared/CompletenessScore";
@@ -145,7 +147,7 @@ export function UniversityDataTable({ universities, total, currentPage }: Univer
                         </div>
                       </td>
                       <td className="px-8 py-5 text-slate-300">
-                        <span className="font-bold text-white text-xs">{uni.type}</span>
+                        <span className="font-bold text-white text-xs">{getUniversityTypeLabel(uni.type, "en") || uni.type}</span>
                         <span className="text-[11px] text-slate-400 block mt-0.5">({uni.educationModel})</span>
                       </td>
                       <td className="px-8 py-5">
