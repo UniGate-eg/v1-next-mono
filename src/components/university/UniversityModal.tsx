@@ -4,7 +4,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { formatCity } from "@/lib/utils";
 import { UniversityTypeBadge } from "@/components/university/UniversityTypeBadge";
-import { getEducationModelLabel, getEducationModelIcon } from "@/lib/education-model";
+import { getEducationModelLabel } from "@/lib/education-model";
+import { EducationModelIcon } from "@/components/university/EducationModelIcon";
 import { SuggestionDialog } from "@/components/university/SuggestionDialog";
 import { useCompareStore } from "@/stores/compareStore";
 import { useBookmarks } from "@/hooks/useBookmarks";
@@ -443,7 +444,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
               {getLangField("model") && (
                 <span className="modal-meta-item">
-                  {getEducationModelIcon((displayUni as any).educationModel ?? (displayUni as any).model) || displayUni.modelEmoji || "🎓"}{" "}
+                  <EducationModelIcon model={(displayUni as any).educationModel ?? (displayUni as any).model} />{" "}
                   {isArabic ? `نموذج ${getLangField("model")}` : `${getLangField("model")} Model`}
                 </span>
               )}
