@@ -9,6 +9,14 @@ import { UniversityCard } from "@/components/university/UniversityCard";
 import { UniversityModal, type UniversityData } from "@/components/university/UniversityModal";
 import { TuitionBudgetFilter } from "@/components/university/TuitionBudgetFilter";
 import { formatCity } from "@/lib/utils";
+import {
+  UNIVERSITY_TYPES,
+  UNIVERSITY_TYPE_META,
+  normalizeTypeParam,
+  toTypeParam,
+  countByType,
+  type UniversityType,
+} from "@/lib/university-type";
 import type { SlimSearchToken } from "@/types/university.types";
 
 const parseTuition = (tuitionStr?: string | number) => {
@@ -41,9 +49,6 @@ const emojiMap: Record<string, string> = {
   German: "🏛️",
   British: "🏫",
   Egyptian: "🇪🇬",
-  Private: "🔒",
-  Public: "🏫",
-  National: "🏛️",
   Cairo: "🏙️",
   Giza: "🏜️",
   Alexandria: "🌊",
@@ -95,12 +100,12 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
 
   const [activeFilters, setActiveFilters] = useState<{
     model: string[];
-    type: string[];
+    type: UniversityType[];
     city: string[];
     major: string[];
   }>(() => ({
     model: [],
-    type: parseCsvParam(searchParams.get("type")),
+    type: normalizeTypeParam(searchParams.get("type")),
     city: parseCsvParam(searchParams.get("city")),
     major: [],
   }));
@@ -117,10 +122,10 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     const typeParam = searchParams.get("type");
-    if (typeParam && appliedTypeParamRef.current !== typeParam) {
+    if (typeParam !== null && appliedTypeParamRef.current !== typeParam) {
       appliedTypeParamRef.current = typeParam;
-      const types = parseCsvParam(typeParam);
-      setActiveFilters((prev) => ({ ...prev, type: Array.from(new Set([...prev.type, ...types])) }));
+      const types = normalizeTypeParam(typeParam);
+      setActiveFilters((prev) => ({ ...prev, type: types }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -129,6 +134,12 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   const [currentSort, setCurrentSort] = useState("default");
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(400000);
+
+  const typeCounts = useMemo(() => countByType(universitiesDatabase), [universitiesDatabase]);
+  const countMap = useMemo(
+    () => Object.fromEntries(typeCounts.map((tc) => [tc.type, tc.count])) as Record<UniversityType, number>,
+    [typeCounts]
+  );
 
   const allCities = useMemo(() => {
     const citiesSet = new Set<string>();
@@ -141,7 +152,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     return Array.from(citiesSet).sort();
   }, [universitiesDatabase]);
 
-  const handleFilterToggle = (category: "model" | "type" | "city" | "major", value: string) => {
+  const handleFilterToggle = (category: "model" | "city" | "major", value: string) => {
     setActiveFilters((prev) => {
       const isSelected = prev[category].includes(value);
       if (isSelected) {
@@ -152,6 +163,27 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     });
   };
 
+  const handleTypeToggle = (type: UniversityType) => {
+    setActiveFilters((prev) => {
+      const isSelected = prev.type.includes(type);
+      const nextTypes = isSelected
+        ? prev.type.filter((t) => t !== type)
+        : [...prev.type, type];
+
+      const params = new URLSearchParams(window.location.search);
+      const paramVal = toTypeParam(nextTypes);
+      if (paramVal) {
+        params.set("type", paramVal);
+      } else {
+        params.delete("type");
+      }
+      const newUrl = params.toString() ? `/universities?${params.toString()}` : "/universities";
+      window.history.replaceState(null, "", newUrl);
+
+      return { ...prev, type: nextTypes };
+    });
+  };
+
   const clearAllFilters = () => {
     setSearchQuery("");
     setActiveFilters({ model: [], type: [], city: [], major: [] });
@@ -159,6 +191,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     setCurrentSort("default");
     setPriceMin(0);
     setPriceMax(400000);
+    window.history.replaceState(null, "", "/universities");
   };
 
   const filteredUnis = useMemo(() => {
@@ -173,10 +206,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     if (activeFilters.type.length > 0) {
-      filtered = filtered.filter((u: any) => {
-        const uType = (u.type || "").toUpperCase();
-        return activeFilters.type.some((t) => uType.includes(t.toUpperCase()));
-      });
+      filtered = filtered.filter((u: any) => activeFilters.type.includes(u.type as UniversityType));
     }
 
     if (activeFilters.city.length > 0) {
@@ -280,13 +310,21 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
 
   const activeFilterTags = useMemo(() => {
     const tags: Array<{ category: string; value: string; emoji: string; displayValue: string }> = [];
-    Object.entries(activeFilters).forEach(([category, values]) => {
-      values.forEach((val) => {
-        const majorItem = category === "major" ? predefinedMajors.find((c) => c.name === val) : null;
-        const displayVal = majorItem ? (language === "ar" ? majorItem.name_ar : majorItem.name) : val;
-        const displayEmoji = majorItem ? majorItem.icon : emojiMap[val] || "📍";
-        tags.push({ category, value: val, emoji: displayEmoji, displayValue: displayVal });
-      });
+    activeFilters.model.forEach((val) => {
+      tags.push({ category: "model", value: val, emoji: emojiMap[val] || "🎓", displayValue: t(val) });
+    });
+    activeFilters.type.forEach((val) => {
+      const meta = UNIVERSITY_TYPE_META[val];
+      tags.push({ category: "type", value: val, emoji: meta.icon, displayValue: meta[language] });
+    });
+    activeFilters.city.forEach((val) => {
+      tags.push({ category: "city", value: val, emoji: "🏙️", displayValue: formatCity(val, language) });
+    });
+    activeFilters.major.forEach((val) => {
+      const majorItem = predefinedMajors.find((c) => c.name === val);
+      const displayVal = majorItem ? (language === "ar" ? majorItem.name_ar : majorItem.name) : val;
+      const displayEmoji = majorItem ? majorItem.icon : "📚";
+      tags.push({ category: "major", value: val, emoji: displayEmoji, displayValue: displayVal });
     });
     if (rankFilter !== "all") {
       tags.push({
@@ -311,7 +349,6 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   }, [activeFilters, rankFilter, priceMin, priceMax, searchQuery, language]);
 
   const modelsList = ["American", "German", "British", "Egyptian"];
-  const typesList = ["Private", "Public", "National"];
 
   return (
     <div className="universities-tab-container">
@@ -399,15 +436,21 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
             <div className="filter-group">
               <span className="filter-group-label">{t("Type")}</span>
               <div className="filter-group-chips">
-                {typesList.map((type) => (
-                  <button
-                    key={type}
-                    className={`filter-chip ${activeFilters.type.includes(type) ? "active" : ""}`}
-                    onClick={() => handleFilterToggle("type", type)}
-                  >
-                    <span className="fc-emoji">{emojiMap[type]}</span> {t(type)}
-                  </button>
-                ))}
+                {UNIVERSITY_TYPES.map((type) => {
+                  const count = countMap[type] ?? 0;
+                  const isSelected = activeFilters.type.includes(type);
+                  if (count === 0 && !isSelected) return null;
+                  const meta = UNIVERSITY_TYPE_META[type];
+                  return (
+                    <button
+                      key={type}
+                      className={`filter-chip ${isSelected ? "active" : ""}`}
+                      onClick={() => handleTypeToggle(type)}
+                    >
+                      <span className="fc-emoji">{meta.icon}</span> {meta[language]} ({count})
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -525,7 +568,11 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
                       else if (tag.category === "price") {
                         setPriceMin(0);
                         setPriceMax(400000);
-                      } else handleFilterToggle(tag.category as any, tag.value);
+                      } else if (tag.category === "type") {
+                        handleTypeToggle(tag.value as UniversityType);
+                      } else {
+                        handleFilterToggle(tag.category as any, tag.value);
+                      }
                     }}
                   >
                     ×
@@ -552,23 +599,44 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
             : `Showing ${filteredUnis.length} of ${universitiesDatabase.length} universities`}
         </div>
 
-        {/* Universities Grid */}
-        <div className="uni-grid uni-grid-full" id="unisGrid">
-          {filteredUnis.map((uni: any) => (
-            <UniversityCard
-              key={uni.id}
-              university={uni}
-              onViewDetails={() => {
-                posthog.capture("university_card_viewed", {
-                  university_id: String(uni.id),
-                  university_type: uni.type,
-                  university_city: uni.city || uni.governorate,
-                });
-                setSelectedUniModal(uni);
-              }}
-            />
-          ))}
-        </div>
+        {/* Universities Grid / Empty State */}
+        {filteredUnis.length === 0 ? (
+          <div className="py-16 text-center space-y-4 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 p-8 my-6">
+            <div className="text-4xl">🏛️</div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              {activeFilters.type.length > 0 && activeFilters.type.every((t) => (countMap[t] ?? 0) === 0)
+                ? language === "ar"
+                  ? `لا توجد جامعات ${activeFilters.type.map((t) => UNIVERSITY_TYPE_META[t].ar).join(" / ")} مدرجة حالياً.`
+                  : `No ${activeFilters.type.map((t) => UNIVERSITY_TYPE_META[t].en).join(" / ")} universities are listed yet.`
+                : language === "ar"
+                ? "لم يتم العثور على أي جامعات تطابق معايير البحث"
+                : "No universities matched your search criteria"}
+            </h3>
+            <button
+              onClick={clearAllFilters}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold transition-all shadow-md shadow-blue-500/20 cursor-pointer"
+            >
+              {language === "ar" ? "عرض كل الجامعات" : "View all universities"}
+            </button>
+          </div>
+        ) : (
+          <div className="uni-grid uni-grid-full" id="unisGrid">
+            {filteredUnis.map((uni: any) => (
+              <UniversityCard
+                key={uni.id}
+                university={uni}
+                onViewDetails={() => {
+                  posthog.capture("university_card_viewed", {
+                    university_id: String(uni.id),
+                    university_type: uni.type,
+                    university_city: uni.city || uni.governorate,
+                  });
+                  setSelectedUniModal(uni);
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* University Detail Modal */}
