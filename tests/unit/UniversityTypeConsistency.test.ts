@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import * as fs from "fs";
 import * as path from "path";
+import { UNIVERSITY_TYPE_META } from "../../src/lib/university-type";
+import { EDUCATION_MODEL_META } from "../../src/lib/education-model";
 
 function getAllSourceFiles(dir: string, fileList: string[] = []): string[] {
   const files = fs.readdirSync(dir);
@@ -70,6 +72,25 @@ describe("University Type Consistency Static Guard", () => {
       violations,
       `Found a duplicate EDUCATION_MODEL_LABELS map outside src/lib/education-model: ${JSON.stringify(violations)}. ` +
         `Import from @/lib/education-model instead.`
+    ).toEqual([]);
+  });
+
+  it("uses a distinct icon for every institution type and education model shown together (e.g. German model vs National type both showed 🏛️)", () => {
+    const typeIcons = Object.entries(UNIVERSITY_TYPE_META).map(([type, meta]) => ({ set: "type", key: type, icon: meta.icon }));
+    const modelIcons = Object.entries(EDUCATION_MODEL_META).map(([model, meta]) => ({ set: "model", key: model, icon: meta.icon }));
+    const all = [...typeIcons, ...modelIcons];
+
+    const byIcon = new Map<string, typeof all>();
+    for (const entry of all) {
+      byIcon.set(entry.icon, [...(byIcon.get(entry.icon) || []), entry]);
+    }
+
+    const collisions = [...byIcon.values()].filter((group) => group.length > 1);
+
+    expect(
+      collisions,
+      `Found icon collisions across university type and education model: ${JSON.stringify(collisions)}. ` +
+        `A university card shows a type badge and a model badge side by side, so every icon must be unique across both sets.`
     ).toEqual([]);
   });
 });
