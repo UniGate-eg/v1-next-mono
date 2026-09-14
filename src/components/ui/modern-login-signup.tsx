@@ -367,12 +367,18 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
       }}
     >
       <img
-        src={isAr ? "/logo_ar.jpeg" : "/logo_en.jpeg"}
-        alt={isAr ? "بوابة الجامعة" : "UniGate Egypt"}
+        src={
+          isAr
+            ? "/Logo_Kit/arabic_writing_with university_logo.png"
+            : "/Logo_Kit/English_version_with_writing.png"
+        }
+        alt={isAr ? "دليل الجامعات" : "University Guide"}
         style={{
           height: "60px",
           borderRadius: "12px",
           objectFit: "contain",
+          background: "rgba(255, 255, 255, 0.95)",
+          padding: "4px 10px",
           boxShadow: "0 4px 20px rgba(124, 58, 237, 0.35)",
           border: "1px solid rgba(255, 255, 255, 0.1)",
         }}
