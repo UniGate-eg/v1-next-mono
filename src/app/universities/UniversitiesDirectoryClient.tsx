@@ -25,6 +25,10 @@ import {
   countByEducationModel,
   type EducationModel,
 } from "@/lib/education-model";
+import { MajorMatchEngine } from "@/lib/majors/engine/MajorMatchEngine";
+import { DegreeProgramMatchSource } from "@/lib/majors/engine/DegreeProgramMatchSource";
+import { AcademicEntityMatchSource } from "@/lib/majors/engine/AcademicEntityMatchSource";
+import { MAJOR_DEFINITIONS } from "@/lib/majors/MajorDefinitions";
 import type { SlimSearchToken } from "@/types/university.types";
 
 const parseTuition = (tuitionStr?: string | number) => {
@@ -57,19 +61,6 @@ const emojiMap: Record<string, string> = {
   Giza: "🏜️",
   Alexandria: "🌊",
 };
-
-const predefinedMajors = [
-  { name: "Computer Science", name_ar: "علوم الحاسب", icon: "💻" },
-  { name: "Artificial Intelligence", name_ar: "الذكاء الاصطناعي", icon: "🤖" },
-  { name: "Engineering", name_ar: "الهندسة والتكنولوجيا", icon: "🔧" },
-  { name: "Business Administration", name_ar: "إدارة أعمال", icon: "📊" },
-  { name: "Pharmacy", name_ar: "صيدلة", icon: "💊" },
-  { name: "Medicine", name_ar: "طب بشري", icon: "🩺" },
-  { name: "Dentistry", name_ar: "طب أسنان", icon: "🦷" },
-  { name: "Biotechnology", name_ar: "تكنولوجيا حيوية", icon: "🧬" },
-  { name: "Applied Arts", name_ar: "فنون تطبيقية", icon: "🎨" },
-  { name: "Economics", name_ar: "اقتصاد وعلوم سياسية", icon: "📈" },
-];
 
 interface UniversitiesDirectoryClientProps {
   initialUniversities?: SlimSearchToken[];
@@ -111,11 +102,12 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     model: [],
     type: normalizeTypeParam(searchParams.get("type")),
     city: parseCsvParam(searchParams.get("city")),
-    major: [],
+    major: parseCsvParam(searchParams.get("major")),
   }));
 
   const appliedCityParamRef = useRef<string | null>(searchParams.get("city"));
   const appliedTypeParamRef = useRef<string | null>(searchParams.get("type"));
+  const appliedMajorParamRef = useRef<string | null>(searchParams.get("major"));
 
   useEffect(() => {
     const cityParam = searchParams.get("city");
@@ -130,6 +122,13 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
       appliedTypeParamRef.current = typeParam;
       const types = normalizeTypeParam(typeParam);
       setActiveFilters((prev) => ({ ...prev, type: types }));
+    }
+
+    const majorParam = searchParams.get("major");
+    if (majorParam && appliedMajorParamRef.current !== majorParam) {
+      appliedMajorParamRef.current = majorParam;
+      const majors = parseCsvParam(majorParam);
+      setActiveFilters((prev) => ({ ...prev, major: Array.from(new Set([...prev.major, ...majors])) }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -150,6 +149,22 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     () => Object.fromEntries(modelCounts.map((mc) => [mc.model, mc.count])) as Record<EducationModel, number>,
     [modelCounts]
   );
+
+  // Matches the same academic-entity engine used on /majors — degree programs
+  // and faculty/department names, not university display names.
+  const majorEngine = useMemo(
+    () => new MajorMatchEngine([new DegreeProgramMatchSource(), new AcademicEntityMatchSource()]),
+    []
+  );
+
+  const matchedUniIdsByMajorId = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const major of MAJOR_DEFINITIONS) {
+      const matches = majorEngine.getMatches(universitiesDatabase as SlimSearchToken[], major);
+      map.set(major.id, new Set(matches.map((m) => m.university.id)));
+    }
+    return map;
+  }, [universitiesDatabase, majorEngine]);
 
   const allCities = useMemo(() => {
     const citiesSet = new Set<string>();
@@ -234,10 +249,9 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     if (activeFilters.major.length > 0) {
-      filtered = filtered.filter((u: any) => {
-        const nameStr = `${u.nameEn || ""} ${u.nameAr || ""}`.toLowerCase();
-        return activeFilters.major.some((m) => nameStr.includes(m.toLowerCase()));
-      });
+      filtered = filtered.filter((u: any) =>
+        activeFilters.major.some((majorId) => matchedUniIdsByMajorId.get(majorId)?.has(u.id))
+      );
     }
 
     if (rankFilter !== "all") {
@@ -316,7 +330,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     return filtered;
-  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase]);
+  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
 
   const {
     visibleItems: visibleUnis,
@@ -347,7 +361,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
       tags.push({ category: "city", value: val, emoji: "🏙️", displayValue: formatCity(val, language) });
     });
     activeFilters.major.forEach((val) => {
-      const majorItem = predefinedMajors.find((c) => c.name === val);
+      const majorItem = MAJOR_DEFINITIONS.find((c) => c.id === val);
       const displayVal = majorItem ? (language === "ar" ? majorItem.name_ar : majorItem.name) : val;
       const displayEmoji = majorItem ? majorItem.icon : "📚";
       tags.push({ category: "major", value: val, emoji: displayEmoji, displayValue: displayVal });
@@ -549,18 +563,22 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
                 }}
               >
                 <option value="">{language === "ar" ? "اختر تخصصاً..." : "Select a major..."}</option>
-                {predefinedMajors.map((major) => (
-                  <option key={major.name} value={major.name} disabled={activeFilters.major.includes(major.name)}>
+                {MAJOR_DEFINITIONS.map((major) => (
+                  <option key={major.id} value={major.id} disabled={activeFilters.major.includes(major.id)}>
                     {language === "ar" ? major.name_ar : major.name}
                   </option>
                 ))}
               </select>
               <div className="filter-group-chips">
-                {activeFilters.major.map((major) => (
-                  <button key={major} className="filter-chip active" onClick={() => handleFilterToggle("major", major)}>
-                    <span className="fc-emoji">🎓</span> {major} ✕
-                  </button>
-                ))}
+                {activeFilters.major.map((majorId) => {
+                  const majorItem = MAJOR_DEFINITIONS.find((m) => m.id === majorId);
+                  const label = majorItem ? (language === "ar" ? majorItem.name_ar : majorItem.name) : majorId;
+                  return (
+                    <button key={majorId} className="filter-chip active" onClick={() => handleFilterToggle("major", majorId)}>
+                      <span className="fc-emoji">🎓</span> {label} ✕
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
