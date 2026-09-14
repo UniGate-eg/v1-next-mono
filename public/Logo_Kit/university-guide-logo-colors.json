@@ -1,0 +1,34 @@
+{
+  "brand": "دليل الجامعات",
+  "palette": {
+    "primary": {
+      "name": "Deep Purple",
+      "hex": "#4C2A85"
+    },
+    "accent": {
+      "name": "Coral",
+      "hex": "#F26B5B"
+    },
+    "background_light": {
+      "name": "Warm White",
+      "hex": "#FAF8F5"
+    },
+    "text": {
+      "name": "Deep Charcoal",
+      "hex": "#25222A"
+    },
+    "background_dark": {
+      "name": "Deep Dark Navy",
+      "hex": "#070D1C"
+    },
+    "logo_white": {
+      "name": "White",
+      "hex": "#FFFFFF"
+    }
+  },
+  "logo_gradient": {
+    "start": "#4C2A85",
+    "end": "#F26B5B",
+    "direction": "top-to-bottom"
+  }
+}
