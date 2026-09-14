@@ -10,6 +10,17 @@ import { PermissionProvider } from "@/contexts/PermissionContext";
 export const metadata = {
   title: "UniGate — Operations & RBAC Console",
   description: "Administrative governance and catalog operations for Egyptian Higher Education",
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/Logo_Kit/university-guide-logo-transparent.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/Logo_Kit/university-guide-logo-transparent.png" },
+    ],
+  },
 };
 
 export const dynamic = "force-dynamic";
