@@ -11,15 +11,18 @@ import { UniversityTypeBadge } from "@/components/university/UniversityTypeBadge
 import { EgyptFlag } from "@/components/ui/EgyptFlag";
 import type { SlimSearchToken } from "@/types/university.types";
 
+// filterValue must match a MajorDefinition.id from src/lib/majors/MajorDefinitions.ts —
+// the /universities major filter matches against that engine's academic-entity data,
+// not against these display names.
 const homeMajors = [
-  { name: "Computer Science", name_ar: "علوم الحاسب", icon: "💻" },
-  { name: "Artificial Intelligence", name_ar: "الذكاء الاصطناعي", icon: "🤖" },
-  { name: "Industrial Engineering", name_ar: "هندسة صناعية", icon: "🏭" },
-  { name: "Business Administration", name_ar: "إدارة أعمال", icon: "📊" },
-  { name: "Pharmacy", name_ar: "صيدلة", icon: "💊" },
-  { name: "Architectural Engineering", name_ar: "هندسة معمارية", icon: "🏗️" },
-  { name: "Mechatronics Engineering", name_ar: "هندسة الميكاترونكس", icon: "⚙️" },
-  { name: "Economics", name_ar: "اقتصاد", icon: "📈" },
+  { name: "Computer Science", name_ar: "علوم الحاسب", icon: "💻", filterValue: "cs" },
+  { name: "Artificial Intelligence", name_ar: "الذكاء الاصطناعي", icon: "🤖", filterValue: "ai" },
+  { name: "Industrial Engineering", name_ar: "هندسة صناعية", icon: "🏭", filterValue: "industrial-eng" },
+  { name: "Business Administration", name_ar: "إدارة أعمال", icon: "📊", filterValue: "business" },
+  { name: "Pharmacy", name_ar: "صيدلة", icon: "💊", filterValue: "pharmacy" },
+  { name: "Architectural Engineering", name_ar: "هندسة معمارية", icon: "🏗️", filterValue: "architectural-eng" },
+  { name: "Mechatronics Engineering", name_ar: "هندسة الميكاترونكس", icon: "⚙️", filterValue: "mechatronics" },
+  { name: "Economics", name_ar: "اقتصاد", icon: "📈", filterValue: "economics" },
 ];
 
 interface MarketingHomeClientProps {
@@ -791,7 +794,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
             {homeMajors.map((m) => (
               <Link
                 key={m.name}
-                href={`/universities?search=${encodeURIComponent(m.name)}`}
+                href={`/universities?major=${encodeURIComponent(m.filterValue)}`}
                 className="major-chip"
               >
                 <span className="chip-icon">{m.icon}</span>
