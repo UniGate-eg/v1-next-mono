@@ -24,6 +24,17 @@ export const metadata: Metadata = {
   title: "UniCompass — Egypt University Guide & Admissions Tracker",
   description:
     "Explore, filter, compare, and track admissions for all Egyptian universities (Public, Private, National, and International) with verified degree programs.",
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/Logo_Kit/university-guide-logo-transparent.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/Logo_Kit/university-guide-logo-transparent.png" },
+    ],
+  },
 };
 
 export default function RootLayout({
