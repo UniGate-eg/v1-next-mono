@@ -33,9 +33,19 @@ export function Footer() {
               style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
             >
               <img
-                src={language === "ar" ? "/logo_ar.jpeg" : "/logo_en.jpeg"}
-                alt={language === "ar" ? "بوابة الجامعة" : "University Gate"}
-                style={{ height: "70px", borderRadius: "10px", objectFit: "contain" }}
+                src={
+                  language === "ar"
+                    ? "/Logo_Kit/arabic_writing_with university_logo.png"
+                    : "/Logo_Kit/English_version_with_writing.png"
+                }
+                alt={language === "ar" ? "دليل الجامعات" : "University Guide"}
+                style={{
+                  height: "50px",
+                  borderRadius: "8px",
+                  objectFit: "contain",
+                  background: "rgba(255, 255, 255, 0.95)",
+                  padding: "4px 8px",
+                }}
               />
             </Link>
             <span className="logo-badge">{language === "ar" ? "مصر" : "Egypt"}</span>
