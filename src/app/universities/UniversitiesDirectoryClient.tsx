@@ -159,12 +159,17 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
 
   const matchedUniIdsByMajorId = useMemo(() => {
     const map = new Map<string, Set<string>>();
-    for (const major of MAJOR_DEFINITIONS) {
-      const matches = majorEngine.getMatches(universitiesDatabase as SlimSearchToken[], major);
-      map.set(major.id, new Set(matches.map((m) => m.university.id)));
+    // Optimization: Only compute matches for active majors rather than all 900+ definitions
+    const activeMajorIds = activeFilters?.major || [];
+    for (const majorId of activeMajorIds) {
+      const majorDef = MAJOR_DEFINITIONS.find((m) => m.id === majorId);
+      if (majorDef) {
+        const matches = majorEngine.getMatches(universitiesDatabase as SlimSearchToken[], majorDef);
+        map.set(majorId, new Set(matches.map((m) => m.university.id)));
+      }
     }
     return map;
-  }, [universitiesDatabase, majorEngine]);
+  }, [universitiesDatabase, majorEngine, activeFilters?.major]);
 
   const allCities = useMemo(() => {
     const citiesSet = new Set<string>();
