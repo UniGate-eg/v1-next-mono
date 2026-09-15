@@ -85,6 +85,7 @@ export function CompareMatrix() {
                       onClick={() => remove(uni.id)}
                       className="text-slate-400 hover:text-red-500 p-1"
                       title="Remove"
+                      aria-label="Remove from comparison"
                     >
                       <X className="h-4 w-4" />
                     </button>
