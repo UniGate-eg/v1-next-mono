@@ -63,9 +63,10 @@ export function withAdminAuth<TInput, TOutput>(
       return { success: true, data: result };
     } catch (error) {
       console.error(`[withAdminAuth Error] [${permissionCode}]:`, error);
+      // SECURITY: Do not expose raw error messages (like database query details) to the client
       return {
         success: false,
-        error: error instanceof Error ? error.message : "An unexpected server error occurred",
+        error: "An unexpected server error occurred",
         code: 500
       };
     }
