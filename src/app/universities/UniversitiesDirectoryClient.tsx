@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState, useMemo, useRef, useEffect } from "react";
+import React, { Suspense, useState, useMemo, useRef, useEffect, useDeferredValue } from "react";
 import { useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -90,6 +90,12 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
+
+  // ⚡ Bolt: Defer search query for heavy filtering to prevent input jank
+  // The UniversitiesDatabase has hundreds of items. Filtering 6 fields for each
+  // on every keystroke blocks the main thread. Deferring tells React to prioritize
+  // updating the input over re-calculating the list.
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const parseCsvParam = (value: string | null) => (value ? value.split(",").map((v) => v.trim()).filter(Boolean) : []);
 
@@ -231,7 +237,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
 
   const filteredUnis = useMemo(() => {
     let filtered = [...universitiesDatabase];
-    const search = searchQuery.trim().toLowerCase();
+    const search = deferredSearchQuery.trim().toLowerCase();
 
     if (activeFilters.model.length > 0) {
       filtered = filtered.filter((u: any) => activeFilters.model.includes(u.educationModel as EducationModel));
@@ -330,7 +336,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     return filtered;
-  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
+  }, [deferredSearchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
 
   const {
     visibleItems: visibleUnis,
