@@ -63,10 +63,11 @@ export function BookmarkCard({ bookmark }: BookmarkCardProps) {
 
         <button
           onClick={() => deleteBookmark(bookmark.id)}
-          className="text-slate-400 hover:text-red-500 p-1 transition-colors"
+          className="text-slate-400 hover:text-red-500 p-1 transition-colors rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
           title={language === "ar" ? "حذف من المتابعة" : "Delete from Tracker"}
+          aria-label={language === "ar" ? "حذف من المتابعة" : "Delete from Tracker"}
         >
-          <Trash2 className="h-3.5 w-3.5" />
+          <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>
 
