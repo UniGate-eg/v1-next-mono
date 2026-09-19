@@ -27,6 +27,7 @@ export function NotificationBell() {
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2.5 rounded-2xl bg-[#111422] border border-[#1D2336] hover:border-purple-500/40 text-slate-400 hover:text-white transition-colors cursor-pointer"
         title="Notifications"
+        aria-label="Notifications"
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
@@ -99,6 +100,7 @@ export function NotificationBell() {
                           onClick={() => handleMarkOne(n.id)}
                           className="p-1 text-slate-400 hover:text-purple-400 rounded-lg hover:bg-[#1E253A]"
                           title="Mark read"
+                          aria-label="Mark as read"
                         >
                           <Check className="w-3.5 h-3.5" />
                         </button>
