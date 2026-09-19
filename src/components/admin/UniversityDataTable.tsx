@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { UniversityDTO } from "../../types/university.types";
 import { getUniversityTypeLabel } from "@/lib/university-type";
@@ -28,16 +28,23 @@ export function UniversityDataTable({ universities, total, currentPage }: Univer
   const router = useRouter();
   const { hasPermission, isScopedTo } = usePermission();
 
-  const filtered = universities.filter((u) => {
-    const matchesSearch =
-      u.nameEn.toLowerCase().includes(search.toLowerCase()) ||
-      u.nameAr.includes(search);
+  // ⚡ Bolt: Memoize filtering and hoist invariant calculations (toLowerCase, staleThreshold)
+  // to avoid O(n) re-computation on every re-render (e.g. when selecting rows).
+  const filtered = useMemo(() => {
+    const lowerSearch = search.toLowerCase();
+    const staleThreshold = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000);
 
-    const isStale = (u as any).updatedAt ? new Date((u as any).updatedAt) < new Date(Date.now() - 180 * 24 * 60 * 60 * 1000) : false;
-    const matchesStale = !staleOnly || isStale;
+    return universities.filter((u) => {
+      const matchesSearch =
+        u.nameEn.toLowerCase().includes(lowerSearch) ||
+        u.nameAr.includes(search);
 
-    return matchesSearch && matchesStale;
-  });
+      const isStale = (u as any).updatedAt ? new Date((u as any).updatedAt) < staleThreshold : false;
+      const matchesStale = !staleOnly || isStale;
+
+      return matchesSearch && matchesStale;
+    });
+  }, [universities, search, staleOnly]);
 
   const toggleSelectAll = () => {
     if (selectedIds.length === filtered.length) {
