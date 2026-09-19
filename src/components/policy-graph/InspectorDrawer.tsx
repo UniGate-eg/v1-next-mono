@@ -37,6 +37,7 @@ export default function InspectorDrawer({
           onClick={onClose}
           className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
           title="Close Inspector"
+          aria-label="Close Inspector"
         >
           <X className="w-4 h-4" />
         </button>

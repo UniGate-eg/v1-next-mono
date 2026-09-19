@@ -1,0 +1,3 @@
+## 2023-10-24 - ARIA labels for icon-only buttons
+**Learning:** Found several icon-only buttons in the application lacking `aria-label` attributes. This violates accessibility guidelines as screen readers cannot announce the purpose of these buttons to users. In particular, `NotificationBell`, `AiPromptBar`, `GraphNavbar`, and `InspectorDrawer` had multiple occurrences of icon-only buttons without `aria-label`.
+**Action:** Always ensure that icon-only buttons have an `aria-label` attribute describing their function for better accessibility. In cases where a `title` attribute is present, it's good practice to mirror that text in the `aria-label` for consistency and screen reader support.
