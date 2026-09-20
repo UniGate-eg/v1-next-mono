@@ -139,10 +139,10 @@ export default function GraphNavbar({
         </button>
 
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 backdrop-blur-md border border-white/10 shadow-lg shadow-black/40">
-          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors">
+          <button aria-label="Toggle dark mode" className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors">
             <Moon className="w-4 h-4" />
           </button>
-          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors">
+          <button aria-label="Search" className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors">
             <Search className="w-4 h-4" />
           </button>
           <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/20 ml-1">
