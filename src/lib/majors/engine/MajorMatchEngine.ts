@@ -19,6 +19,9 @@ import type { MajorDefinition } from "@/lib/majors/MajorDefinitions";
  */
 export class MajorMatchEngine implements IMajorMatchEngine {
   private readonly maxPossibleScore: number;
+  private corpusCache = new Map<string, string>();
+  private prestigeCache = new Map<string, number>();
+  private keywordCache = new WeakMap<MajorDefinition, string[]>();
 
   constructor(private readonly sources: IMatchSource[]) {
     if (sources.length === 0) {
@@ -31,15 +34,26 @@ export class MajorMatchEngine implements IMajorMatchEngine {
     let rawScore = 0;
     const matchedSources: string[] = [];
 
-    for (const source of this.sources) {
-      const tokens = source.extractTokens(university);
-      if (tokens.length === 0) continue;
+    // Cache lowercased keywords safely using a WeakMap
+    let lowerKeywords = this.keywordCache.get(major);
+    if (!lowerKeywords) {
+      lowerKeywords = major.keywords.map((kw) => kw.toLowerCase());
+      this.keywordCache.set(major, lowerKeywords);
+    }
 
-      // Join once; check all keywords against the single corpus string
-      const corpus = tokens.join(" ");
-      const matched = major.keywords.some((kw) =>
-        corpus.includes(kw.toLowerCase()),
-      );
+    for (const source of this.sources) {
+      const cacheKey = `${source.sourceName}_${university.id}`;
+      let corpus = this.corpusCache.get(cacheKey);
+
+      if (corpus === undefined) {
+        const tokens = source.extractTokens(university);
+        corpus = tokens.join(" ");
+        this.corpusCache.set(cacheKey, corpus);
+      }
+
+      if (!corpus) continue;
+
+      const matched = lowerKeywords.some((kw) => corpus!.includes(kw));
 
       if (matched) {
         rawScore += source.weight;
@@ -55,12 +69,17 @@ export class MajorMatchEngine implements IMajorMatchEngine {
   }
 
   private calculatePrestigeScore(u: SlimSearchToken): number {
-    let prestige = 0;
+    let prestige = this.prestigeCache.get(u.id);
+    if (prestige !== undefined) return prestige;
+
+    prestige = 0;
     if (u.qsRanking && u.qsRanking !== "N/A") prestige += 3;
     if (u.theRanking && u.theRanking !== "N/A") prestige += 2;
     if (u.featured) prestige += 2;
     if (Array.isArray(u.structured_faculties) && u.structured_faculties.length > 0) prestige += 1;
     if (Array.isArray(u.degreePrograms) && u.degreePrograms.length > 0) prestige += 1;
+
+    this.prestigeCache.set(u.id, prestige);
     return prestige;
   }
 
