@@ -56,6 +56,7 @@ export default function AiPromptBar({
               <button
                 onClick={() => setIsRiModalOpen(false)}
                 className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Close RI Analysis Recommendations"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -170,6 +171,7 @@ export default function AiPromptBar({
             <button
               type="submit"
               className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-slate-950 transition-all"
+              aria-label="Submit query"
             >
               <Send className="w-3.5 h-3.5" />
             </button>
@@ -190,6 +192,7 @@ export default function AiPromptBar({
               type="button"
               className="flex items-center gap-1 px-2.5 py-2 rounded-xl bg-slate-900/80 border border-white/10 text-slate-400 hover:text-slate-200 text-xs transition-colors"
               title="Recent queries"
+              aria-label="Recent queries"
             >
               <History className="w-3.5 h-3.5" />
               <span className="text-[11px] font-semibold">+3</span>
