@@ -377,6 +377,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
               cursor: "pointer",
             }}
             title={isArabic ? "مقارنة الجامعة" : "Compare university"}
+            aria-label={isArabic ? "مقارنة الجامعة" : "Compare university"}
           >
             <Scale style={{ width: "15px", height: "15px" }} />
           </button>
@@ -397,6 +398,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
               cursor: "pointer",
             }}
             title={isArabic ? "إضافة للمفضلة" : "Bookmark university"}
+            aria-label={isArabic ? "إضافة للمفضلة" : "Bookmark university"}
           >
             <Heart style={{ width: "15px", height: "15px", fill: isBookmarked ? "#FFF" : "none" }} />
           </button>
