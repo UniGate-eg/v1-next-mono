@@ -4,6 +4,7 @@ import React, { Suspense, useState, useMemo, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
 import { useViewportPagination } from "@/hooks/useViewportPagination";
 import { UniversityCard } from "@/components/university/UniversityCard";
@@ -82,6 +83,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   }, []);
 
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get("search") || "");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
 
   useEffect(() => {
     const searchParam = searchParams.get("search");
@@ -231,7 +233,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
 
   const filteredUnis = useMemo(() => {
     let filtered = [...universitiesDatabase];
-    const search = searchQuery.trim().toLowerCase();
+    const search = debouncedSearchQuery.trim().toLowerCase();
 
     if (activeFilters.model.length > 0) {
       filtered = filtered.filter((u: any) => activeFilters.model.includes(u.educationModel as EducationModel));
@@ -330,7 +332,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     return filtered;
-  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
+  }, [debouncedSearchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
 
   const {
     visibleItems: visibleUnis,
