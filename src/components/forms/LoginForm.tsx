@@ -237,7 +237,7 @@ export function LoginForm() {
 
         {/* Remember Me */}
         <div className="flex items-center justify-between pt-0.5">
-          <label className="flex items-center gap-2.5 cursor-pointer select-none group">
+          <label htmlFor="remember-me" className="flex items-center gap-2.5 cursor-pointer select-none group">
             <input
               type="checkbox"
               id="remember-me"
