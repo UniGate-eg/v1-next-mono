@@ -230,50 +230,58 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   };
 
   const filteredUnis = useMemo(() => {
-    let filtered = [...universitiesDatabase];
     const search = searchQuery.trim().toLowerCase();
 
-    if (activeFilters.model.length > 0) {
-      filtered = filtered.filter((u: any) => activeFilters.model.includes(u.educationModel as EducationModel));
-    }
+    // Pre-calculate lowercased cities for faster checking
+    const lowercasedCities = activeFilters.city.length > 0
+      ? activeFilters.city.map(c => c.toLowerCase())
+      : [];
 
-    if (activeFilters.type.length > 0) {
-      filtered = filtered.filter((u: any) => activeFilters.type.includes(u.type as UniversityType));
-    }
+    let filtered = universitiesDatabase.filter((u: any) => {
+      // 1. Model filter
+      if (activeFilters.model.length > 0 && !activeFilters.model.includes(u.educationModel as EducationModel)) {
+        return false;
+      }
 
-    if (activeFilters.city.length > 0) {
-      filtered = filtered.filter((u: any) => {
+      // 2. Type filter
+      if (activeFilters.type.length > 0 && !activeFilters.type.includes(u.type as UniversityType)) {
+        return false;
+      }
+
+      // 3. City filter
+      if (lowercasedCities.length > 0) {
         const cityStr = `${u.city || ""} ${u.governorate || ""}`.toLowerCase();
-        return activeFilters.city.some((c) => cityStr.includes(c.toLowerCase()));
-      });
-    }
+        if (!lowercasedCities.some(c => cityStr.includes(c))) {
+          return false;
+        }
+      }
 
-    if (activeFilters.major.length > 0) {
-      filtered = filtered.filter((u: any) =>
-        activeFilters.major.some((majorId) => matchedUniIdsByMajorId.get(majorId)?.has(u.id))
-      );
-    }
+      // 4. Major filter
+      if (activeFilters.major.length > 0) {
+        if (!activeFilters.major.some((majorId) => matchedUniIdsByMajorId.get(majorId)?.has(u.id))) {
+          return false;
+        }
+      }
 
-    if (rankFilter !== "all") {
-      filtered = filtered.filter((u: any) => {
+      // 5. Rank filter
+      if (rankFilter !== "all") {
         const score = parseRankScore(u);
-        if (rankFilter === "top500") return score <= 500;
-        if (rankFilter === "top1000") return score <= 1000;
-        if (rankFilter === "ranked-egypt") return score < 99999;
-        return true;
-      });
-    }
+        if (rankFilter === "top500" && score > 500) return false;
+        if (rankFilter === "top1000" && score > 1000) return false;
+        if (rankFilter === "ranked-egypt" && score >= 99999) return false;
+      }
 
-    if (priceMin > 0 || priceMax < 400000) {
-      filtered = filtered.filter((u: any) => {
+      // 6. Price filter
+      if (priceMin > 0 || priceMax < 400000) {
         const rawTuition = u.tuition || u.tuitionEgp || (u.type === "PUBLIC" ? 5000 : u.type === "NATIONAL" ? 75000 : 160000);
         const tuition = parseTuition(rawTuition);
-        return tuition >= priceMin && tuition <= priceMax;
-      });
-    }
+        if (tuition < priceMin || tuition > priceMax) {
+          return false;
+        }
+      }
 
-    if (search) {
-      filtered = filtered.filter((u: any) => {
+      // 7. Search query filter
+      if (search) {
         const nameEn = (u.nameEn || "").toLowerCase();
         const nameAr = (u.nameAr || "").toLowerCase();
         const city = (u.city || "").toLowerCase();
@@ -281,16 +289,20 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
         const model = (u.educationModel || "").toLowerCase();
         const short = (u.shortName || "").toLowerCase();
 
-        return (
-          nameEn.includes(search) ||
-          nameAr.includes(search) ||
-          city.includes(search) ||
-          gov.includes(search) ||
-          model.includes(search) ||
-          short.includes(search)
-        );
-      });
-    }
+        if (
+          !nameEn.includes(search) &&
+          !nameAr.includes(search) &&
+          !city.includes(search) &&
+          !gov.includes(search) &&
+          !model.includes(search) &&
+          !short.includes(search)
+        ) {
+          return false;
+        }
+      }
+
+      return true;
+    });
 
     switch (currentSort) {
       case "rank-best":

@@ -1,0 +1,3 @@
+## 2024-05-24 - Chained Array Filters Anti-Pattern
+**Learning:** Found an anti-pattern where multiple sequential `.filter()` operations were used inside a `useMemo` block (e.g., in `UniversitiesDirectoryClient.tsx`). This resulted in up to 7 passes over the dataset and multiple intermediate array allocations per render.
+**Action:** When filtering large datasets in React components, always combine filter conditions into a single O(N) pass with early returns (short-circuiting) to minimize both CPU cycles and memory churn. Pre-calculate invariant values (like lowercased filter strings) outside the loop.
