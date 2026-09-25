@@ -224,6 +224,10 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
         });
 
         if (res.error) {
+          posthog.capture("login_failed", {
+            provider: "email",
+            reason: res.error.message || "unknown",
+          });
           toast.error(
             isAr
               ? "تعذر تسجيل الدخول. يرجى التحقق من البريد الإلكتروني وكلمة المرور."
@@ -256,6 +260,10 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
         });
 
         if (res.error) {
+          posthog.capture("signup_failed", {
+            provider: "email",
+            reason: res.error.message || "unknown",
+          });
           toast.error(
             isAr
               ? "تعذر إنشاء الحساب. قد يكون البريد الإلكتروني مسجلاً مسبقاً."
@@ -275,7 +283,13 @@ export default function ModernLoginSignUp({ defaultMode }: ModernLoginSignUpProp
           }, 300);
         }
       }
-    } catch {
+    } catch (error) {
+      console.error("Email auth request failed", error);
+      posthog.captureException(error);
+      posthog.capture(isLogin ? "login_failed" : "signup_failed", {
+        provider: "email",
+        reason: "exception",
+      });
       toast.error(isAr ? "حدث خطأ غير متوقع. يرجى المحاولة مجدداً." : "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
