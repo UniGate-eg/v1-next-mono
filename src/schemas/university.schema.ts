@@ -16,7 +16,14 @@ export const CreateUniversitySchema = z.object({
   addressAr: z.string().optional(),
   overviewEn: z.string().optional(),
   overviewAr: z.string().optional(),
-  website: z.string().url().optional().or(z.literal("")),
+  website: z.string().url().refine((val) => {
+    try {
+      const parsedUrl = new URL(val);
+      return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
+    } catch {
+      return false;
+    }
+  }, { message: "Invalid URL protocol. Only http and https are allowed." }).optional().or(z.literal("")),
   logoUrl: z.string().optional(),
   established: z.number().int().min(900).max(2100).optional(),
   qsRanking: z.string().optional(),
