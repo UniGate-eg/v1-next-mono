@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState, useMemo, useRef, useEffect } from "react";
+import React, { Suspense, useState, useMemo, useRef, useEffect, useDeferredValue } from "react";
 import { useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -82,6 +82,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   }, []);
 
   const [searchQuery, setSearchQuery] = useState(() => searchParams.get("search") || "");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   useEffect(() => {
     const searchParam = searchParams.get("search");
@@ -231,7 +232,8 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
 
   const filteredUnis = useMemo(() => {
     let filtered = [...universitiesDatabase];
-    const search = searchQuery.trim().toLowerCase();
+    // Use deferredSearchQuery for filtering to prevent UI lag while typing
+    const search = deferredSearchQuery.trim().toLowerCase();
 
     if (activeFilters.model.length > 0) {
       filtered = filtered.filter((u: any) => activeFilters.model.includes(u.educationModel as EducationModel));
@@ -330,7 +332,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     return filtered;
-  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
+  }, [deferredSearchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
 
   const {
     visibleItems: visibleUnis,
@@ -382,11 +384,11 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
         displayValue: getPriceRangeText(),
       });
     }
-    if (searchQuery.trim()) {
-      tags.push({ category: "search", value: `"${searchQuery.trim()}"`, emoji: "🔍", displayValue: `"${searchQuery.trim()}"` });
+    if (deferredSearchQuery.trim()) {
+      tags.push({ category: "search", value: `"${deferredSearchQuery.trim()}"`, emoji: "🔍", displayValue: `"${deferredSearchQuery.trim()}"` });
     }
     return tags;
-  }, [activeFilters, rankFilter, priceMin, priceMax, searchQuery, language]);
+  }, [activeFilters, rankFilter, priceMin, priceMax, deferredSearchQuery, language]);
 
   return (
     <div className="universities-tab-container">
@@ -631,7 +633,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
               ))}
             </div>
 
-            {(activeFilterTags.length > 0 || searchQuery || currentSort !== "default") && (
+            {(activeFilterTags.length > 0 || deferredSearchQuery || currentSort !== "default") && (
               <button className="clear-all-filters-btn" onClick={clearAllFilters}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
