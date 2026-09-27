@@ -1,0 +1,3 @@
+## 2024-09-27 - Added missing ARIA labels to icon-only action buttons in Graph Navbar
+**Learning:** Icon-only toolbars/navbars (like GraphNavbar) often rely on HTML `title` attributes for tooltips, but `title` alone isn't always sufficient or reliably announced by all screen readers. Buttons explicitly need an `aria-label` when the visual content is just an icon, even if they have a tooltip or title.
+**Action:** When implementing dense icon-only toolbars in graph or policy viewers, ensure every `<button>` has a distinct `aria-label` reflecting its exact action (e.g., "Toggle dark mode" or "Zoom In"). Avoid relying purely on `title`.

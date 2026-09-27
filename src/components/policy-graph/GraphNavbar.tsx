@@ -27,7 +27,7 @@ export default function GraphNavbar({
       <div className="flex items-center gap-3 pointer-events-auto">
         <button
           className="p-2 rounded-xl bg-slate-900/60 backdrop-blur-md border border-white/10 text-slate-300 hover:text-white hover:border-white/20 transition-all shadow-lg shadow-black/40"
-          title="Menu"
+          title="Menu" aria-label="Menu"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -84,14 +84,14 @@ export default function GraphNavbar({
           <button
             onClick={onZoomIn}
             className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
-            title="Zoom In"
+            title="Zoom In" aria-label="Zoom In"
           >
             <Plus className="w-4 h-4" />
           </button>
           <button
             onClick={onZoomOut}
             className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
-            title="Zoom Out"
+            title="Zoom Out" aria-label="Zoom Out"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -102,7 +102,7 @@ export default function GraphNavbar({
         {/* Filter & Sort */}
         <button
           className="relative p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
-          title="Filter Legislation"
+          title="Filter Legislation" aria-label="Filter Legislation"
         >
           <Filter className="w-4 h-4" />
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-[10px] font-bold text-slate-950 rounded-full flex items-center justify-center border border-slate-900">
@@ -112,7 +112,7 @@ export default function GraphNavbar({
 
         <button
           className="relative p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
-          title="Sort Decrees"
+          title="Sort Decrees" aria-label="Sort Decrees"
         >
           <ArrowUpDown className="w-4 h-4" />
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-500 text-[10px] font-bold text-slate-950 rounded-full flex items-center justify-center border border-slate-900">
@@ -122,7 +122,7 @@ export default function GraphNavbar({
 
         <button
           className="p-2 rounded-lg text-amber-300 hover:text-amber-200 hover:bg-amber-400/10 transition-colors"
-          title="AI Policy Insights"
+          title="AI Policy Insights" aria-label="AI Policy Insights"
         >
           <Sparkles className="w-4 h-4" />
         </button>
@@ -139,10 +139,10 @@ export default function GraphNavbar({
         </button>
 
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 backdrop-blur-md border border-white/10 shadow-lg shadow-black/40">
-          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors">
+          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors" aria-label="Toggle dark mode">
             <Moon className="w-4 h-4" />
           </button>
-          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors">
+          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors" aria-label="Search">
             <Search className="w-4 h-4" />
           </button>
           <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/20 ml-1">
