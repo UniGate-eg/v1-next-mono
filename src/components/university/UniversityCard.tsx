@@ -17,12 +17,12 @@ interface UniversityCardProps {
   style?: React.CSSProperties;
 }
 
-export function UniversityCard({
+const UniversityCardComponent = ({
   university,
   onViewDetails,
   className = "",
   style,
-}: UniversityCardProps) {
+}: UniversityCardProps) => {
   const { language } = useLanguage();
   const { bookmarks, createBookmark, deleteBookmark } = useBookmarks();
   const { selectedUniversities, toggleUniversity } = useCompareStore();
@@ -144,7 +144,7 @@ export function UniversityCard({
           ...style,
         } as React.CSSProperties
       }
-      onClick={() => onViewDetails && onViewDetails(university)}
+      onClick={() => onViewDetails?.(university)}
     >
       <div className="uni-card-header">
         <div className="uni-card-model">
@@ -199,7 +199,7 @@ export function UniversityCard({
           className="view-details-btn"
           onClick={(e) => {
             e.stopPropagation();
-            if (onViewDetails) onViewDetails(university);
+            onViewDetails?.(university);
           }}
         >
           {language === "ar" ? "عرض التفاصيل" : "View Details"}
@@ -249,4 +249,6 @@ export function UniversityCard({
       </div>
     </div>
   );
-}
+};
+
+export const UniversityCard = React.memo(UniversityCardComponent);

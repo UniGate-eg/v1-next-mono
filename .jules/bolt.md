@@ -1,0 +1,3 @@
+## 2024-05-18 - Missing memoization on frequently rendered UniversityCard
+**Learning:** `UniversityCard` is heavily rendered in `UniversitiesDirectoryClient`, inside a grid that lists all universities. It takes a complex `university` object as a prop and performs heavy string matching/language field parsing every time, yet it is not memoized using `React.memo`. This leads to unnecessary re-renders when parent states change (e.g. filters) but the specific university object has not.
+**Action:** When components inside a large list or grid receive complex objects and have their own calculation logic, use `React.memo` with a custom equality check (e.g., checking ID, selected state) to prevent unnecessary re-renders and improve list performance.
