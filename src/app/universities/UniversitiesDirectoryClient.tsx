@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState, useMemo, useRef, useEffect } from "react";
+import React, { Suspense, useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -72,6 +72,15 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const searchParams = useSearchParams();
+
+  const handleViewDetails = useCallback((uni: UniversityData) => {
+    posthog.capture("university_card_viewed", {
+      university_id: String(uni.id),
+      university_type: uni.type,
+      university_city: (uni as any).city || (uni as any).governorate,
+    });
+    setSelectedUniModal(uni);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -682,14 +691,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
                     university={uni}
                     className={isNewlyRevealed ? "uni-card-page-enter" : ""}
                     style={isNewlyRevealed ? { animationDelay: `${Math.min(staggerIndex, 12) * 40}ms` } : undefined}
-                    onViewDetails={() => {
-                      posthog.capture("university_card_viewed", {
-                        university_id: String(uni.id),
-                        university_type: uni.type,
-                        university_city: uni.city || uni.governorate,
-                      });
-                      setSelectedUniModal(uni);
-                    }}
+                    onViewDetails={handleViewDetails}
                   />
                 );
               })}
