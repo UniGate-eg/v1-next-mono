@@ -47,7 +47,7 @@ export function RegisterForm() {
       toast.error(
         isAr
           ? "يرجى الموافقة على شروط الاستخدام وسياسة الخصوصية للمتابعة."
-          : "Please agree to the Terms of Service to continue."
+          : "Please agree to the Terms of Service to continue.",
       );
       return;
     }
@@ -64,13 +64,13 @@ export function RegisterForm() {
         toast.error(
           isAr
             ? "تعذر إنشاء الحساب. قد يكون البريد الإلكتروني مسجلاً مسبقاً."
-            : res.error.message || "Registration failed. Please try again."
+            : res.error.message || "Registration failed. Please try again.",
         );
       } else {
         toast.success(
           isAr
             ? "تم إنشاء حساب الطالب بنجاح! مرحباً بك في UniGate."
-            : "Account created successfully! Welcome to UniGate."
+            : "Account created successfully! Welcome to UniGate.",
         );
         router.push("/dashboard");
         router.refresh();
@@ -79,7 +79,7 @@ export function RegisterForm() {
       toast.error(
         isAr
           ? "حدث خطأ غير متوقع أثناء إنشاء الحساب."
-          : "An unexpected error occurred."
+          : "An unexpected error occurred.",
       );
     } finally {
       setLoading(false);
@@ -113,10 +113,18 @@ export function RegisterForm() {
             placeholder={isAr ? "مثال: أحمد محمود" : "e.g. Ahmed Mahmoud"}
             {...register("name")}
             disabled={loading}
+            aria-invalid={errors.name ? "true" : "false"}
+            aria-describedby={errors.name ? "name-error" : undefined}
             className="w-full h-11 px-3.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 focus:bg-white/[0.07] text-white placeholder:text-slate-500 text-sm transition-all duration-200 outline-none disabled:opacity-50"
           />
           {errors.name && (
-            <p className="text-xs text-rose-400 font-medium pl-1 animate-in fade-in">{errors.name.message}</p>
+            <p
+              id="name-error"
+              role="alert"
+              className="text-xs text-rose-400 font-medium pl-1 animate-in fade-in"
+            >
+              {errors.name.message}
+            </p>
           )}
         </div>
 
@@ -132,17 +140,27 @@ export function RegisterForm() {
             placeholder={isAr ? "student@example.com" : "student@example.com"}
             {...register("email")}
             disabled={loading}
+            aria-invalid={errors.email ? "true" : "false"}
+            aria-describedby={errors.email ? "email-error" : undefined}
             className="w-full h-11 px-3.5 rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 focus:bg-white/[0.07] text-white placeholder:text-slate-500 text-sm transition-all duration-200 outline-none disabled:opacity-50"
           />
           {errors.email && (
-            <p className="text-xs text-rose-400 font-medium pl-1 animate-in fade-in">{errors.email.message}</p>
+            <p
+              id="email-error"
+              role="alert"
+              className="text-xs text-rose-400 font-medium pl-1 animate-in fade-in"
+            >
+              {errors.email.message}
+            </p>
           )}
         </div>
 
         {/* Password */}
         <div className="space-y-1.5">
           <label className="block text-xs font-medium text-slate-300">
-            {isAr ? "كلمة المرور (8 أحرف على الأقل)" : "Password (min 8 characters)"}
+            {isAr
+              ? "كلمة المرور (8 أحرف على الأقل)"
+              : "Password (min 8 characters)"}
           </label>
           <div className="relative">
             <input
@@ -151,18 +169,40 @@ export function RegisterForm() {
               placeholder="••••••••"
               {...register("password")}
               disabled={loading}
+              aria-invalid={errors.password ? "true" : "false"}
+              aria-describedby={errors.password ? "password-error" : undefined}
               className={`w-full h-11 px-3.5 ${isAr ? "pl-11" : "pr-11"} rounded-xl bg-white/[0.04] border border-white/10 hover:border-white/20 focus:border-purple-400 focus:ring-4 focus:ring-purple-500/15 focus:bg-white/[0.07] text-white placeholder:text-slate-500 text-sm transition-all duration-200 outline-none disabled:opacity-50`}
             />
             <button
               type="button"
               onClick={() => setShowPassword((prev) => !prev)}
+              aria-label={
+                showPassword
+                  ? isAr
+                    ? "إخفاء كلمة المرور"
+                    : "Hide password"
+                  : isAr
+                    ? "إظهار كلمة المرور"
+                    : "Show password"
+              }
+              aria-pressed={showPassword}
               className={`absolute ${isAr ? "left-3" : "right-3"} top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition-colors cursor-pointer`}
             >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
             </button>
           </div>
           {errors.password && (
-            <p className="text-xs text-rose-400 font-medium pl-1 animate-in fade-in">{errors.password.message}</p>
+            <p
+              id="password-error"
+              role="alert"
+              className="text-xs text-rose-400 font-medium pl-1 animate-in fade-in"
+            >
+              {errors.password.message}
+            </p>
           )}
 
           {/* Password Strength Indicator */}
@@ -177,10 +217,10 @@ export function RegisterForm() {
                         ? strength <= 1
                           ? "bg-rose-500"
                           : strength <= 2
-                          ? "bg-amber-400"
-                          : strength <= 3
-                          ? "bg-blue-400"
-                          : "bg-emerald-400"
+                            ? "bg-amber-400"
+                            : strength <= 3
+                              ? "bg-blue-400"
+                              : "bg-emerald-400"
                         : "bg-slate-800"
                     }`}
                   />
@@ -188,12 +228,20 @@ export function RegisterForm() {
               </div>
               <p className="text-[11px] font-medium text-slate-400">
                 {strength <= 1
-                  ? (isAr ? "ضعيفة — أضف أرقاماً ورموزاً" : "Weak — add symbols and numbers")
+                  ? isAr
+                    ? "ضعيفة — أضف أرقاماً ورموزاً"
+                    : "Weak — add symbols and numbers"
                   : strength <= 2
-                  ? (isAr ? "متوسطة" : "Fair")
-                  : strength <= 3
-                  ? (isAr ? "جيدة" : "Good")
-                  : (isAr ? "قوية جداً" : "Strong password")}
+                    ? isAr
+                      ? "متوسطة"
+                      : "Fair"
+                    : strength <= 3
+                      ? isAr
+                        ? "جيدة"
+                        : "Good"
+                      : isAr
+                        ? "قوية جداً"
+                        : "Strong password"}
               </p>
             </div>
           )}
@@ -211,13 +259,27 @@ export function RegisterForm() {
             <span className="text-xs text-slate-400 leading-normal">
               {isAr ? (
                 <>
-                  أوافق على <span className="text-purple-400 hover:underline">شروط الخدمة</span> و{" "}
-                  <span className="text-purple-400 hover:underline">سياسة الخصوصية</span>.
+                  أوافق على{" "}
+                  <span className="text-purple-400 hover:underline">
+                    شروط الخدمة
+                  </span>{" "}
+                  و{" "}
+                  <span className="text-purple-400 hover:underline">
+                    سياسة الخصوصية
+                  </span>
+                  .
                 </>
               ) : (
                 <>
-                  I agree to the <span className="text-purple-400 hover:underline">Terms of Service</span> and{" "}
-                  <span className="text-purple-400 hover:underline">Privacy Policy</span>.
+                  I agree to the{" "}
+                  <span className="text-purple-400 hover:underline">
+                    Terms of Service
+                  </span>{" "}
+                  and{" "}
+                  <span className="text-purple-400 hover:underline">
+                    Privacy Policy
+                  </span>
+                  .
                 </>
               )}
             </span>
@@ -233,7 +295,9 @@ export function RegisterForm() {
           {loading ? (
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>{isAr ? "جاري إنشاء الحساب..." : "Creating Account..."}</span>
+              <span>
+                {isAr ? "جاري إنشاء الحساب..." : "Creating Account..."}
+              </span>
             </>
           ) : (
             <>
