@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useUniversitySearch } from "@/hooks/useUniversitySearch";
@@ -34,6 +34,10 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
   const { index: universitiesDatabase } = useUniversitySearch(initialUniversities);
   const { bookmarks = [] } = useBookmarks();
   const [selectedUniModal, setSelectedUniModal] = useState<UniversityData | null>(null);
+
+  const handleViewDetails = useCallback((u: UniversityData) => {
+    setSelectedUniModal(u);
+  }, []);
 
   // Search state
   const [heroSearchQuery, setHeroSearchQuery] = useState("");
@@ -764,7 +768,7 @@ export function MarketingHomeClient({ initialUniversities = [] }: MarketingHomeC
                 <UniversityCard
                   key={uni.id}
                   university={uni}
-                  onViewDetails={(u) => setSelectedUniModal(u)}
+                  onViewDetails={handleViewDetails}
                 />
               ))
             ) : (
