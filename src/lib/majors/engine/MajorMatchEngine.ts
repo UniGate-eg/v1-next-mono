@@ -19,6 +19,11 @@ import type { MajorDefinition } from "@/lib/majors/MajorDefinitions";
  */
 export class MajorMatchEngine implements IMajorMatchEngine {
   private readonly maxPossibleScore: number;
+  private corpusCache = new WeakMap<SlimSearchToken, Map<string, string>>();
+  private prestigeCache = new WeakMap<SlimSearchToken, number>();
+
+  // Use a WeakMap keyed by MajorDefinition object to cache the lowercased keywords.
+  private majorLowerKwCache = new WeakMap<MajorDefinition, string[]>();
 
   constructor(private readonly sources: IMatchSource[]) {
     if (sources.length === 0) {
@@ -31,15 +36,29 @@ export class MajorMatchEngine implements IMajorMatchEngine {
     let rawScore = 0;
     const matchedSources: string[] = [];
 
-    for (const source of this.sources) {
-      const tokens = source.extractTokens(university);
-      if (tokens.length === 0) continue;
+    let uniCache = this.corpusCache.get(university);
+    if (!uniCache) {
+      uniCache = new Map();
+      this.corpusCache.set(university, uniCache);
+    }
 
-      // Join once; check all keywords against the single corpus string
-      const corpus = tokens.join(" ");
-      const matched = major.keywords.some((kw) =>
-        corpus.includes(kw.toLowerCase()),
-      );
+    let lowerKw = this.majorLowerKwCache.get(major);
+    if (!lowerKw) {
+      lowerKw = major.keywords.map((kw) => kw.toLowerCase());
+      this.majorLowerKwCache.set(major, lowerKw);
+    }
+
+    for (const source of this.sources) {
+      let corpus = uniCache.get(source.sourceName);
+      if (corpus === undefined) {
+        const tokens = source.extractTokens(university);
+        corpus = tokens.length > 0 ? tokens.join(" ") : "";
+        uniCache.set(source.sourceName, corpus);
+      }
+
+      if (corpus === "") continue;
+
+      const matched = lowerKw.some((kw) => corpus!.includes(kw));
 
       if (matched) {
         rawScore += source.weight;
@@ -55,12 +74,17 @@ export class MajorMatchEngine implements IMajorMatchEngine {
   }
 
   private calculatePrestigeScore(u: SlimSearchToken): number {
+    let cached = this.prestigeCache.get(u);
+    if (cached !== undefined) return cached;
+
     let prestige = 0;
     if (u.qsRanking && u.qsRanking !== "N/A") prestige += 3;
     if (u.theRanking && u.theRanking !== "N/A") prestige += 2;
     if (u.featured) prestige += 2;
     if (Array.isArray(u.structured_faculties) && u.structured_faculties.length > 0) prestige += 1;
     if (Array.isArray(u.degreePrograms) && u.degreePrograms.length > 0) prestige += 1;
+
+    this.prestigeCache.set(u, prestige);
     return prestige;
   }
 
