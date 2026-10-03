@@ -19,24 +19,39 @@ import type { MajorDefinition } from "@/lib/majors/MajorDefinitions";
  */
 export class MajorMatchEngine implements IMajorMatchEngine {
   private readonly maxPossibleScore: number;
+  private readonly corpusCache: WeakMap<SlimSearchToken, Map<string, string>>;
 
   constructor(private readonly sources: IMatchSource[]) {
     if (sources.length === 0) {
       throw new Error("MajorMatchEngine requires at least one IMatchSource.");
     }
     this.maxPossibleScore = sources.reduce((sum, s) => sum + s.weight, 0);
+    this.corpusCache = new WeakMap();
   }
 
   score(university: SlimSearchToken, major: MajorDefinition): ScoredUniversity {
     let rawScore = 0;
     const matchedSources: string[] = [];
 
-    for (const source of this.sources) {
-      const tokens = source.extractTokens(university);
-      if (tokens.length === 0) continue;
+    // Use WeakMap cache to memoize expensive string concatenations across multiple score() calls
+    let uniCache = this.corpusCache.get(university);
+    if (!uniCache) {
+      uniCache = new Map<string, string>();
+      this.corpusCache.set(university, uniCache);
+    }
 
-      // Join once; check all keywords against the single corpus string
-      const corpus = tokens.join(" ");
+    for (const source of this.sources) {
+      let corpus = uniCache.get(source.sourceName);
+
+      // If we haven't extracted and joined tokens for this university+source yet, do it now and cache it
+      if (corpus === undefined) {
+        const tokens = source.extractTokens(university);
+        corpus = tokens.join(" ");
+        uniCache.set(source.sourceName, corpus);
+      }
+
+      if (corpus.length === 0) continue;
+
       const matched = major.keywords.some((kw) =>
         corpus.includes(kw.toLowerCase()),
       );
