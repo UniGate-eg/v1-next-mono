@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
+import { Search, X, Loader2 } from "lucide-react";
 
 interface UniversitySearchProps {
   initialSearch?: string;
@@ -60,6 +60,7 @@ export function UniversitySearch({
           <button
             type="button"
             onClick={handleClear}
+            aria-label="Clear search"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
           >
             <X className="h-4 w-4" />
@@ -67,7 +68,14 @@ export function UniversitySearch({
         )}
       </div>
       <Button type="submit" disabled={isPending} className="h-11 px-5">
-        {isPending ? "Searching..." : "Search"}
+        {isPending ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Searching...
+          </>
+        ) : (
+          "Search"
+        )}
       </Button>
     </form>
   );
