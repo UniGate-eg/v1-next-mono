@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState, useMemo, useRef, useEffect } from "react";
+import React, { Suspense, useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -332,6 +332,15 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     return filtered;
   }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
 
+  const handleViewDetails = useCallback((uni: any) => {
+    posthog.capture("university_card_viewed", {
+      university_id: String(uni.id),
+      university_type: uni.type,
+      university_city: uni.city || uni.governorate,
+    });
+    setSelectedUniModal(uni);
+  }, []);
+
   const {
     visibleItems: visibleUnis,
     hasMore,
@@ -339,6 +348,20 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     newlyRevealedCount,
     sentinelRef,
   } = useViewportPagination(filteredUnis, 24);
+
+  const cardStyles = useMemo(() => {
+    const styles: Record<string, React.CSSProperties> = {};
+    const firstNewIndex = visibleUnis.length - newlyRevealedCount;
+
+    visibleUnis.forEach((uni: any, idx: number) => {
+      const isNewlyRevealed = idx >= firstNewIndex;
+      if (isNewlyRevealed) {
+        const staggerIndex = idx - firstNewIndex;
+        styles[uni.id] = { animationDelay: `${Math.min(staggerIndex, 12) * 40}ms` };
+      }
+    });
+    return styles;
+  }, [visibleUnis, newlyRevealedCount]);
 
   const getPriceRangeText = () => {
     if (priceMin === 0 && priceMax >= 400000) return t("Any") || "Any";
@@ -673,23 +696,14 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
           <>
             <div className="uni-grid uni-grid-full" id="unisGrid">
               {visibleUnis.map((uni: any, idx: number) => {
-                const firstNewIndex = visibleUnis.length - newlyRevealedCount;
-                const isNewlyRevealed = idx >= firstNewIndex;
-                const staggerIndex = idx - firstNewIndex;
+                const isNewlyRevealed = idx >= (visibleUnis.length - newlyRevealedCount);
                 return (
                   <UniversityCard
                     key={uni.id}
                     university={uni}
                     className={isNewlyRevealed ? "uni-card-page-enter" : ""}
-                    style={isNewlyRevealed ? { animationDelay: `${Math.min(staggerIndex, 12) * 40}ms` } : undefined}
-                    onViewDetails={() => {
-                      posthog.capture("university_card_viewed", {
-                        university_id: String(uni.id),
-                        university_type: uni.type,
-                        university_city: uni.city || uni.governorate,
-                      });
-                      setSelectedUniModal(uni);
-                    }}
+                    style={cardStyles[uni.id]}
+                    onViewDetails={handleViewDetails}
                   />
                 );
               })}
