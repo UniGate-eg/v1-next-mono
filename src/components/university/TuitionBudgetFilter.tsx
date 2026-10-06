@@ -133,6 +133,7 @@ export function TuitionBudgetFilter({
               onClick={onReset}
               className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 rounded-lg hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
               title={isArabic ? "إعادة ضبط الميزانية" : "Reset budget filter"}
+              aria-label={isArabic ? "إعادة ضبط الميزانية" : "Reset budget filter"}
             >
               <RotateCcw className="w-3 h-3" />
               <span className="text-[11px] hidden sm:inline">{isArabic ? "إعادة ضبط" : "Reset"}</span>
