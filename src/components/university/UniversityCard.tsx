@@ -17,7 +17,7 @@ interface UniversityCardProps {
   style?: React.CSSProperties;
 }
 
-export function UniversityCard({
+export const UniversityCard = React.memo(function UniversityCard({
   university,
   onViewDetails,
   className = "",
@@ -249,4 +249,4 @@ export function UniversityCard({
       </div>
     </div>
   );
-}
+});
