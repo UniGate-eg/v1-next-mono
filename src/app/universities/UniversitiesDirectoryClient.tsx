@@ -157,14 +157,23 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     []
   );
 
-  const matchedUniIdsByMajorId = useMemo(() => {
-    const map = new Map<string, Set<string>>();
-    for (const major of MAJOR_DEFINITIONS) {
-      const matches = majorEngine.getMatches(universitiesDatabase as SlimSearchToken[], major);
-      map.set(major.id, new Set(matches.map((m) => m.university.id)));
+  // ⚡ Bolt: Lazily compute major match sets ONLY for actively selected majors.
+  // Previously, this pre-computed O(M*N) matches for all 30+ majors on every load,
+  // which was a massive waste of cycles if the user never filtered by major.
+  // By isolating it here, it only runs when `activeFilters.major` changes.
+  const activeMajorIdSets = useMemo(() => {
+    const sets = new Map<string, Set<string>>();
+    if (activeFilters.major.length > 0) {
+      for (const majorId of activeFilters.major) {
+        const majorDef = MAJOR_DEFINITIONS.find((m) => m.id === majorId);
+        if (majorDef) {
+          const matches = majorEngine.getMatches(universitiesDatabase as SlimSearchToken[], majorDef);
+          sets.set(majorId, new Set(matches.map((m) => m.university.id)));
+        }
+      }
     }
-    return map;
-  }, [universitiesDatabase, majorEngine]);
+    return sets;
+  }, [activeFilters.major, universitiesDatabase, majorEngine]);
 
   const allCities = useMemo(() => {
     const citiesSet = new Set<string>();
@@ -250,7 +259,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
 
     if (activeFilters.major.length > 0) {
       filtered = filtered.filter((u: any) =>
-        activeFilters.major.some((majorId) => matchedUniIdsByMajorId.get(majorId)?.has(u.id))
+        activeFilters.major.some((majorId) => activeMajorIdSets.get(majorId)?.has(u.id))
       );
     }
 
@@ -330,7 +339,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     return filtered;
-  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
+  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, activeMajorIdSets]);
 
   const {
     visibleItems: visibleUnis,

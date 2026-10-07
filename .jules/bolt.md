@@ -1,0 +1,3 @@
+## 2024-03-20 - [Performance] Lazy compute active major match sets
+**Learning:** Pre-computing O(M*N) elements on initial load when the result is only needed for filters caused unnecessary bottleneck, particularly where M is the number of definitions (30+) and N is the number of universities. The `useMemo` also ran on every interaction on other filters if it was nested incorrectly.
+**Action:** Extract the complex `useMemo` operation out and compute matches *only* when the array of active items (`activeFilters.major`) is non-empty. Keep the deps precise (`activeFilters.major`, `universitiesDatabase`).
