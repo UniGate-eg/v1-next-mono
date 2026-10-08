@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { DegreeProgramDTO, FacultyDTO } from "@/types/university.types";
 import {
   createProgramAction,
@@ -162,16 +162,19 @@ export function ProgramsTab({
     }
   };
 
-  const filteredPrograms = degreePrograms.filter((p) => {
-    const matchesSearch =
-      p.nameEn.toLowerCase().includes(search.toLowerCase()) ||
-      p.nameAr.includes(search);
+  const filteredPrograms = useMemo(() => {
+    const searchLower = search.toLowerCase();
+    return degreePrograms.filter((p) => {
+      const matchesSearch =
+        p.nameEn.toLowerCase().includes(searchLower) ||
+        p.nameAr.includes(search);
 
-    const matchesFaculty =
-      selectedFacultyFilter === "ALL" || p.facultyId === selectedFacultyFilter;
+      const matchesFaculty =
+        selectedFacultyFilter === "ALL" || p.facultyId === selectedFacultyFilter;
 
-    return matchesSearch && matchesFaculty;
-  });
+      return matchesSearch && matchesFaculty;
+    });
+  }, [degreePrograms, search, selectedFacultyFilter]);
 
   return (
     <div className="space-y-6">

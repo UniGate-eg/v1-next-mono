@@ -41,8 +41,9 @@ export function UserTable({ initialUsers, roles, universities }: UserTableProps)
   }, [initialUsers]);
 
   const filteredUsers = useMemo(() => {
+    const q = search.toLowerCase();
+
     return initialUsers.filter((u) => {
-      const q = search.toLowerCase();
       const matchesSearch =
         !q ||
         u.name.toLowerCase().includes(q) ||

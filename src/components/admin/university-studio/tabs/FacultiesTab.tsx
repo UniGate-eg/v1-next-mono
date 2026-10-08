@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { FacultyDTO } from "@/types/university.types";
 import {
   createFacultyAction,
@@ -144,12 +144,15 @@ export function FacultiesTab({ universityId, faculties }: FacultiesTabProps) {
     }
   };
 
-  const filteredFaculties = faculties.filter(
-    (f) =>
-      f.nameEn.toLowerCase().includes(search.toLowerCase()) ||
-      f.nameAr.includes(search) ||
-      (f.deanName && f.deanName.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filteredFaculties = useMemo(() => {
+    const searchLower = search.toLowerCase();
+    return faculties.filter(
+      (f) =>
+        f.nameEn.toLowerCase().includes(searchLower) ||
+        f.nameAr.includes(search) ||
+        (f.deanName && f.deanName.toLowerCase().includes(searchLower))
+    );
+  }, [faculties, search]);
 
   return (
     <div className="space-y-6">
