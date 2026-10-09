@@ -1,0 +1,4 @@
+## 2025-02-19 - Fix Open Redirect Vulnerability in getSafeRedirectUrl
+**Vulnerability:** A bypass in the custom URL filtering logic for redirect parameters (like `?redirect=///example.com`) allowed open redirects. This was possible because the `URL` constructor parses `///example.com` into the domain `example.com` despite being given a dummy origin, successfully bypassing the existing check for strings starting with `//` or `/\\`.
+**Learning:** Checking string prefixes (like `startsWith("//")`) is insufficient to secure open redirect parameters because browsers and the URL specification parse variations with multiple slashes, backslashes, and tabs in unexpected ways.
+**Prevention:** Rely on parsing the URL against a dummy origin (e.g., `http://localhost`) and explicitly assert that the `origin` property matches the expected base, rejecting payloads where the domain was reassigned.
