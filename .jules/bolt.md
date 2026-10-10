@@ -1,0 +1,3 @@
+## 2024-10-10 - Optimizing Search Filter Performance
+**Learning:** React re-renders `filteredUnis` very frequently during search (on every key press before debounce, or when filter tags change). Running `.toLowerCase()` multiple times per university inside the filter loops creates significant string allocation overhead.
+**Action:** Always pre-calculate derived search fields (like lowercase aggregated strings) using `useMemo` on the source data (e.g., `universitiesDatabase`) so the filtering logic can perform fast string `.includes()` checks without redundant object allocation. Memoize props and callbacks passed to mapped list items (e.g. `UniversityCard`) so they do not unnecessarily re-render on parent state updates.

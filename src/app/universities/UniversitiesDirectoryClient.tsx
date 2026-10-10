@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState, useMemo, useRef, useEffect } from "react";
+import React, { Suspense, useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -229,8 +229,24 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     window.history.replaceState(null, "", "/universities");
   };
 
+  const processedDatabase = useMemo(() => {
+    return universitiesDatabase.map((u: any) => ({
+      ...u,
+      _searchableText: (
+        (u.nameEn || "") + " " +
+        (u.nameAr || "") + " " +
+        (u.city || "") + " " +
+        (u.governorate || "") + " " +
+        (u.educationModel || "") + " " +
+        (u.shortName || "")
+      ).toLowerCase(),
+    }));
+  }, [universitiesDatabase]);
+
+  const lowercaseCityFilters = useMemo(() => activeFilters.city.map(c => c.toLowerCase()), [activeFilters.city]);
+
   const filteredUnis = useMemo(() => {
-    let filtered = [...universitiesDatabase];
+    let filtered = [...processedDatabase];
     const search = searchQuery.trim().toLowerCase();
 
     if (activeFilters.model.length > 0) {
@@ -241,10 +257,10 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
       filtered = filtered.filter((u: any) => activeFilters.type.includes(u.type as UniversityType));
     }
 
-    if (activeFilters.city.length > 0) {
+    if (lowercaseCityFilters.length > 0) {
       filtered = filtered.filter((u: any) => {
         const cityStr = `${u.city || ""} ${u.governorate || ""}`.toLowerCase();
-        return activeFilters.city.some((c) => cityStr.includes(c.toLowerCase()));
+        return lowercaseCityFilters.some((c) => cityStr.includes(c));
       });
     }
 
@@ -273,23 +289,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     if (search) {
-      filtered = filtered.filter((u: any) => {
-        const nameEn = (u.nameEn || "").toLowerCase();
-        const nameAr = (u.nameAr || "").toLowerCase();
-        const city = (u.city || "").toLowerCase();
-        const gov = (u.governorate || "").toLowerCase();
-        const model = (u.educationModel || "").toLowerCase();
-        const short = (u.shortName || "").toLowerCase();
-
-        return (
-          nameEn.includes(search) ||
-          nameAr.includes(search) ||
-          city.includes(search) ||
-          gov.includes(search) ||
-          model.includes(search) ||
-          short.includes(search)
-        );
-      });
+      filtered = filtered.filter((u: any) => u._searchableText.includes(search));
     }
 
     switch (currentSort) {
@@ -330,7 +330,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     return filtered;
-  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
+  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, processedDatabase, lowercaseCityFilters, matchedUniIdsByMajorId]);
 
   const {
     visibleItems: visibleUnis,
@@ -346,6 +346,25 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     if (priceMax >= 400000) return `${(priceMin / 1000).toFixed(0)}K+`;
     return `${(priceMin / 1000).toFixed(0)}K – ${(priceMax / 1000).toFixed(0)}K`;
   };
+
+
+
+  const staggerStyles = useMemo(() => {
+    const styles = [];
+    for (let i = 0; i <= 12; i++) {
+      styles.push({ animationDelay: `${i * 40}ms` });
+    }
+    return styles;
+  }, []);
+
+  const handleViewDetails = useCallback((uni: any) => {
+    posthog.capture("university_card_viewed", {
+      university_id: String(uni.id),
+      university_type: uni.type,
+      university_city: uni.city || uni.governorate,
+    });
+    setSelectedUniModal(uni);
+  }, []);
 
   const activeFilterTags = useMemo(() => {
     const tags: Array<{ category: string; value: string; emoji: React.ReactNode; displayValue: string }> = [];
@@ -681,15 +700,8 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
                     key={uni.id}
                     university={uni}
                     className={isNewlyRevealed ? "uni-card-page-enter" : ""}
-                    style={isNewlyRevealed ? { animationDelay: `${Math.min(staggerIndex, 12) * 40}ms` } : undefined}
-                    onViewDetails={() => {
-                      posthog.capture("university_card_viewed", {
-                        university_id: String(uni.id),
-                        university_type: uni.type,
-                        university_city: uni.city || uni.governorate,
-                      });
-                      setSelectedUniModal(uni);
-                    }}
+                    style={isNewlyRevealed ? staggerStyles[Math.min(staggerIndex, 12)] : undefined}
+                    onViewDetails={handleViewDetails}
                   />
                 );
               })}
