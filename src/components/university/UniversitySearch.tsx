@@ -54,12 +54,15 @@ export function UniversitySearch({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={placeholder}
+          aria-label="Search university"
           className="h-11 pl-10 pr-10 text-sm bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xs"
         />
         {search && (
           <button
             type="button"
             onClick={handleClear}
+            aria-label="Clear search"
+            title="Clear search"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
           >
             <X className="h-4 w-4" />
