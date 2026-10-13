@@ -1,0 +1,3 @@
+## 2025-02-21 - Granular Zustand selectors and the Rules of Hooks
+**Learning:** When refactoring a single destructuring Zustand hook call into multiple granular selector calls to optimize re-renders (e.g., in a list item component like `UniversityCard`), it's very easy to accidentally move the hook calls below an early return if the original code had variables interleaved with the hooks.
+**Action:** Always strictly verify that all newly created `useStore` hooks remain at the absolute top of the functional component, prior to any conditional logic or early returns (`if (!data) return null;`), to strictly adhere to React's Rules of Hooks.
