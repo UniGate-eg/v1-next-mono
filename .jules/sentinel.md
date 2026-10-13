@@ -1,0 +1,4 @@
+## 2024-10-13 - Open Redirect Fix in getSafeRedirectUrl
+**Vulnerability:** The `getSafeRedirectUrl` function attempted to prevent Open Redirects by checking string prefixes like `!trimmed.startsWith("/") || trimmed.startsWith("//")`. However, this was flawed as the `URL` constructor correctly parses malformed protocol-relative paths like `/\t/evil.com` or `/\n/evil.com` as targeting external origins (e.g., `http://evil.com`), bypassing the simple prefix check and leading to an Open Redirect vulnerability.
+**Learning:** String-prefix matching (e.g., `startsWith('//')`) is insufficient for validating relative URLs because URL constructors handle malformed inputs with whitespace and control characters differently.
+**Prevention:** Always validate the actual parsed properties (like `origin`) of a URL object against expected values, rather than relying on raw string manipulation of the input path.

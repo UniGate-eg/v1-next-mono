@@ -31,6 +31,15 @@ export function getSafeRedirectUrl(target: string | null | undefined, fallback =
   try {
     // Verify that parsing as a relative URL inside a dummy origin maintains the exact pathname
     const parsed = new URL(trimmed, "http://localhost");
+
+    if (parsed.origin !== "http://localhost") {
+      return fallback;
+    }
+
+    if (!parsed.pathname.startsWith("/")) {
+      return fallback;
+    }
+
     return parsed.pathname + parsed.search + parsed.hash;
   } catch {
     return fallback;

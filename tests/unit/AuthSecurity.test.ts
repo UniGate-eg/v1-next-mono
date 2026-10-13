@@ -18,6 +18,12 @@ describe("Authentication Security: Open-Redirect Defense (getSafeRedirectUrl)", 
     expect(getSafeRedirectUrl("/\\evil.com")).toBe("/dashboard");
   });
 
+  it("blocks malformed protocol-relative URLs (e.g. /\\t/evil.com)", () => {
+    expect(getSafeRedirectUrl("/\t/evil.com")).toBe("/dashboard");
+    expect(getSafeRedirectUrl("/\n/evil.com")).toBe("/dashboard");
+    expect(getSafeRedirectUrl("///evil.com")).toBe("/dashboard");
+  });
+
   it("blocks external absolute URLs (e.g. https://phishing-site.com)", () => {
     expect(getSafeRedirectUrl("https://phishing-site.com")).toBe("/dashboard");
     expect(getSafeRedirectUrl("http://phishing-site.com")).toBe("/dashboard");
