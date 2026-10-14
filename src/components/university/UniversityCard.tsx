@@ -25,12 +25,19 @@ export function UniversityCard({
 }: UniversityCardProps) {
   const { language } = useLanguage();
   const { bookmarks, createBookmark, deleteBookmark } = useBookmarks();
-  const { selectedUniversities, toggleUniversity } = useCompareStore();
+
+  // ⚡ Bolt Optimization: Calculate uniIdStr first to use it in granular selectors
+  const uniIdStr = university ? String(university.id || (university as any).slug || "") : "";
+
+  // ⚡ Bolt Optimization: Use granular Zustand selectors instead of destructuring the whole store.
+  // Destructuring `const { ... } = useCompareStore()` in a list component makes every card subscribe
+  // to the entire store, causing massive O(N) re-renders when *any* item is added/removed.
+  const isCompared = useCompareStore((state) =>
+    state.selectedUniversities.some((u) => String(u.id) === uniIdStr)
+  );
+  const toggleUniversity = useCompareStore((state) => state.toggleUniversity);
 
   if (!university) return null;
-
-  const uniIdStr = String(university.id || (university as any).slug || "");
-  const isCompared = selectedUniversities.some((u) => String(u.id) === uniIdStr);
 
   const existingBookmark = bookmarks.find(
     (b) => String(b.universityId) === uniIdStr
