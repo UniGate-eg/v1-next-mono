@@ -1,0 +1,4 @@
+## 2024-10-24 - [Bypass of Open Redirect Protection]
+**Vulnerability:** The relative URL validation string-prefix logic in `getSafeRedirectUrl` (`startsWith('/')`, `!startsWith('//')`, etc.) was insufficient. It allowed open redirect bypasses because inputs like `/\t/example.com` or `/\n/example.com` were accepted by string checks, but interpreted as absolute URLs (origin changing) by the WHATWG `URL` constructor.
+**Learning:** Checking string prefixes for relative URLs is unreliable because browsers and the URL constructor parse tabs, newlines, and slashes generously, converting them to protocol-relative or absolute external URLs.
+**Prevention:** Always validate the parsed URL's `origin` against the expected base origin after passing the target to the `URL` constructor, rather than relying strictly on string prefix checks.
