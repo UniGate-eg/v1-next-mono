@@ -61,6 +61,7 @@ export function UniversitySearch({
             type="button"
             onClick={handleClear}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            aria-label="Clear search"
           >
             <X className="h-4 w-4" />
           </button>
