@@ -4,7 +4,10 @@ export const CreateSuggestionSchema = z.object({
   universityId: z.string().min(1),
   suggestedField: z.string().min(1),
   suggestedValue: z.string().min(1),
-  sourceUrl: z.string().url().optional(),
+  sourceUrl: z.string().url().refine(
+    (val) => val.startsWith("http://") || val.startsWith("https://"),
+    { message: "Only HTTP/HTTPS URLs are allowed for security reasons" }
+  ).optional(),
   notes: z.string().optional(),
   suggestedByEmail: z.string().optional(),
 });

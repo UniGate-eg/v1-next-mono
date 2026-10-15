@@ -1,0 +1,4 @@
+## 2026-10-15 - XSS via Zod URL Validation
+**Vulnerability:** The `z.string().url()` schema validation in Zod permits arbitrary URI protocols (such as `javascript:`, `file:`, `data:`). When these validated URLs are directly interpolated into React anchor tags (e.g., `<a href={url}>`), it exposes the application to Cross-Site Scripting (XSS) if an attacker provides a `javascript:` payload.
+**Learning:** Zod's default URL validation is insufficient for secure web links. It strictly validates the structural format of a URI, not its scheme safety. We must explicitly filter allowed protocols before rendering user-provided URLs.
+**Prevention:** Always chain `.refine(val => val.startsWith('http://') || val.startsWith('https://'))` to `z.string().url()` schemas where the output is expected to be a web link.
