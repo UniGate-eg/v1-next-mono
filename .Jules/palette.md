@@ -1,0 +1,3 @@
+## 2024-05-19 - Missing ARIA Labels on Icon Buttons in Modal
+**Learning:** Found several icon-only buttons in the UniversityModal that lacked `aria-label` attributes, making them inaccessible to screen readers. For example, the compare button, bookmark button, tab buttons, copy buttons, etc., didn't have `aria-label`s. Also, some lack disabled state management and proper `title` attributes that might be redundant if `aria-label` is not provided.
+**Action:** When adding icon-only buttons, always include `aria-label` or visually hidden text to convey the button's action to assistive technologies.
