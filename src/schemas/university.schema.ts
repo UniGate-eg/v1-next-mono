@@ -2,12 +2,23 @@ import { z } from "zod";
 import { UNIVERSITY_TYPES } from "@/lib/university-type";
 
 export const CreateUniversitySchema = z.object({
-  slug: z.string().min(2).max(50).regex(/^[a-z0-9-]+$/),
+  slug: z
+    .string()
+    .min(2)
+    .max(50)
+    .regex(/^[a-z0-9-]+$/),
   shortName: z.string().min(1).max(20).optional(),
   emoji: z.string().min(1).max(10).default("🏛️"),
   nameEn: z.string().min(3).max(150),
   nameAr: z.string().min(3).max(150),
-  educationModel: z.enum(["AMERICAN", "GERMAN", "BRITISH", "EGYPTIAN", "FRENCH", "CANADIAN"]),
+  educationModel: z.enum([
+    "AMERICAN",
+    "GERMAN",
+    "BRITISH",
+    "EGYPTIAN",
+    "FRENCH",
+    "CANADIAN",
+  ]),
   type: z.enum(UNIVERSITY_TYPES),
   typeSourceRef: z.string().min(1).optional().nullable(),
   governorate: z.string().min(2).max(50),
@@ -16,7 +27,14 @@ export const CreateUniversitySchema = z.object({
   addressAr: z.string().optional(),
   overviewEn: z.string().optional(),
   overviewAr: z.string().optional(),
-  website: z.string().url().optional().or(z.literal("")),
+  website: z
+    .string()
+    .url()
+    .refine((url) => /^https?:\/\//i.test(url), {
+      message: "URL must start with http:// or https://",
+    })
+    .optional()
+    .or(z.literal("")),
   logoUrl: z.string().optional(),
   established: z.number().int().min(900).max(2100).optional(),
   qsRanking: z.string().optional(),
@@ -26,7 +44,9 @@ export const CreateUniversitySchema = z.object({
   socialLinks: z.record(z.string()).optional(),
   strengthsEn: z.array(z.string()).default([]),
   strengthsAr: z.array(z.string()).default([]),
-  publishStatus: z.enum(["PUBLISHED", "DRAFT", "ARCHIVED"]).default("PUBLISHED"),
+  publishStatus: z
+    .enum(["PUBLISHED", "DRAFT", "ARCHIVED"])
+    .default("PUBLISHED"),
 });
 
 export const UpdateUniversitySchema = CreateUniversitySchema.partial().extend({
@@ -40,7 +60,9 @@ export type UpdateUniversityInput = z.infer<typeof UpdateUniversitySchema>;
 export const UniversityFiltersSchema = z.object({
   search: z.string().optional(),
   type: z.enum(UNIVERSITY_TYPES).optional(),
-  educationModel: z.enum(["AMERICAN", "GERMAN", "BRITISH", "EGYPTIAN", "FRENCH", "CANADIAN"]).optional(),
+  educationModel: z
+    .enum(["AMERICAN", "GERMAN", "BRITISH", "EGYPTIAN", "FRENCH", "CANADIAN"])
+    .optional(),
   city: z.string().optional(),
   hasMedicine: z.boolean().optional(),
   hasEngineering: z.boolean().optional(),
