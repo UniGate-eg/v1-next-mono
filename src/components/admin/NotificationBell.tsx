@@ -3,13 +3,17 @@
 import React, { useState } from "react";
 import { Bell, Check, ExternalLink, Sparkles, Inbox, X } from "lucide-react";
 import { useNotifications } from "../../hooks/useNotifications";
-import { markNotificationReadAction, markAllNotificationsReadAction } from "../../server/actions/admin/notification.admin.actions";
+import {
+  markNotificationReadAction,
+  markAllNotificationsReadAction,
+} from "../../server/actions/admin/notification.admin.actions";
 import Link from "next/link";
 import { format } from "date-fns";
 
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
-  const { notifications, unreadCount, markAsReadLocal, markAllAsReadLocal } = useNotifications();
+  const { notifications, unreadCount, markAsReadLocal, markAllAsReadLocal } =
+    useNotifications();
 
   const handleMarkOne = async (id: string) => {
     markAsReadLocal(id);
@@ -25,6 +29,8 @@ export function NotificationBell() {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Toggle notifications"
+        aria-expanded={isOpen}
         className="relative p-2.5 rounded-2xl bg-[#111422] border border-[#1D2336] hover:border-purple-500/40 text-slate-400 hover:text-white transition-colors cursor-pointer"
         title="Notifications"
       >
@@ -38,11 +44,16 @@ export function NotificationBell() {
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
           <div className="absolute right-0 mt-3 w-96 rounded-3xl bg-[#101320] border border-[#21283D] shadow-2xl z-50 overflow-hidden ring-1 ring-white/10 animate-in fade-in zoom-in-95 duration-150">
             <div className="p-4 border-b border-[#1C2236] flex items-center justify-between bg-[#0C0F1A]">
               <div className="flex items-center gap-2">
-                <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Alerts & Feed</h3>
+                <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">
+                  Alerts & Feed
+                </h3>
                 {unreadCount > 0 && (
                   <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold border border-purple-500/30">
                     {unreadCount} new
@@ -52,6 +63,7 @@ export function NotificationBell() {
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAll}
+                  aria-label="Mark all as read"
                   className="text-[11px] font-bold text-purple-400 hover:text-purple-300 transition-colors"
                 >
                   Mark all read
@@ -63,8 +75,12 @@ export function NotificationBell() {
               {notifications.length === 0 ? (
                 <div className="p-10 text-center text-slate-500 space-y-2">
                   <Inbox className="w-8 h-8 mx-auto text-slate-600" />
-                  <p className="text-xs font-semibold text-slate-400">All caught up</p>
-                  <p className="text-[10px] text-slate-500">No pending operational alerts.</p>
+                  <p className="text-xs font-semibold text-slate-400">
+                    All caught up
+                  </p>
+                  <p className="text-[10px] text-slate-500">
+                    No pending operational alerts.
+                  </p>
                 </div>
               ) : (
                 notifications.map((n) => (
@@ -86,9 +102,13 @@ export function NotificationBell() {
                           >
                             {n.type.replace(/_/g, " ")}
                           </span>
-                          <span className="text-xs font-bold text-white truncate">{n.title}</span>
+                          <span className="text-xs font-bold text-white truncate">
+                            {n.title}
+                          </span>
                         </div>
-                        <p className="text-xs text-slate-300 leading-relaxed">{n.message}</p>
+                        <p className="text-xs text-slate-300 leading-relaxed">
+                          {n.message}
+                        </p>
                         <span className="text-[10px] text-slate-500 block">
                           {format(new Date(n.createdAt), "MMM d, HH:mm")}
                         </span>
@@ -97,6 +117,7 @@ export function NotificationBell() {
                       {!n.isRead && (
                         <button
                           onClick={() => handleMarkOne(n.id)}
+                          aria-label="Mark as read"
                           className="p-1 text-slate-400 hover:text-purple-400 rounded-lg hover:bg-[#1E253A]"
                           title="Mark read"
                         >
