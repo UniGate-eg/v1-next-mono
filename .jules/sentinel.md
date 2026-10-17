@@ -1,0 +1,4 @@
+## 2026-10-17 - Prevent XSS in Zod URL Schemas
+**Vulnerability:** Zod's `z.string().url()` allows arbitrary protocols, including `javascript:`, which can lead to Stored XSS if the URL is later rendered into an `href` attribute without further sanitization.
+**Learning:** This repo relies heavily on Zod for payload validation before persisting into the database (e.g. `website` in university schemas). While Next.js often protects against React-based XSS, manual DOM insertions or raw attribute usages (like `<a href={website}>`) could bypass protections if an attacker injects `javascript:alert(1)`.
+**Prevention:** Always chain `z.string().url()` with `.refine(val => val.startsWith("http://") || val.startsWith("https://"))` for untrusted user inputs representing external websites. Be cautious applying this blindly to internal URLs (like `logoUrl`) that legitimately use relative paths.
