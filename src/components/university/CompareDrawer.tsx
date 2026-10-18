@@ -7,7 +7,8 @@ import { useCompareStore } from "@/stores/compareStore";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 export function CompareDrawer() {
-  const { selectedUniversities, clear } = useCompareStore();
+  const selectedUniversities = useCompareStore((state) => state.selectedUniversities);
+  const clear = useCompareStore((state) => state.clear);
   const { language } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
