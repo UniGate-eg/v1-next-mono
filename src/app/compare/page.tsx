@@ -15,7 +15,10 @@ import posthog from "posthog-js";
 function ComparePageContent() {
   const { language } = useLanguage();
   const { index: universitiesDatabase } = useUniversitySearch();
-  const { selectedIds, toggle, toggleUniversity, clear } = useCompareStore();
+  const selectedIds = useCompareStore((state) => state.selectedIds);
+  const toggle = useCompareStore((state) => state.toggle);
+  const toggleUniversity = useCompareStore((state) => state.toggleUniversity);
+  const clear = useCompareStore((state) => state.clear);
   const [selectorSearch, setSelectorSearch] = useState("");
   const searchParams = useSearchParams();
   const appliedParamRef = useRef<string | null>(null);
