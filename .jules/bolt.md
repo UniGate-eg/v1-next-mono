@@ -1,0 +1,3 @@
+## 2024-10-19 - Zustand Store Component Optimization
+**Learning:** Destructuring the entire state object from a Zustand store (e.g. `const { selectedUniversities, toggleUniversity } = useCompareStore()`) subscribes the component to every state change within that store. This causes unnecessary re-renders in components (like `UniversityCard` or `UniversityModal`) when unrelated state values change.
+**Action:** Use granular selectors in Zustand hooks (e.g. `const isCompared = useCompareStore(state => state.selectedUniversities.some(u => String(u.id) === uniIdStr))`) to ensure a component only re-renders when the specific value it depends on updates.

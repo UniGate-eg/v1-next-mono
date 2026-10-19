@@ -11,7 +11,9 @@ import Link from "next/link";
 import { formatGovernorate } from "@/lib/utils";
 
 export function CompareMatrix() {
-  const { selectedIds, remove, clear } = useCompareStore();
+  const selectedIds = useCompareStore((state) => state.selectedIds);
+  const remove = useCompareStore((state) => state.remove);
+  const clear = useCompareStore((state) => state.clear);
   const [universities, setUniversities] = useState<UniversityDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
