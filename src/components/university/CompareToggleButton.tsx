@@ -18,9 +18,9 @@ export function CompareToggleButton({
   variant = "outline",
   size = "sm",
 }: CompareToggleButtonProps) {
-  const selectedIds = useCompareStore((state) => state.selectedIds);
+  // ⚡ Bolt: Selecting primitive avoids whole-store subscription, improving list performance significantly
+  const isSelected = useCompareStore((state) => state.selectedIds.includes(universityId));
   const toggle = useCompareStore((state) => state.toggle);
-  const isSelected = selectedIds.includes(universityId);
 
   return (
     <Button
