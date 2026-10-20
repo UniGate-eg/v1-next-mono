@@ -108,7 +108,10 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
   const { language } = useLanguage();
   const isArabic = language === "ar";
 
-  const { selectedUniversities, toggleUniversity } = useCompareStore();
+  const uniIdStr = String(uni?.id || "");
+  // ⚡ Bolt: Granular selector extracts primitive boolean to prevent unnecessary Modal re-renders on compare store changes
+  const isCompared = useCompareStore((state) => state.selectedUniversities.some((u) => String(u.id) === uniIdStr));
+  const toggleUniversity = useCompareStore((state) => state.toggleUniversity);
   const { bookmarks, createBookmark, deleteBookmark } = useBookmarks();
 
   const [expandedFaculties, setExpandedFaculties] = useState<Record<number, boolean>>({ 0: true });
@@ -122,8 +125,6 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
   });
   const [copiedText, setCopiedText] = useState<string | null>(null);
 
-  const uniIdStr = String(uni?.id || "");
-  const isCompared = selectedUniversities.some((u) => String(u.id) === uniIdStr);
   const existingBookmark = bookmarks.find(
     (b) => String(b.universityId) === uniIdStr || String(b.university?.id) === uniIdStr
   );
