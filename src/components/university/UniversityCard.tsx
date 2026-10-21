@@ -25,63 +25,121 @@ export function UniversityCard({
 }: UniversityCardProps) {
   const { language } = useLanguage();
   const { bookmarks, createBookmark, deleteBookmark } = useBookmarks();
-  const { selectedUniversities, toggleUniversity } = useCompareStore();
+  // ⚡ Bolt Optimization: Granular selectors prevent O(N) re-renders when compare list changes
+  const toggleUniversity = useCompareStore((state) => state.toggleUniversity);
+  const uniIdStr = String(university?.id || (university as any)?.slug || "");
+  const isCompared = useCompareStore((state) =>
+    state.selectedUniversities.some((u) => String(u.id) === uniIdStr),
+  );
 
   if (!university) return null;
 
-  const uniIdStr = String(university.id || (university as any).slug || "");
-  const isCompared = selectedUniversities.some((u) => String(u.id) === uniIdStr);
-
   const existingBookmark = bookmarks.find(
-    (b) => String(b.universityId) === uniIdStr
+    (b) => String(b.universityId) === uniIdStr,
   );
   const isBookmarked = !!existingBookmark;
 
   const getLangField = (fieldName: string): string => {
     const uniAny = university as any;
     if (fieldName === "model" || fieldName === "educationModel") {
-      return getEducationModelLabel(uniAny.educationModel ?? uniAny.model, language) || "";
+      return (
+        getEducationModelLabel(
+          uniAny.educationModel ?? uniAny.model,
+          language,
+        ) || ""
+      );
     }
     if (language === "ar") {
       if (uniAny[fieldName + "_ar"]) return uniAny[fieldName + "_ar"];
       if (uniAny[fieldName + "Ar"]) return uniAny[fieldName + "Ar"];
       if (fieldName === "description" || fieldName === "overview") {
-        return uniAny.overviewAr || uniAny.overview_ar || uniAny.description_ar || uniAny.description || uniAny.overviewEn;
+        return (
+          uniAny.overviewAr ||
+          uniAny.overview_ar ||
+          uniAny.description_ar ||
+          uniAny.description ||
+          uniAny.overviewEn
+        );
       }
       if (fieldName === "location") {
         const raw = uniAny.city || uniAny.governorate || "مصر";
         return formatCity(raw, "ar");
       }
-      if (fieldName === "name") return uniAny.nameAr || uniAny.name_ar || uniAny.nameEn || uniAny.name;
+      if (fieldName === "name")
+        return uniAny.nameAr || uniAny.name_ar || uniAny.nameEn || uniAny.name;
     }
     if (uniAny[fieldName + "En"]) return uniAny[fieldName + "En"];
     if (fieldName === "description" || fieldName === "overview") {
-      return uniAny.overviewEn || uniAny.overview_en || uniAny.description || uniAny.overviewAr;
+      return (
+        uniAny.overviewEn ||
+        uniAny.overview_en ||
+        uniAny.description ||
+        uniAny.overviewAr
+      );
     }
-    if (fieldName === "location") return formatCity(uniAny.city || uniAny.governorate || "Egypt", "en");
-    if (fieldName === "name") return uniAny.nameEn || uniAny.name || uniAny.nameAr;
+    if (fieldName === "location")
+      return formatCity(uniAny.city || uniAny.governorate || "Egypt", "en");
+    if (fieldName === "name")
+      return uniAny.nameEn || uniAny.name || uniAny.nameAr;
     return uniAny[fieldName] || "";
   };
 
   const getLangArray = (fieldName: string): string[] => {
     const uniAny = university as any;
     if (language === "ar") {
-      if (Array.isArray(uniAny[fieldName + "_ar"]) && uniAny[fieldName + "_ar"].length > 0) return uniAny[fieldName + "_ar"];
-      if (Array.isArray(uniAny[fieldName + "Ar"]) && uniAny[fieldName + "Ar"].length > 0) return uniAny[fieldName + "Ar"];
-      if (fieldName === "strengths" && Array.isArray(uniAny.strengthsAr) && uniAny.strengthsAr.length > 0) return uniAny.strengthsAr;
-      if (fieldName === "faculties" && Array.isArray(uniAny.faculties_ar) && uniAny.faculties_ar.length > 0) return uniAny.faculties_ar;
+      if (
+        Array.isArray(uniAny[fieldName + "_ar"]) &&
+        uniAny[fieldName + "_ar"].length > 0
+      )
+        return uniAny[fieldName + "_ar"];
+      if (
+        Array.isArray(uniAny[fieldName + "Ar"]) &&
+        uniAny[fieldName + "Ar"].length > 0
+      )
+        return uniAny[fieldName + "Ar"];
+      if (
+        fieldName === "strengths" &&
+        Array.isArray(uniAny.strengthsAr) &&
+        uniAny.strengthsAr.length > 0
+      )
+        return uniAny.strengthsAr;
+      if (
+        fieldName === "faculties" &&
+        Array.isArray(uniAny.faculties_ar) &&
+        uniAny.faculties_ar.length > 0
+      )
+        return uniAny.faculties_ar;
     }
-    if (Array.isArray(uniAny[fieldName + "En"]) && uniAny[fieldName + "En"].length > 0) return uniAny[fieldName + "En"];
-    if (fieldName === "strengths" && Array.isArray(uniAny.strengthsEn) && uniAny.strengthsEn.length > 0) return uniAny.strengthsEn;
-    if (fieldName === "faculties" && Array.isArray(uniAny.faculties) && uniAny.faculties.length > 0) {
-      return uniAny.faculties.map((item: any) => typeof item === "string" ? item : item.nameEn || item.name || "").filter(Boolean);
+    if (
+      Array.isArray(uniAny[fieldName + "En"]) &&
+      uniAny[fieldName + "En"].length > 0
+    )
+      return uniAny[fieldName + "En"];
+    if (
+      fieldName === "strengths" &&
+      Array.isArray(uniAny.strengthsEn) &&
+      uniAny.strengthsEn.length > 0
+    )
+      return uniAny.strengthsEn;
+    if (
+      fieldName === "faculties" &&
+      Array.isArray(uniAny.faculties) &&
+      uniAny.faculties.length > 0
+    ) {
+      return uniAny.faculties
+        .map((item: any) =>
+          typeof item === "string" ? item : item.nameEn || item.name || "",
+        )
+        .filter(Boolean);
     }
     if (Array.isArray(uniAny[fieldName])) {
       return uniAny[fieldName]
         .map((item: any) =>
           typeof item === "string"
             ? item
-            : (language === "ar" && item.nameAr ? item.nameAr : item.nameEn) || item.name || ""
+            : (language === "ar" && item.nameAr ? item.nameAr : item.nameEn) ||
+              item.name ||
+              "",
         )
         .filter(Boolean);
     }
@@ -105,16 +163,23 @@ export function UniversityCard({
     toggleUniversity({
       id: uniIdStr,
       slug: (university as any).slug || String(university.id),
-      nameAr: (university as any).name_ar || (university as any).nameAr || university.name || "",
+      nameAr:
+        (university as any).name_ar ||
+        (university as any).nameAr ||
+        university.name ||
+        "",
       nameEn: (university as any).name || (university as any).nameEn || "",
       type: (university as any).type,
-      governorate: (university as any).city || (university as any).governorate || "Cairo",
-      majorsCount: university.majors?.length || university.faculties?.length || 0,
+      governorate:
+        (university as any).city || (university as any).governorate || "Cairo",
+      majorsCount:
+        university.majors?.length || university.faculties?.length || 0,
     });
   };
 
   const rawFacs =
-    university.structured_faculties && university.structured_faculties.length > 0
+    university.structured_faculties &&
+    university.structured_faculties.length > 0
       ? university.structured_faculties
       : getLangArray("faculties");
 
@@ -123,7 +188,11 @@ export function UniversityCard({
       if (!f) return "";
       if (typeof f === "string") return f.trim();
       if (typeof f === "object") {
-        return (language === "ar" && f.name_ar ? f.name_ar : f.name_en) || f.name || "";
+        return (
+          (language === "ar" && f.name_ar ? f.name_ar : f.name_en) ||
+          f.name ||
+          ""
+        );
       }
       return String(f);
     })
@@ -131,16 +200,21 @@ export function UniversityCard({
 
   const strengthsList = getLangArray("strengths");
 
-  const uniName = getLangField("name") || university.nameEn || university.name || "";
-  const educationModel = (university as any).educationModel || (university as any).model;
-  const locationName = getLangField("location") || (university as any).governorate || "Egypt";
+  const uniName =
+    getLangField("name") || university.nameEn || university.name || "";
+  const educationModel =
+    (university as any).educationModel || (university as any).model;
+  const locationName =
+    getLangField("location") || (university as any).governorate || "Egypt";
 
   return (
     <div
       className={`uni-card animate-in ${className}`}
       style={
         {
-          "--card-accent": university.accentGradient || "linear-gradient(135deg, #7C3AED, #EC4899)",
+          "--card-accent":
+            university.accentGradient ||
+            "linear-gradient(135deg, #7C3AED, #EC4899)",
           ...style,
         } as React.CSSProperties
       }
@@ -150,7 +224,11 @@ export function UniversityCard({
         <div className="uni-card-model">
           <EducationModelBadge model={educationModel} showIcon={true} />
           {!getEducationModelLabel(educationModel, language) && (
-            <UniversityTypeBadge type={university.type} variant="inline" showIcon={true} />
+            <UniversityTypeBadge
+              type={university.type}
+              variant="inline"
+              showIcon={true}
+            />
           )}
         </div>
         <div className="uni-card-emoji">{university.emoji || "🏛️"}</div>
@@ -162,11 +240,17 @@ export function UniversityCard({
         {university.type ? (
           <>
             {" · "}
-            <UniversityTypeBadge type={university.type} variant="inline" showIcon={true} />
+            <UniversityTypeBadge
+              type={university.type}
+              variant="inline"
+              showIcon={true}
+            />
           </>
         ) : null}
       </div>
-      <p className="uni-card-desc">{getLangField("description") || university.description}</p>
+      <p className="uni-card-desc">
+        {getLangField("description") || university.description}
+      </p>
 
       {strengthsList.length > 0 && (
         <>
@@ -185,7 +269,9 @@ export function UniversityCard({
 
       {facultiesList.length > 0 && (
         <div className="uni-card-faculties">
-          <strong>{language === "ar" ? "الكليات الأكاديمية:" : "Main Faculties:"}</strong>{" "}
+          <strong>
+            {language === "ar" ? "الكليات الأكاديمية:" : "Main Faculties:"}
+          </strong>{" "}
           {facultiesList
             .slice(0, 3)
             .map((f: string) => f.split(" ").slice(0, 3).join(" "))
@@ -203,13 +289,24 @@ export function UniversityCard({
           }}
         >
           {language === "ar" ? "عرض التفاصيل" : "View Details"}
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <UniversityTypeBadge type={university.type} variant="inline" className="uni-card-type" />
+          <UniversityTypeBadge
+            type={university.type}
+            variant="inline"
+            className="uni-card-type"
+          />
           <button
             className={`card-compare-btn ${isCompared ? "selected" : ""}`}
             onClick={handleCompareClick}
