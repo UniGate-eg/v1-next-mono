@@ -4,7 +4,7 @@ export const CreateSuggestionSchema = z.object({
   universityId: z.string().min(1),
   suggestedField: z.string().min(1),
   suggestedValue: z.string().min(1),
-  sourceUrl: z.string().url().optional(),
+  sourceUrl: z.string().url().refine((val) => val.toLowerCase().startsWith('http://') || val.toLowerCase().startsWith('https://'), { message: "URL must start with http:// or https://" }).optional(),
   notes: z.string().optional(),
   suggestedByEmail: z.string().optional(),
 });
