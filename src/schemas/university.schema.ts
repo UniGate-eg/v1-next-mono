@@ -16,7 +16,7 @@ export const CreateUniversitySchema = z.object({
   addressAr: z.string().optional(),
   overviewEn: z.string().optional(),
   overviewAr: z.string().optional(),
-  website: z.string().url().optional().or(z.literal("")),
+  website: z.string().url().optional().or(z.literal("")).refine((url) => !url || url.toLowerCase().startsWith('http://') || url.toLowerCase().startsWith('https://'), { message: 'Must be http or https' }),
   logoUrl: z.string().optional(),
   established: z.number().int().min(900).max(2100).optional(),
   qsRanking: z.string().optional(),
