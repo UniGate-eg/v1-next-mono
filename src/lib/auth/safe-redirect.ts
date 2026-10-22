@@ -12,26 +12,23 @@
 export function getSafeRedirectUrl(target: string | null | undefined, fallback = "/dashboard"): string {
   if (!target) return fallback;
 
-  const trimmed = target.trim();
-
-  // Guard against protocol-relative URLs and non-relative paths
-  if (!trimmed.startsWith("/") || trimmed.startsWith("//") || trimmed.startsWith("/\\")) {
-    return fallback;
-  }
-
-  // Guard against dangerous schemes encoded in path format
-  if (
-    trimmed.toLowerCase().includes("javascript:") ||
-    trimmed.toLowerCase().includes("data:") ||
-    trimmed.toLowerCase().includes("vbscript:")
-  ) {
-    return fallback;
-  }
-
   try {
-    // Verify that parsing as a relative URL inside a dummy origin maintains the exact pathname
-    const parsed = new URL(trimmed, "http://localhost");
-    return parsed.pathname + parsed.search + parsed.hash;
+    const base = "http://localhost";
+    const parsed = new URL(target, base);
+    if (parsed.origin !== base) {
+      return fallback;
+    }
+
+    // Additional guard against pseudo-protocols masquerading as paths
+    const combined = parsed.pathname + parsed.search + parsed.hash;
+    if (
+      combined.toLowerCase().includes("javascript:") ||
+      combined.toLowerCase().includes("data:") ||
+      combined.toLowerCase().includes("vbscript:")
+    ) {
+      return fallback;
+    }
+    return combined;
   } catch {
     return fallback;
   }

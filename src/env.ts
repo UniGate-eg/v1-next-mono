@@ -3,17 +3,17 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    DATABASE_URL: z.string().url(),
+    DATABASE_URL: z.string().url().refine((url) => url.toLowerCase().startsWith('postgres://') || url.toLowerCase().startsWith('postgresql://'), { message: 'Must be a valid postgres URL' }),
     ACCELERATE_URL: z.string().optional(),
     BETTER_AUTH_SECRET: z.string().min(16).default("unicompass_development_secret_key_32bytes_minimum!"),
-    BETTER_AUTH_URL: z.string().url().default("http://localhost:3000"),
+    BETTER_AUTH_URL: z.string().url().refine((url) => url.toLowerCase().startsWith('http://') || url.toLowerCase().startsWith('https://'), { message: 'Must be http or https' }).default("http://localhost:3000"),
     GOOGLE_CLIENT_ID: z.string().optional(),
     GOOGLE_CLIENT_SECRET: z.string().optional(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     INITIAL_SUPER_ADMIN_EMAIL: z.string().email().optional(),
   },
   client: {
-    NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
+    NEXT_PUBLIC_APP_URL: z.string().url().refine((url) => url.toLowerCase().startsWith('http://') || url.toLowerCase().startsWith('https://'), { message: 'Must be http or https' }).default("http://localhost:3000"),
   },
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
