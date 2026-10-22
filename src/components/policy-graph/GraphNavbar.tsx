@@ -1,8 +1,19 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { ViewMode } from './types';
-import { Network, GitFork, Plus, Minus, Filter, ArrowUpDown, Sparkles, Moon, Search, Menu } from 'lucide-react';
+import React from "react";
+import { ViewMode } from "./types";
+import {
+  Network,
+  GitFork,
+  Plus,
+  Minus,
+  Filter,
+  ArrowUpDown,
+  Sparkles,
+  Moon,
+  Search,
+  Menu,
+} from "lucide-react";
 
 interface GraphNavbarProps {
   viewMode: ViewMode;
@@ -26,8 +37,9 @@ export default function GraphNavbar({
       {/* Left: Menu + Brand Logo */}
       <div className="flex items-center gap-3 pointer-events-auto">
         <button
-          className="p-2 rounded-xl bg-slate-900/60 backdrop-blur-md border border-white/10 text-slate-300 hover:text-white hover:border-white/20 transition-all shadow-lg shadow-black/40"
+          className="p-2 rounded-xl bg-slate-900/60 backdrop-blur-md border border-white/10 text-slate-300 hover:text-white hover:border-white/20 transition-all shadow-lg shadow-black/40 focus-visible:ring-2 focus:outline-none focus-visible:ring-white/50"
           title="Menu"
+          aria-label="Menu"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -41,10 +53,16 @@ export default function GraphNavbar({
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5 leading-tight">
-              <span className="font-bold tracking-wide text-sm text-slate-100">Control</span>
-              <span className="text-xs font-semibold px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">AI</span>
+              <span className="font-bold tracking-wide text-sm text-slate-100">
+                Control
+              </span>
+              <span className="text-xs font-semibold px-1.5 py-0.2 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                AI
+              </span>
             </div>
-            <span className="text-[11px] text-slate-400 font-medium">Policy Platform</span>
+            <span className="text-[11px] text-slate-400 font-medium">
+              Policy Platform
+            </span>
           </div>
         </div>
       </div>
@@ -54,24 +72,26 @@ export default function GraphNavbar({
         {/* Network Graph vs Tree Toggle */}
         <div className="flex items-center bg-slate-950/60 rounded-xl p-0.5 border border-white/5">
           <button
-            onClick={() => onToggleViewMode('constellation')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              viewMode === 'constellation'
-                ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+            onClick={() => onToggleViewMode("constellation")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all focus-visible:ring-2 focus:outline-none focus-visible:ring-white/50 ${
+              viewMode === "constellation"
+                ? "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 text-emerald-300 border border-emerald-400/40 shadow-sm"
+                : "text-slate-400 hover:text-slate-200"
             }`}
             title="Constellation Network View"
+            aria-label="Constellation Network View"
           >
             <Network className="w-4 h-4" />
           </button>
           <button
-            onClick={() => onToggleViewMode('drilldown')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              viewMode === 'drilldown'
-                ? 'bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-400/40 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+            onClick={() => onToggleViewMode("drilldown")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all focus-visible:ring-2 focus:outline-none focus-visible:ring-white/50 ${
+              viewMode === "drilldown"
+                ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-300 border border-cyan-400/40 shadow-sm"
+                : "text-slate-400 hover:text-slate-200"
             }`}
             title="Hierarchical Tree View"
+            aria-label="Hierarchical Tree View"
           >
             <GitFork className="w-4 h-4" />
           </button>
@@ -83,15 +103,17 @@ export default function GraphNavbar({
         <div className="flex items-center gap-1">
           <button
             onClick={onZoomIn}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus:outline-none focus-visible:ring-white/50"
             title="Zoom In"
+            aria-label="Zoom In"
           >
             <Plus className="w-4 h-4" />
           </button>
           <button
             onClick={onZoomOut}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus:outline-none focus-visible:ring-white/50"
             title="Zoom Out"
+            aria-label="Zoom Out"
           >
             <Minus className="w-4 h-4" />
           </button>
@@ -101,8 +123,9 @@ export default function GraphNavbar({
 
         {/* Filter & Sort */}
         <button
-          className="relative p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+          className="relative p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus:outline-none focus-visible:ring-white/50"
           title="Filter Legislation"
+          aria-label="Filter Legislation"
         >
           <Filter className="w-4 h-4" />
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-[10px] font-bold text-slate-950 rounded-full flex items-center justify-center border border-slate-900">
@@ -111,8 +134,9 @@ export default function GraphNavbar({
         </button>
 
         <button
-          className="relative p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors"
+          className="relative p-2 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors focus-visible:ring-2 focus:outline-none focus-visible:ring-white/50"
           title="Sort Decrees"
+          aria-label="Sort Decrees"
         >
           <ArrowUpDown className="w-4 h-4" />
           <span className="absolute -top-1 -right-1 w-4 h-4 bg-cyan-500 text-[10px] font-bold text-slate-950 rounded-full flex items-center justify-center border border-slate-900">
@@ -121,8 +145,9 @@ export default function GraphNavbar({
         </button>
 
         <button
-          className="p-2 rounded-lg text-amber-300 hover:text-amber-200 hover:bg-amber-400/10 transition-colors"
+          className="p-2 rounded-lg text-amber-300 hover:text-amber-200 hover:bg-amber-400/10 transition-colors focus-visible:ring-2 focus:outline-none focus-visible:ring-white/50"
           title="AI Policy Insights"
+          aria-label="AI Policy Insights"
         >
           <Sparkles className="w-4 h-4" />
         </button>
@@ -139,10 +164,18 @@ export default function GraphNavbar({
         </button>
 
         <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 backdrop-blur-md border border-white/10 shadow-lg shadow-black/40">
-          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors">
+          <button
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors focus-visible:ring-2 focus:outline-none focus-visible:ring-white/50"
+            title="Toggle theme"
+            aria-label="Toggle theme"
+          >
             <Moon className="w-4 h-4" />
           </button>
-          <button className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors">
+          <button
+            className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors focus-visible:ring-2 focus:outline-none focus-visible:ring-white/50"
+            title="Search"
+            aria-label="Search"
+          >
             <Search className="w-4 h-4" />
           </button>
           <div className="w-8 h-8 rounded-lg overflow-hidden border border-white/20 ml-1">
