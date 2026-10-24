@@ -25,12 +25,15 @@ export function UniversityCard({
 }: UniversityCardProps) {
   const { language } = useLanguage();
   const { bookmarks, createBookmark, deleteBookmark } = useBookmarks();
-  const { selectedUniversities, toggleUniversity } = useCompareStore();
+
+  const safeUniIdStr = university ? String(university.id || (university as any).slug || "") : "";
+
+  const isCompared = useCompareStore((state) => state.selectedUniversities.some((u) => String(u.id) === safeUniIdStr));
+  const toggleUniversity = useCompareStore((state) => state.toggleUniversity);
 
   if (!university) return null;
 
-  const uniIdStr = String(university.id || (university as any).slug || "");
-  const isCompared = selectedUniversities.some((u) => String(u.id) === uniIdStr);
+  const uniIdStr = safeUniIdStr;
 
   const existingBookmark = bookmarks.find(
     (b) => String(b.universityId) === uniIdStr
