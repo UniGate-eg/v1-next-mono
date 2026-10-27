@@ -1,0 +1,4 @@
+## 2024-05-24 - Zod URL validation allows javascript: protocol
+**Vulnerability:** Zod's `z.string().url()` allows arbitrary protocols, including `javascript:`, which could lead to Stored XSS if the URL is rendered in an `href` attribute. This is specifically relevant for fields like `website` in the `CreateUniversitySchema` and `sourceUrl` in `CreateSuggestionSchema`.
+**Learning:** `z.string().url()` only verifies if a string is a valid URL according to WHATWG URL Standard. It doesn't restrict the protocol. If rendered into a link, it might introduce a security risk.
+**Prevention:** Always restrict URL schemes by refining `z.string().url()` to explicitly check if the URL starts with `http://` or `https://` when the user is supposed to submit web links. For example, `z.string().url().refine(url => url.toLowerCase().startsWith('http://') || url.toLowerCase().startsWith('https://'))`.
