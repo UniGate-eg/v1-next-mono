@@ -1,0 +1,3 @@
+## 2024-03-24 - Granular Zustand Selectors Optimize List Rendering
+**Learning:** Using destructuring on a Zustand store (`const { items } = useStore()`) within a list component forces the component to re-render whenever *any* state in the store changes. In `UniversityCard` and `UniversityModal`, accessing `compareStore` via destructuring caused excessive re-renders when modifying the compare list.
+**Action:** When accessing Zustand stores in list items, always use granular selectors (e.g., `useStore(state => state.items.some(i => i.id === id))`) so the component only re-renders when the specific data it depends on changes.
