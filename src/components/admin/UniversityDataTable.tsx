@@ -94,7 +94,7 @@ export function UniversityDataTable({ universities, total, currentPage }: Univer
             <thead className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider bg-[#0C0E18] border-b border-[#1A2033]">
               <tr>
                 <th className="px-8 py-5 w-14 text-center">
-                  <button onClick={toggleSelectAll} className="text-slate-500 hover:text-white">
+                  <button onClick={toggleSelectAll} className="text-slate-500 hover:text-white" aria-label="Select all universities">
                     {selectedIds.length > 0 && selectedIds.length === filtered.length ? (
                       <CheckSquare className="w-4.5 h-4.5 text-purple-400" />
                     ) : (
@@ -129,7 +129,7 @@ export function UniversityDataTable({ universities, total, currentPage }: Univer
                       }`}
                     >
                       <td className="px-8 py-5 text-center">
-                        <button onClick={() => toggleSelect(uni.id)} className="text-slate-500 hover:text-white">
+                        <button onClick={() => toggleSelect(uni.id)} className="text-slate-500 hover:text-white" aria-label="Select university">
                           {isSelected ? (
                             <CheckSquare className="w-4.5 h-4.5 text-purple-400" />
                           ) : (
