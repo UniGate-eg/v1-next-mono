@@ -52,7 +52,7 @@ export function NotificationBell() {
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAll}
-                  className="text-[11px] font-bold text-purple-400 hover:text-purple-300 transition-colors"
+                  className="text-[11px] font-bold text-purple-400 hover:text-purple-300 transition-colors" aria-label="Mark all notifications as read"
                 >
                   Mark all read
                 </button>

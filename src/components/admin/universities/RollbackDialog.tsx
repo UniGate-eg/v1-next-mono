@@ -84,7 +84,7 @@ export function RollbackDialog({ log }: RollbackDialogProps) {
                   </p>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600 text-lg">
+              <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600 text-lg" aria-label="Close dialog">
                 ×
               </button>
             </div>
