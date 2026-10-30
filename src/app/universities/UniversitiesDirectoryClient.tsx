@@ -229,8 +229,22 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     window.history.replaceState(null, "", "/universities");
   };
 
+  const precomputedUniversitiesDatabase = useMemo(() => {
+    return universitiesDatabase.map((u: any) => ({
+      ...u,
+      _searchTokens: [
+        (u.nameEn || "").toLowerCase(),
+        (u.nameAr || "").toLowerCase(),
+        (u.city || "").toLowerCase(),
+        (u.governorate || "").toLowerCase(),
+        (u.educationModel || "").toLowerCase(),
+        (u.shortName || "").toLowerCase(),
+      ]
+    }));
+  }, [universitiesDatabase]);
+
   const filteredUnis = useMemo(() => {
-    let filtered = [...universitiesDatabase];
+    let filtered = [...precomputedUniversitiesDatabase];
     const search = searchQuery.trim().toLowerCase();
 
     if (activeFilters.model.length > 0) {
@@ -273,23 +287,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     if (search) {
-      filtered = filtered.filter((u: any) => {
-        const nameEn = (u.nameEn || "").toLowerCase();
-        const nameAr = (u.nameAr || "").toLowerCase();
-        const city = (u.city || "").toLowerCase();
-        const gov = (u.governorate || "").toLowerCase();
-        const model = (u.educationModel || "").toLowerCase();
-        const short = (u.shortName || "").toLowerCase();
-
-        return (
-          nameEn.includes(search) ||
-          nameAr.includes(search) ||
-          city.includes(search) ||
-          gov.includes(search) ||
-          model.includes(search) ||
-          short.includes(search)
-        );
-      });
+      filtered = filtered.filter((u: any) => u._searchTokens.some((token: string) => token.includes(search)));
     }
 
     switch (currentSort) {
@@ -330,7 +328,7 @@ function UniversitiesDirectoryContent({ initialUniversities = [] }: Universities
     }
 
     return filtered;
-  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, universitiesDatabase, matchedUniIdsByMajorId]);
+  }, [searchQuery, activeFilters, rankFilter, currentSort, priceMin, priceMax, precomputedUniversitiesDatabase, matchedUniIdsByMajorId]);
 
   const {
     visibleItems: visibleUnis,
