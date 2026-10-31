@@ -1,0 +1,4 @@
+## 2025-02-14 - Fix Open Redirect via Tab/Newline URL Injection Bypass
+**Vulnerability:** The open redirect prevention in `src/lib/auth/safe-redirect.ts` relied on string checks `.startsWith("/")` and `.startsWith("//")` etc. However, the JS `URL` constructor parses `/\t/evil.com` or `/\n/evil.com` as a valid URL pointing to the host `evil.com`, allowing attackers to bypass the string checks and cause an open redirect.
+**Learning:** String prefix checks on raw input can be bypassed by using control characters like tabs (`\t`), newlines (`\n`), or carriage returns (`\r`) in the URL. The JavaScript `URL` constructor automatically strips these characters, parsing the malformed string into an unintended relative path.
+**Prevention:** To secure URL handling, always validate the post-parsed host (e.g., `parsed.hostname !== "localhost"`) rather than relying purely on pre-parse string checks.
