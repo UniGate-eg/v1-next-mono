@@ -16,7 +16,7 @@ export const CreateUniversitySchema = z.object({
   addressAr: z.string().optional(),
   overviewEn: z.string().optional(),
   overviewAr: z.string().optional(),
-  website: z.string().url().optional().or(z.literal("")),
+  website: z.string().url().refine((val) => val.toLowerCase().startsWith('http://') || val.toLowerCase().startsWith('https://'), { message: "URL must use http or https protocol" }).optional().or(z.literal("")),
   logoUrl: z.string().optional(),
   established: z.number().int().min(900).max(2100).optional(),
   qsRanking: z.string().optional(),
