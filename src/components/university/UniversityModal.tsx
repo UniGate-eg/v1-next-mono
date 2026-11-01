@@ -914,6 +914,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
                           <button
                             onClick={() => handleCopy(phone, `phone-${pIdx}`)}
                             style={{ color: "var(--text-muted)", fontSize: "11px", display: "flex", alignItems: "center", gap: "3px" }}
+                            aria-label="Copy phone number"
                           >
                             {copiedText === `phone-${pIdx}` ? <Check style={{ width: "12px", height: "12px", color: "#10B981" }} /> : <Copy style={{ width: "12px", height: "12px" }} />}
                           </button>
@@ -936,6 +937,7 @@ export function UniversityModal({ uni, onClose, onSelectMajor }: UniversityModal
                           <button
                             onClick={() => handleCopy(email, `email-${eIdx}`)}
                             style={{ color: "var(--text-muted)", fontSize: "11px", display: "flex", alignItems: "center", gap: "3px", marginLeft: "6px" }}
+                            aria-label="Copy email address"
                           >
                             {copiedText === `email-${eIdx}` ? <Check style={{ width: "12px", height: "12px", color: "#10B981" }} /> : <Copy style={{ width: "12px", height: "12px" }} />}
                           </button>
