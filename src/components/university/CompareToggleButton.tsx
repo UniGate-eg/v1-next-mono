@@ -18,9 +18,9 @@ export function CompareToggleButton({
   variant = "outline",
   size = "sm",
 }: CompareToggleButtonProps) {
-  const selectedIds = useCompareStore((state) => state.selectedIds);
+  // ⚡ Bolt: Granular selector returns boolean primitive to prevent re-renders on unrelated store changes
+  const isSelected = useCompareStore((state) => state.selectedIds.includes(universityId));
   const toggle = useCompareStore((state) => state.toggle);
-  const isSelected = selectedIds.includes(universityId);
 
   return (
     <Button
