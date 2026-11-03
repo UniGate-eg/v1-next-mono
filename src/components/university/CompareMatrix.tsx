@@ -82,6 +82,7 @@ export function CompareMatrix() {
                       <p className="text-xs font-medium text-slate-500 font-arabic">{uni.nameAr}</p>
                     </div>
                     <button
+                      aria-label="Remove"
                       onClick={() => remove(uni.id)}
                       className="text-slate-400 hover:text-red-500 p-1"
                       title="Remove"
