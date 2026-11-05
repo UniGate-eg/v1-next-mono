@@ -213,14 +213,14 @@ export function FacultiesTab({ universityId, faculties }: FacultiesTabProps) {
                     <button
                       onClick={() => openEditModal(f)}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
-                      title="Edit Faculty"
+                      title="Edit Faculty" aria-label="Edit Faculty"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(f.id, f.nameEn)}
                       className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-                      title="Delete Faculty"
+                      title="Delete Faculty" aria-label="Delete Faculty"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -279,6 +279,7 @@ export function FacultiesTab({ universityId, faculties }: FacultiesTabProps) {
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>
