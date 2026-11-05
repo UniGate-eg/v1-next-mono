@@ -304,14 +304,14 @@ export function ProgramsTab({
                           <button
                             onClick={() => openEditModal(prog)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-colors"
-                            title="Edit Program"
+                            title="Edit Program" aria-label="Edit Program"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => handleDelete(prog.id, prog.nameEn)}
                             className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-                            title="Delete Program"
+                            title="Delete Program" aria-label="Delete Program"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -347,6 +347,7 @@ export function ProgramsTab({
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                aria-label="Close modal"
               >
                 <X className="w-4 h-4" />
               </button>

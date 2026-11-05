@@ -117,7 +117,7 @@ export function BulkActionBar({
 
         <button
           onClick={handleDismiss}
-          title="Cancel Selection"
+          title="Cancel Selection" aria-label="Cancel Selection"
           className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-[#1C2238] transition-colors cursor-pointer"
         >
           <X className="w-4 h-4" />
