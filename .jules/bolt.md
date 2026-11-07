@@ -1,0 +1,3 @@
+## 2024-05-18 - Granular Zustand Selectors for List Items
+**Learning:** Destructuring a full Zustand store (e.g., `const { data } = useStore()`) within a list component like `UniversityCard` subscribes every single item to the entire store. This causes O(N) re-renders for the whole list whenever any single item updates the store state.
+**Action:** Always use granular selectors returning primitive values (e.g., `useStore(state => state.items.some(i => i.id === id))`) for Zustand stores in list items. When doing so, hoist necessary variables derived from props (using optional chaining/fallbacks) above conditional returns to maintain the Rules of Hooks.
