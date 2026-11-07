@@ -1,0 +1,4 @@
+## 2024-03-24 - Open Redirect Bypass via Control Characters
+**Vulnerability:** The open redirect prevention logic was relying on string prefix checks before parsing the URL. Control characters like tabs (`/\t/evil.com`) bypass the string check but are ignored by the JavaScript URL constructor, leading to a valid redirect to another domain.
+**Learning:** The URL constructor strips certain control characters. Pre-parse string validation of URLs is insufficient for security; validation must happen on the parsed properties.
+**Prevention:** Validate the post-parsed properties of the URL (e.g., checking `parsed.hostname !== "localhost"`) rather than relying purely on pre-parse string checks.
