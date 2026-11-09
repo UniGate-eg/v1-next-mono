@@ -18,9 +18,8 @@ export function CompareToggleButton({
   variant = "outline",
   size = "sm",
 }: CompareToggleButtonProps) {
-  const selectedIds = useCompareStore((state) => state.selectedIds);
+  const isSelected = useCompareStore((state) => state.selectedIds.includes(universityId));
   const toggle = useCompareStore((state) => state.toggle);
-  const isSelected = selectedIds.includes(universityId);
 
   return (
     <Button
