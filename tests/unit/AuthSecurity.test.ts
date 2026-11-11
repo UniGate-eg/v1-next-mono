@@ -30,6 +30,13 @@ describe("Authentication Security: Open-Redirect Defense (getSafeRedirectUrl)", 
     expect(getSafeRedirectUrl("data:text/html,<script>alert(1)</script>")).toBe("/dashboard");
   });
 
+  it("blocks path-based open redirect bypasses using control characters", () => {
+    expect(getSafeRedirectUrl("/\t/evil.com")).toBe("/dashboard");
+    expect(getSafeRedirectUrl("/\n/evil.com")).toBe("/dashboard");
+    expect(getSafeRedirectUrl("/\r/evil.com")).toBe("/dashboard");
+    expect(getSafeRedirectUrl("/\t/localhost//evil.com")).toBe("/dashboard");
+  });
+
   it("uses custom fallback when specified and target is empty or invalid", () => {
     expect(getSafeRedirectUrl("", "/admin")).toBe("/admin");
     expect(getSafeRedirectUrl(null, "/admin/dashboard")).toBe("/admin/dashboard");
